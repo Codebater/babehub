@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Babe Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --color-background: #121212;
+        --color-secondary: #1E1E1E;
+        --color-card: #2A2A2A;
+        --color-primary: #F472B6;
+        --color-text-main: #E5E7EB;
+        --color-text-secondary: #9CA3AF;
+        --color-border-color: #374151;
+      }
+      .theme-pink {
+        --color-background: #FCE7F3; /* tailwind pink-100 */
+        --color-secondary: #FBCFE8; /* tailwind pink-200 */
+        --color-card: #ffffff;
+        --color-primary: #EC4899; /* tailwind pink-500 */
+        --color-text-main: #111827; /* tailwind gray-900 */
+        --color-text-secondary: #4B5563; /* tailwind gray-600 */
+        --color-border-color: #F9A8D4; /* tailwind pink-300 */
+      }
+      /* Ensure body transitions its own background smoothly */
+      body {
+        transition: background-color 0.7s ease, color 0.7s ease;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'background': 'var(--color-background)',
+              'secondary': 'var(--color-secondary)',
+              'card': 'var(--color-card)',
+              'primary': 'var(--color-primary)',
+              'text-main': 'var(--color-text-main)',
+              'text-secondary': 'var(--color-text-secondary)',
+              'border-color': 'var(--color-border-color)',
+            },
+            fontFamily: {
+                sans: ['Poppins', 'sans-serif'],
+            },
+            animation: {
+                'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                'fade-in-down': 'fadeInDown 1s ease-out forwards',
+                'marquee': 'marquee 40s linear infinite',
+                'marquee-right': 'marquee-right 40s linear infinite',
+            },
+            keyframes: {
+                fadeInUp: {
+                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                fadeInDown: {
+                    '0%': { opacity: '0', transform: 'translateY(-20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                marquee: {
+                    'from': { transform: 'translateX(0)' },
+                    'to': { transform: 'translateX(-100%)' },
+                },
+                'marquee-right': {
+                    'from': { transform: 'translateX(-100%)' },
+                    'to': { transform: 'translateX(0)' },
+                },
+            },
+          },
+          accentColor: {
+            'primary': 'var(--color-primary)',
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-background">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

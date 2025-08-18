@@ -1,0 +1,61 @@
+import React from 'react';
+import { useLanguage } from '../hooks/useLanguage';
+import { WhatsAppIcon, InstagramIcon, BabeHubLogo } from './IconComponents';
+
+const Footer: React.FC = () => {
+    const { t } = useLanguage();
+    
+    const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+        e.preventDefault();
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    const socialLinks = [
+        { href: 'https://wa.me/13433532380', icon: <WhatsAppIcon className="w-6 h-6" />, name: 'WhatsApp' },
+        { href: 'https://www.instagram.com/vivas_models/', icon: <InstagramIcon className="w-6 h-6" />, name: 'Instagram' },
+    ];
+
+    const navLinks = [
+        { label: t('footer.howWeWork'), href: '#how-it-works' },
+        { label: t('footer.contactUs'), href: '#apply' },
+        { label: t('header.faq'), href: '#faq' },
+    ];
+
+    return (
+        <footer className="bg-black text-gray-300 border-t border-gray-800">
+            <div className="container mx-auto px-6 py-12 text-center">
+                <a href="#hero" onClick={(e) => scrollToSection(e, 'hero')} className="inline-flex items-center mb-8">
+                     <BabeHubLogo className="h-10 w-auto text-gray-200" />
+                </a>
+
+                <nav className="flex justify-center items-center space-x-2 sm:space-x-4 mb-8">
+                    {navLinks.map((link, index) => (
+                        <React.Fragment key={link.label}>
+                            <a href={link.href} onClick={(e) => scrollToSection(e, link.href.substring(1))} className="text-gray-300 hover:text-primary transition-colors text-sm font-semibold cursor-pointer">
+                                {link.label}
+                            </a>
+                            {index < navLinks.length - 1 && <span className="text-gray-600">|</span>}
+                        </React.Fragment>
+                    ))}
+                </nav>
+
+                <div className="flex justify-center items-center space-x-6 mb-8">
+                    {socialLinks.map(link => (
+                        <a key={link.name} href={link.href} aria-label={link.name} target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-primary transition-colors">
+                            {link.icon}
+                        </a>
+                    ))}
+                </div>
+
+                <div className="text-center text-gray-500 text-sm">
+                    &copy; {new Date().getFullYear()} Babe Hub. {t('footer.rights')}
+                </div>
+            </div>
+        </footer>
+    );
+};
+
+export default Footer;
