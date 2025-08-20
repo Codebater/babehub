@@ -1,10 +1,10 @@
-
 export default {
   header: {
     services: 'Servicios',
     benefits: 'Beneficios',
     testimonials: 'Testimonios',
     faq: 'FAQ',
+    partners: 'Socios',
     applyNow: 'Aplicar ahora',
     openMenu: 'Abrir menú',
     closeMenu: 'Cerrar menú',
@@ -126,6 +126,30 @@ export default {
     ava: {
       quote: 'El equipo de chat 24/7 es un cambio de juego. Mis ventas de PPV se han disparado. ¡Lo recomiendo encarecidamente!',
     },
+  },
+  sponsors: {
+    title: 'Para Marcas y Socios 🏆',
+    subtitle: 'Obtén acceso directo a una red premium de creadores. Impulsa un engagement auténtico y resultados incomparables para tu marca.',
+    button: 'Contacto para B2B',
+    card: {
+      network: {
+        title: 'Red Exclusiva',
+        metric: '+150 Creadores Verificados',
+      },
+      liveData: {
+        title: 'Datos de Campaña en Vivo',
+        metric: '95M+ Impresiones',
+        subMetric: 'Este Mes',
+      },
+      engagement: {
+        title: 'Interacción Directa',
+        message: 'Nueva consulta de asociación...',
+      },
+      verified: {
+        title: 'Socios Verificados',
+        description: 'Verificados por Calidad e Impacto',
+      }
+    }
   },
   faq: {
     title: 'Preguntas Frecuentes',

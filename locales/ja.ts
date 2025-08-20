@@ -1,10 +1,10 @@
-
 export default {
   header: {
     services: 'サービス',
     benefits: '利点',
     testimonials: 'お客様の声',
     faq: 'FAQ',
+    partners: 'パートナー',
     applyNow: '今すぐ応募',
     openMenu: 'メニューを開く',
     closeMenu: 'メニューを閉じる',
@@ -127,6 +127,30 @@ export default {
       quote: '24時間年中無休のチャットチームは画期的です。私のPPVの売上が急増しました。強くお勧めします！',
     },
   },
+  sponsors: {
+    title: 'ブランド＆パートナー様へ 🏆',
+    subtitle: 'プレミアムなクリエイターネットワークに直接アクセスできます。ブランドの真のエンゲージメントと比類のない結果を促進します。',
+    button: 'B2Bのお問い合わせ',
+    card: {
+      network: {
+        title: '限定ネットワーク',
+        metric: '150人以上の審査済みクリエイター',
+      },
+      liveData: {
+        title: 'ライブキャンペーンデータ',
+        metric: '9500万回以上',
+        subMetric: '今月',
+      },
+      engagement: {
+        title: 'ダイレクトエンゲージメント',
+        message: '新規パートナーシップのお問い合わせ...',
+      },
+      verified: {
+        title: '認証済みパートナー',
+        description: '品質と影響力を審査済み',
+      }
+    }
+  },
   faq: {
     title: 'よくある質問',
     subtitle: '質問がありますか？答えがあります。',
@@ -179,7 +203,7 @@ export default {
       subtitle: 'いくつかの簡単な質問から始めましょう。',
       q_age: '18歳以上ですか？',
       q_age_error: '応募するには18歳以上である必要があります。',
-      q_creator: 'アクティブなコンテンツクリエーターですか？',
+      q_creator: 'アクティブなコンテンツクリエイターですか？',
       q_revenue: '収益を上げていますか？',
       q_earnings: '現在の月収（米ドル）',
       earnings_placeholder: '範囲を選択...',

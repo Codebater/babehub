@@ -24,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({ onApplyClick }) => {
         { label: t('header.benefits'), href: '#benefits' },
         { label: t('header.testimonials'), href: '#testimonials' },
         { label: t('header.faq'), href: '#faq' },
+        { label: t('header.partners'), href: '#sponsors' },
     ];
 
     useEffect(() => {

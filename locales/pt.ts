@@ -1,10 +1,10 @@
-
 export default {
   header: {
     services: 'Serviços',
     benefits: 'Benefícios',
     testimonials: 'Depoimentos',
     faq: 'FAQ',
+    partners: 'Parceiros',
     applyNow: 'Candidate-se Agora',
     openMenu: 'Abrir menu',
     closeMenu: 'Fechar menu',
@@ -69,7 +69,7 @@ export default {
   },
   benefits: {
     title: 'Mais Liberdade, Mais Ganhos',
-    subtitle: 'Juntar-se à Babe Hub significa recuperar seu tempo enquanto aumenta exponencialmente sua renda. Nossa expertise se torna sua vantagem injusta.',
+    subtitle: 'Juntar-se à Babe Hub significa recuperar seu tempo while aumentando exponencialmente sua renda. Nossa expertise se torna sua vantagem injusta.',
     income: {
       title: 'Escale Sua Renda para 5-6 Dígitos',
       description: 'Aproveite nossas estratégias baseadas em dados e equipe de especialistas para transformar seu conteúdo em um negócio de alta receita, alcançando metas financeiras que você apenas sonhou.',
@@ -126,6 +126,30 @@ export default {
     ava: {
       quote: 'A equipe de chat 24/7 é uma virada de jogo. Minhas vendas de PPV dispararam. Recomendo muito!',
     },
+  },
+  sponsors: {
+    title: 'Para Marcas e Parceiros 🏆',
+    subtitle: 'Obtenha acesso direto a uma rede premium de criadores. Impulsione o engajamento autêntico e resultados incomparáveis para sua marca.',
+    button: 'Contato para B2B',
+    card: {
+      network: {
+        title: 'Rede Exclusiva',
+        metric: '+150 Criadores Verificados',
+      },
+      liveData: {
+        title: 'Dados da Campanha ao Vivo',
+        metric: '95 mi+ Impressões',
+        subMetric: 'Este Mês',
+      },
+      engagement: {
+        title: 'Engajamento Direto',
+        message: 'Nova consulta de parceria...',
+      },
+      verified: {
+        title: 'Parceiros Verificados',
+        description: 'Verificados por Qualidade e Impacto',
+      }
+    }
   },
   faq: {
     title: 'Perguntas Frequentes',

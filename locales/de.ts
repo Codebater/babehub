@@ -1,10 +1,10 @@
-
 export default {
   header: {
     services: 'Dienste',
     benefits: 'Vorteile',
     testimonials: 'Referenzen',
     faq: 'FAQ',
+    partners: 'Partner',
     applyNow: 'Jetzt bewerben',
     openMenu: 'Menü öffnen',
     closeMenu: 'Menü schließen',
@@ -126,6 +126,30 @@ export default {
     ava: {
       quote: 'Das 24/7-Chat-Team ist ein Game-Changer. Meine PPV-Verkäufe sind durch die Decke gegangen. Sehr zu empfehlen!',
     },
+  },
+  sponsors: {
+    title: 'Für Marken & Partner 🏆',
+    subtitle: 'Erhalten Sie direkten Zugang zu einem Premium-Netzwerk von Creatorn. Sorgen Sie für authentisches Engagement und beispiellose Ergebnisse für Ihre Marke.',
+    button: 'B2B-Kontakt',
+    card: {
+      network: {
+        title: 'Exklusives Netzwerk',
+        metric: '150+ geprüfte Creator',
+      },
+      liveData: {
+        title: 'Live-Kampagnendaten',
+        metric: '95 Mio.+ Impressionen',
+        subMetric: 'Diesen Monat',
+      },
+      engagement: {
+        title: 'Direktes Engagement',
+        message: 'Neue Partnerschaftsanfrage...',
+      },
+      verified: {
+        title: 'Geprüfte Partner',
+        description: 'Auf Qualität & Wirkung geprüft',
+      }
+    }
   },
   faq: {
     title: 'Häufig gestellte Fragen',

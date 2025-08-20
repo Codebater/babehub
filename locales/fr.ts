@@ -1,10 +1,10 @@
-
 export default {
   header: {
     services: 'Services',
     benefits: 'Avantages',
     testimonials: 'Témoignages',
     faq: 'FAQ',
+    partners: 'Partenaires',
     applyNow: 'Postuler maintenant',
     openMenu: 'Ouvrir le menu',
     closeMenu: 'Fermer le menu',
@@ -76,7 +76,7 @@ export default {
     },
     time: {
       title: 'Récupérez votre temps précieux',
-      description: 'Notre équipe dévouée gère votre compte 24/7, s\'occupant des DM et de la planification pour que vous puissiez vous concentrer sur la création, les voyages ou simplement vivre votre vie.',
+      description: 'Notre équipe dévouée gère votre compte 24/7, s\'occupant des DM et de la planification pour que vous puissiez vous concentrer sur la création, les voyages ou simplemente vivre votre vie.',
     },
     growth: {
       title: 'Croissance explosive et durable',
@@ -126,6 +126,30 @@ export default {
     ava: {
       quote: 'L\'équipe de chat 24/7 change la donne. Mes ventes de PPV ont explosé. Je recommande vivement !',
     },
+  },
+  sponsors: {
+    title: 'Pour les Marques & Partenaires 🏆',
+    subtitle: 'Obtenez un accès direct à un réseau premium de créateurs. Générez un engagement authentique et des résultats inégalés pour votre marque.',
+    button: 'Contact B2B',
+    card: {
+      network: {
+        title: 'Réseau Exclusif',
+        metric: '+150 Créateurs Vérifiés',
+      },
+      liveData: {
+        title: 'Données de Campagne en Direct',
+        metric: '95 M+ Impressions',
+        subMetric: 'Ce Mois-ci',
+      },
+      engagement: {
+        title: 'Engagement Direct',
+        message: 'Nouvelle demande de partenariat...',
+      },
+      verified: {
+        title: 'Partenaires Vérifiés',
+        description: 'Vérifiés pour la Qualité et l\'Impact',
+      }
+    }
   },
   faq: {
     title: 'Questions frequently posées',

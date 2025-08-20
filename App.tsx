@@ -5,8 +5,8 @@ import Hero from './components/Hero';
 import Services from './components/Services';
 import Benefits from './components/Benefits';
 import HowItWorks from './components/HowItWorks';
-import BoldLogoMarquee from './components/BoldLogoMarquee';
 import Testimonials from './components/Testimonials';
+import Sponsors from './components/Sponsors';
 import FAQ from './components/FAQ';
 import Apply from './components/Apply';
 import Footer from './components/Footer';
@@ -113,10 +113,10 @@ const App: React.FC = () => {
                     <Services services={servicesData} />
                     <Benefits onApplyClick={handleApplyClick} sectionRef={benefitsRef} />
                     <HowItWorks />
-                    <BoldLogoMarquee />
                     <Testimonials testimonials={testimonialsData} />
                     <FAQ faqItems={faqData} />
                     <Apply onApplyClick={handleApplyClick} />
+                    <Sponsors />
                 </main>
                 <Footer />
             </div>

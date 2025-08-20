@@ -1,10 +1,10 @@
-
 export default {
   header: {
     services: 'Services',
     benefits: 'Benefits',
     testimonials: 'Testimonials',
     faq: 'FAQ',
+    partners: 'Partners',
     applyNow: 'Apply Now',
     openMenu: 'Open menu',
     closeMenu: 'Close menu',
@@ -126,6 +126,30 @@ export default {
     ava: {
       quote: 'The 24/7 chatting team is a game-changer. My PPV sales have gone through the roof. Highly recommend!',
     },
+  },
+  sponsors: {
+    title: 'For Brands & Partners 🏆',
+    subtitle: 'Get direct access to a premium network of creators. Drive authentic engagement and unparalleled results for your brand.',
+    button: 'Contact for B2B',
+    card: {
+      network: {
+        title: 'Exclusive Network',
+        metric: '150+ Vetted Creators',
+      },
+      liveData: {
+        title: 'Live Campaign Data',
+        metric: '95M+ Impressions',
+        subMetric: 'This Month',
+      },
+      engagement: {
+        title: 'Direct Engagement',
+        message: 'New Partnership Inquiry...',
+      },
+      verified: {
+        title: 'Verified Partners',
+        description: 'Vetted for Quality & Impact',
+      }
+    }
   },
   faq: {
     title: 'Frequently Asked Questions',
