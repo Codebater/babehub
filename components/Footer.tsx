@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
     }
 
     const socialLinks = [
-        { href: 'https://wa.me/13433532380', icon: <WhatsAppIcon className="w-6 h-6" />, name: 'WhatsApp' },
+        { href: 'https://wa.me/420795477701', icon: <WhatsAppIcon className="w-6 h-6" />, name: 'WhatsApp' },
         { href: 'https://www.instagram.com/bab3hub?igsh=OTF1Ynk5eHBncjA2', icon: <InstagramIcon className="w-6 h-6" />, name: 'Instagram' },
     ];
 

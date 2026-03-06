@@ -69,7 +69,7 @@ const DataGridVisualization = () => (
 
 const Sponsors: React.FC = () => {
     const { t } = useLanguage();
-    const whatsappLink = 'https://wa.me/13433532380';
+    const whatsappLink = 'https://wa.me/420795477701';
     
     return (
         <section id="sponsors" className="relative bg-black py-32 text-white overflow-hidden transition-colors duration-700">

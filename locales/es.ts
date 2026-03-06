@@ -229,7 +229,7 @@ export default {
       check_campaigns_highlight2: 'NDAs',
       check_campaigns_part3: ' si es necesario.',
       check_profit_part1: 'Reconozco la ',
-      check_profit_highlight1: 'participación en ganancias del 35–55%',
+      check_profit_highlight1: 'participación en ganancias del 30–40%',
       check_profit_part2: ' de la agencia, y entiendo que el porcentaje exacto se discutirá durante la entrevista.',
     },
     step3: {

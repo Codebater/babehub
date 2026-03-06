@@ -229,7 +229,7 @@ export default {
       check_campaigns_highlight2: 'NDA',
       check_campaigns_part3: ' หากจำเป็น',
       check_profit_part1: 'ฉันรับทราบถึง',
-      check_profit_highlight1: 'ส่วนแบ่งกำไร 35–55%',
+      check_profit_highlight1: 'ส่วนแบ่งกำไร 30–40%',
       check_profit_part2: ' ของเอเจนซี่ และเข้าใจว่าเปอร์เซ็นต์ที่แน่นอนจะถูกหารือในระหว่างการสัมภาษณ์',
     },
     step3: {

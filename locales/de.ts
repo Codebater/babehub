@@ -229,7 +229,7 @@ export default {
       check_campaigns_highlight2: 'NDAs',
       check_campaigns_part3: ' zu arbeiten.',
       check_profit_part1: 'Ich erkenne die ',
-      check_profit_highlight1: '35–55% Gewinnbeteiligung',
+      check_profit_highlight1: '30–40% Gewinnbeteiligung',
       check_profit_part2: ' der Agentur an und verstehe, dass der genaue Prozentsatz während des Interviews besprochen wird.',
     },
     step3: {

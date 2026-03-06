@@ -229,7 +229,7 @@ export default {
       check_campaigns_highlight2: 'NDAs',
       check_campaigns_part3: ' if required.',
       check_profit_part1: 'I acknowledge the agency’s ',
-      check_profit_highlight1: '35–55% profit share',
+      check_profit_highlight1: '30–40% profit share',
       check_profit_part2: ', and understand that the exact percentage will be discussed during the interview.',
     },
     step3: {

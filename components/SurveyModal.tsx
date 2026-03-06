@@ -362,7 +362,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                         </div>
                         <div>
                             <label htmlFor="whatsapp" className="block text-sm font-medium text-text-secondary mb-1">{t('survey.step3.q_whatsapp')}</label>
-                            <InputField type="tel" name="whatsapp" id="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+1 123 456 7890" />
+                            <InputField type="tel" name="whatsapp" id="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+420 795 477 701" />
                         </div>
                     </div>
                 );
