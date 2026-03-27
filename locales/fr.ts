@@ -107,7 +107,7 @@ export default {
     },
     step3: {
       title: 'Intégration stratégique',
-      description: 'Notre intégration est sélective car nous nous concentrons sur des partenariats de qualité. Nous mettrons en place votre stratégie de croissance et, pour les talents exceptionnels, offrirons l\'option de campagnes payantes à partir de 2 000 $/mois. Ce service est entièrement facultatif et conçu pour accélérer le succès.',
+      description: 'Notre intégration est sélective car nous nous concentrons sur des partenariats de qualité. Nous mettrons en place votre stratégie de croissance et, pour les talents exceptionnels, offrirons l\'option de campagnes payantes. Ce service est entièrement facultatif et conçu pour accélérer le succès.',
     },
     step4: {
       title: 'Croissance exponentielle',
@@ -187,6 +187,48 @@ export default {
     howWeWork: 'Comment nous travaillons',
     contactUs: 'Contactez-nous',
   },
+  growth: {
+    title: 'Histoires de Croissance Prouvées',
+    subtitle: 'Des résultats réels de nos partenaires. Nous ne nous contentons pas de gérer ; nous passons à l\'échelle.',
+    stories: [
+      {
+        title: 'De Zéro au Top 0,1%',
+        image: 'https://images.unsplash.com/photo-1551288049-bbb652167c8a?q=80&w=800&auto=format&fit=crop',
+        description: 'Cette créatrice a commencé avec un nouveau compte. En 4 mois, nous l\'avons fait passer à 25 000 $/mois grâce à un marketing agressif et un chat 24/7.',
+        metrics: [
+          { label: 'Revenus', value: '25 000 $+' },
+          { label: 'Croissance', value: 'Nouveau compte' },
+          { label: 'Délai', value: '4 mois' }
+        ]
+      },
+      {
+        title: 'Retrouver la Liberté',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+        description: 'Une créatrice gagnant 5 000 $/mois était épuisée. Nous avons repris la gestion, augmenté ses revenus à 18 000 $/mois et réduit son temps de travail à 4 heures/semaine.',
+        metrics: [
+          { label: 'Revenus', value: '18 000 $+' },
+          { label: 'Charge de travail', value: '-80%' },
+          { label: 'Fans', value: '+3,2k' }
+        ]
+      }
+    ]
+  },
+  marketing: {
+    title_part1: 'Nous développons votre ',
+    title_highlight: 'Présence',
+    subtitle: 'Nous avons nos propres stratégies et partenaires pour booster votre contenu et votre présence',
+    applyNow: 'Postuler maintenant',
+    joinedBy: 'rejoint par ',
+    creatorsPlus: '100 créateurs +',
+    stats: {
+      lastWeek: '+10% depuis la semaine dernière',
+      following: 'Abonnements',
+      estimatedGrowth: 'Croissance estimée',
+      engagementBoosted: 'Engagement boosté',
+      aiTargeting: 'Ciblage IA',
+      engaged: 'Engagé',
+    }
+  },
   survey: {
     title_prefix: 'Postuler chez',
     title_suffix: '',
@@ -205,7 +247,9 @@ export default {
       q_age_error: 'Vous devez avoir 18 ans ou plus pour postuler.',
       q_creator: 'Êtes-vous un créateur de contenu actif ?',
       q_revenue: 'Générez-vous des revenus ?',
+      q_country: 'Pays',
       q_earnings: 'Revenus mensuels actuels (USD)',
+      country_placeholder: 'Sélectionnez votre pays...',
       earnings_placeholder: 'Sélectionnez une fourchette...',
       earnings_o1: 'Moins de 1 000 $',
       earnings_o2: 'Plus de 20 000 $',
@@ -229,7 +273,7 @@ export default {
       check_campaigns_highlight2: 'NDA',
       check_campaigns_part3: ' si nécessaire.',
       check_profit_part1: 'Je reconnais la ',
-      check_profit_highlight1: 'part des bénéfices de 35 à 55 %',
+      check_profit_highlight1: 'part des bénéfices de 30 à 40 %',
       check_profit_part2: ' de l\'agence et je comprends que le pourcentage exact sera discuté lors de l\'entretien.',
     },
     step3: {

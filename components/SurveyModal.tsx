@@ -105,6 +105,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
         isOver18: '',
         socialPlatform: '',
         socialHandle: '',
+        country: '',
         isActiveCreator: '',
         isGeneratingRevenue: '',
         monthlyEarnings: '',
@@ -115,7 +116,6 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const totalSteps = 3;
 
@@ -135,7 +135,6 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
     useEffect(() => {
         if (isOpen) {
             setIsSubmitted(false);
-            setSubmitError(null);
             setCurrentStep(1);
             setFormData({
                 name: '',
@@ -144,6 +143,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                 isOver18: '',
                 socialPlatform: '',
                 socialHandle: '',
+                country: '',
                 isActiveCreator: '',
                 isGeneratingRevenue: '',
                 monthlyEarnings: '',
@@ -194,7 +194,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
         switch (currentStep) {
             case 1:
                 const revenueCheck = formData.isGeneratingRevenue === 'yes' ? formData.monthlyEarnings !== '' : true;
-                return formData.isOver18 === 'yes' && formData.isActiveCreator !== '' && formData.isGeneratingRevenue !== '' && revenueCheck;
+                return formData.isOver18 === 'yes' && formData.isActiveCreator !== '' && formData.isGeneratingRevenue !== '' && revenueCheck && formData.country !== '';
             case 2:
                 return formData.socialPlatform.trim() !== '' && formData.socialHandle.trim() !== '' && formData.contentType.trim() !== '';
             case 3:
@@ -213,7 +213,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         
         if (currentStep !== totalSteps || !canProceed()) {
@@ -221,34 +221,12 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
         }
 
         setIsSubmitting(true);
-        setSubmitError(null);
-
-        try {
-            const resp = await fetch('https://formspree.io/f/xgvzydlk', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
-
-            const payload = await resp.json().catch(() => null);
-
-            if (!resp.ok) {
-                const message =
-                    payload?.error ||
-                    payload?.message ||
-                    `Submission failed (HTTP ${resp.status}).`;
-                throw new Error(message);
-            }
-
-            setIsSubmitted(true);
-        } catch (err: any) {
-            setSubmitError(err?.message || 'Submission failed. Please try again.');
-        } finally {
+        // Simulate API call
+        setTimeout(() => {
+            console.log("Form Submitted:", formData);
             setIsSubmitting(false);
-        }
+            setIsSubmitted(true);
+        }, 1500);
     };
 
     const renderStepContent = () => {
@@ -286,6 +264,27 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                                <ChoiceBox name="isGeneratingRevenue" value="yes" selectedValue={formData.isGeneratingRevenue} onSelect={handleChoiceChange} label={yes} />
                                <ChoiceBox name="isGeneratingRevenue" value="no" selectedValue={formData.isGeneratingRevenue} onSelect={handleChoiceChange} label={no} />
                            </div>
+                        </div>
+                        <div>
+                            <label htmlFor="country" className="block text-sm font-medium text-text-secondary mb-1">{t('survey.step1.q_country')}</label>
+                            <SelectField name="country" id="country" value={formData.country} onChange={handleChange} required>
+                                <option value="" disabled>{t('survey.step1.country_placeholder')}</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="CA">Canada</option>
+                                <option value="AU">Australia</option>
+                                <option value="DE">Germany</option>
+                                <option value="FR">France</option>
+                                <option value="ES">Spain</option>
+                                <option value="IT">Italy</option>
+                                <option value="NL">Netherlands</option>
+                                <option value="BR">Brazil</option>
+                                <option value="MX">Mexico</option>
+                                <option value="CO">Colombia</option>
+                                <option value="TH">Thailand</option>
+                                <option value="JP">Japan</option>
+                                <option value="Other">Other</option>
+                            </SelectField>
                         </div>
                         {formData.isGeneratingRevenue === 'yes' && (
                             <div className="animate-fade-in-up" style={{animationDuration: '0.4s'}}>
@@ -386,7 +385,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                         </div>
                         <div>
                             <label htmlFor="whatsapp" className="block text-sm font-medium text-text-secondary mb-1">{t('survey.step3.q_whatsapp')}</label>
-                            <InputField type="tel" name="whatsapp" id="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+420 795 477 701" />
+                            <InputField type="tel" name="whatsapp" id="whatsapp" value={formData.whatsapp} onChange={handleChange} placeholder="+1 123 456 7890" />
                         </div>
                     </div>
                 );
@@ -456,11 +455,6 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                             <div className="flex-grow">
                                 {renderStepContent()}
                             </div>
-                            {submitError && (
-                                <div className="mt-6 rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-                                    {submitError}
-                                </div>
-                            )}
 
                             <div className="mt-8 pt-4 border-t border-border-color flex justify-between items-center">
                                 <button

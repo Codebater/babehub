@@ -2,7 +2,11 @@ import React from 'react';
 import { useLanguage } from '../hooks/useLanguage';
 import { WhatsAppIcon, InstagramIcon, BabeHubLogo } from './IconComponents';
 
-const Footer: React.FC = () => {
+interface FooterProps {
+    onMediaClick?: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ onMediaClick }) => {
     const { t } = useLanguage();
     
     const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
@@ -15,7 +19,7 @@ const Footer: React.FC = () => {
 
     const socialLinks = [
         { href: 'https://wa.me/420795477701', icon: <WhatsAppIcon className="w-6 h-6" />, name: 'WhatsApp' },
-        { href: 'https://www.instagram.com/bab3hub?igsh=OTF1Ynk5eHBncjA2', icon: <InstagramIcon className="w-6 h-6" />, name: 'Instagram' },
+        { href: 'https://www.instagram.com/bab3hub/', icon: <InstagramIcon className="w-6 h-6" />, name: 'Instagram' },
     ];
 
     const navLinks = [
@@ -37,9 +41,15 @@ const Footer: React.FC = () => {
                             <a href={link.href} onClick={(e) => scrollToSection(e, link.href.substring(1))} className="text-gray-300 hover:text-primary transition-colors text-sm font-semibold cursor-pointer">
                                 {link.label}
                             </a>
-                            {index < navLinks.length - 1 && <span className="text-gray-600">|</span>}
+                            <span className="text-gray-600">|</span>
                         </React.Fragment>
                     ))}
+                    <button 
+                        onClick={onMediaClick}
+                        className="text-gray-300 hover:text-primary transition-colors text-sm font-semibold cursor-pointer"
+                    >
+                        Media
+                    </button>
                 </nav>
 
                 <div className="flex justify-center items-center space-x-6 mb-8">

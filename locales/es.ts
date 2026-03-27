@@ -107,7 +107,7 @@ export default {
     },
     step3: {
       title: 'Onboarding Estratégico',
-      description: 'Nuestro onboarding es selectivo ya que nos enfocamos en asociaciones de calidad. Estableceremos tu estrategia de crecimiento y, para talentos excepcionales, brindaremos la opción de campañas pagadas a partir de $2,000/mes. Este servicio es completamente opcional y está diseñado para acelerar el éxito.',
+      description: 'Nuestro onboarding es selectivo ya que nos enfocamos en asociaciones de calidad. Estableceremos tu estrategia de crecimiento y, para talentos excepcionales, brindaremos la opción de campañas pagadas. Este servicio es completamente opcional y está diseñado para acelerar el éxito.',
     },
     step4: {
       title: 'Crecimiento Exponencial',
@@ -187,6 +187,48 @@ export default {
     howWeWork: 'Cómo trabajamos',
     contactUs: 'Contacto',
   },
+  growth: {
+    title: 'Historias de Crecimiento Probadas',
+    subtitle: 'Resultados reales de nuestros socios. No solo gestionamos; escalamos.',
+    stories: [
+      {
+        title: 'De Cero al Top 0.1%',
+        image: 'https://images.unsplash.com/photo-1551288049-bbb652167c8a?q=80&w=800&auto=format&fit=crop',
+        description: 'Esta creadora comenzó con una cuenta nueva. En 4 meses, la escalamos a $25k/mes mediante marketing agresivo y chat 24/7.',
+        metrics: [
+          { label: 'Ingresos', value: '$25,000+' },
+          { label: 'Crecimiento', value: 'Cuenta Nueva' },
+          { label: 'Plazo', value: '4 Meses' }
+        ]
+      },
+      {
+        title: 'Recuperando la Libertad',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+        description: 'Una creadora que ganaba $5k/mes estaba agotada. Nos hicimos cargo de la gestión, aumentamos sus ganancias a $18k/mes y redujemos su tiempo de trabajo a 4 horas/semana.',
+        metrics: [
+          { label: 'Ingresos', value: '$18,000+' },
+          { label: 'Carga de trabajo', value: '-80%' },
+          { label: 'Fans', value: '+3.2k' }
+        ]
+      }
+    ]
+  },
+  marketing: {
+    title_part1: 'Escalamos tu ',
+    title_highlight: 'Presencia',
+    subtitle: 'Tenemos nuestras propias estrategias y socios para impulsar tu contenido y tu presencia',
+    applyNow: 'Aplicar ahora',
+    joinedBy: 'unido por ',
+    creatorsPlus: '100 creadores +',
+    stats: {
+      lastWeek: '+10% desde la semana pasada',
+      following: 'Siguiendo',
+      estimatedGrowth: 'Crecimiento estimado',
+      engagementBoosted: 'Engagement impulsado',
+      aiTargeting: 'Targeting IA',
+      engaged: 'Comprometido',
+    }
+  },
   survey: {
     title_prefix: 'Aplicar a',
     title_suffix: '',
@@ -205,7 +247,9 @@ export default {
       q_age_error: 'Debes ser mayor de 18 años para aplicar.',
       q_creator: '¿Eres un creador de contenido activo?',
       q_revenue: '¿Generas ingresos?',
+      q_country: 'País',
       q_earnings: 'Ingresos Mensuales Actuales (USD)',
+      country_placeholder: 'Selecciona tu país...',
       earnings_placeholder: 'Selecciona un rango...',
       earnings_o1: 'Menos de $1,000',
       earnings_o2: 'Más de $20,000',
@@ -229,7 +273,7 @@ export default {
       check_campaigns_highlight2: 'NDAs',
       check_campaigns_part3: ' si es necesario.',
       check_profit_part1: 'Reconozco la ',
-      check_profit_highlight1: 'participación en ganancias del 30–40%',
+      check_profit_highlight1: 'participación en ganancias del 30-40%',
       check_profit_part2: ' de la agencia, y entiendo que el porcentaje exacto se discutirá durante la entrevista.',
     },
     step3: {

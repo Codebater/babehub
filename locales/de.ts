@@ -107,7 +107,7 @@ export default {
     },
     step3: {
       title: 'Strategisches Onboarding',
-      description: 'Unser Onboarding ist selektiv, da wir uns auf Qualitätspartnerschaften konzentrieren. Wir erstellen deine Wachstumsstrategie und bieten für außergewöhnliche Talente die Option für bezahlte Kampagnen ab 2.000 $/Monat. Dieser Service ist optional und soll den Erfolg beschleunigen.',
+      description: 'Unser Onboarding ist selektiv, da wir uns auf Qualitätspartnerschaften konzentrieren. Wir erstellen deine Wachstumsstrategie und bieten für außergewöhnliche Talente die Option für bezahlte Kampagnen. Dieser Service ist optional und soll den Erfolg beschleunigen.',
     },
     step4: {
       title: 'Exponentielles Wachstum',
@@ -187,6 +187,48 @@ export default {
     howWeWork: 'Wie wir arbeiten',
     contactUs: 'Kontakt',
   },
+  growth: {
+    title: 'Bewährte Wachstumsgeschichten',
+    subtitle: 'Echte Ergebnisse unserer Partner. Wir verwalten nicht nur; wir skalieren.',
+    stories: [
+      {
+        title: 'Von Null auf Top 0,1%',
+        image: 'https://images.unsplash.com/photo-1551288049-bbb652167c8a?q=80&w=800&auto=format&fit=crop',
+        description: 'Diese Creatorin startete mit einem neuen Konto. Innerhalb von 4 Monaten skalierten wir sie auf 25.000 $/Monat durch aggressives Marketing und 24/7-Chatting.',
+        metrics: [
+          { label: 'Umsatz', value: '25.000 $+' },
+          { label: 'Wachstum', value: 'Neues Konto' },
+          { label: 'Zeitrahmen', value: '4 Monate' }
+        ]
+      },
+      {
+        title: 'Freiheit zurückgewinnen',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+        description: 'Eine Creatorin, die 5.000 $/Monat verdiente, war ausgebrannt. Wir übernahmen das Management, steigerten ihre Einnahmen auf 18.000 $/Monat und reduzierten ihre Arbeitszeit auf 4 Stunden/Woche.',
+        metrics: [
+          { label: 'Umsatz', value: '18.000 $+' },
+          { label: 'Arbeitsaufwand', value: '-80%' },
+          { label: 'Fans', value: '+3,2k' }
+        ]
+      }
+    ]
+  },
+  marketing: {
+    title_part1: 'Wir skalieren deine ',
+    title_highlight: 'Präsenz',
+    subtitle: 'Wir haben unsere eigenen Strategien und Partner, um deine Inhalte und deine Präsenz zu steigern',
+    applyNow: 'Jetzt bewerben',
+    joinedBy: 'dabei sind ',
+    creatorsPlus: '100+ Creator',
+    stats: {
+      lastWeek: '+10% seit letzter Woche',
+      following: 'Follower',
+      estimatedGrowth: 'Geschätztes Wachstum',
+      engagementBoosted: 'Engagement gesteigert',
+      aiTargeting: 'KI-Targeting',
+      engaged: 'Engagiert',
+    }
+  },
   survey: {
     title_prefix: 'Bewerben bei',
     title_suffix: '',
@@ -205,7 +247,9 @@ export default {
       q_age_error: 'Du musst 18 Jahre oder älter sein, um dich zu bewerben.',
       q_creator: 'Bist du ein aktiver Content Creator?',
       q_revenue: 'Erzielst du Einnahmen?',
+      q_country: 'Land',
       q_earnings: 'Aktuelle monatliche Einnahmen (USD)',
+      country_placeholder: 'Wähle dein Land...',
       earnings_placeholder: 'Wähle einen Bereich...',
       earnings_o1: 'Weniger als 1.000 $',
       earnings_o2: 'Mehr als 20.000 $',
@@ -229,7 +273,7 @@ export default {
       check_campaigns_highlight2: 'NDAs',
       check_campaigns_part3: ' zu arbeiten.',
       check_profit_part1: 'Ich erkenne die ',
-      check_profit_highlight1: '30–40% Gewinnbeteiligung',
+      check_profit_highlight1: '30-40 %',
       check_profit_part2: ' der Agentur an und verstehe, dass der genaue Prozentsatz während des Interviews besprochen wird.',
     },
     step3: {

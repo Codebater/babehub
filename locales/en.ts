@@ -107,7 +107,7 @@ export default {
     },
     step3: {
       title: 'Strategic Onboarding',
-      description: 'Our onboarding is selective as we focus on quality partnerships. We\'ll set up your growth strategy and, for exceptional talent, provide the option for paid campaigns starting at $2,000/month. This service is completely optional and designed to accelerate success.',
+      description: 'Our onboarding is selective as we focus on quality partnerships. We\'ll set up your growth strategy and, for exceptional talent, provide the option for paid campaigns. This service is completely optional and designed to accelerate success.',
     },
     step4: {
       title: 'Exponential Growth',
@@ -187,6 +187,48 @@ export default {
     howWeWork: 'How We Work',
     contactUs: 'Contact Us',
   },
+  growth: {
+    title: 'Proven Growth Stories',
+    subtitle: 'Real results from our partners. We don\'t just manage; we scale.',
+    stories: [
+      {
+        title: 'From Zero to Top 0.1%',
+        image: 'https://images.unsplash.com/photo-1551288049-bbb652167c8a?q=80&w=800&auto=format&fit=crop',
+        description: 'This creator started with a new account. Within 4 months, we scaled her to $25k/month through aggressive marketing and 24/7 chatting.',
+        metrics: [
+          { label: 'Revenue', value: '$25,000+' },
+          { label: 'Growth', value: 'New Account' },
+          { label: 'Timeframe', value: '4 Months' }
+        ]
+      },
+      {
+        title: 'Reclaiming Freedom',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+        description: 'A creator earning $5k/month was burnt out. We took over management, increased her earnings to $18k/month, and reduced her work time to 4 hours/week.',
+        metrics: [
+          { label: 'Revenue', value: '$18,000+' },
+          { label: 'Workload', value: '-80%' },
+          { label: 'Fans', value: '+3.2k' }
+        ]
+      }
+    ]
+  },
+  marketing: {
+    title_part1: 'We scale your ',
+    title_highlight: 'Presence',
+    subtitle: 'We have our own driven strategies and partners to boost your content and your presence',
+    applyNow: 'Apply Now',
+    joinedBy: 'joined by ',
+    creatorsPlus: '100 creators +',
+    stats: {
+      lastWeek: '+10% from last week',
+      following: 'Following',
+      estimatedGrowth: 'Estimated growth',
+      engagementBoosted: 'Engagement boosted',
+      aiTargeting: 'AI Targeting',
+      engaged: 'Engaged',
+    }
+  },
   survey: {
     title_prefix: 'Apply to',
     title_suffix: '',
@@ -205,7 +247,9 @@ export default {
       q_age_error: 'You must be 18 or older to apply.',
       q_creator: 'Are you an active content creator?',
       q_revenue: 'Generating revenue?',
+      q_country: 'Country',
       q_earnings: 'Current Monthly Earnings (USD)',
+      country_placeholder: 'Select your country...',
       earnings_placeholder: 'Select a range...',
       earnings_o1: 'Less than $1,000',
       earnings_o2: 'More than $20,000',
@@ -229,7 +273,7 @@ export default {
       check_campaigns_highlight2: 'NDAs',
       check_campaigns_part3: ' if required.',
       check_profit_part1: 'I acknowledge the agency’s ',
-      check_profit_highlight1: '30–40% profit share',
+      check_profit_highlight1: '30-40 %',
       check_profit_part2: ', and understand that the exact percentage will be discussed during the interview.',
     },
     step3: {

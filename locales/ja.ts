@@ -107,7 +107,7 @@ export default {
     },
     step3: {
       title: '戦略的オンボーディング',
-      description: '質の高いパートナーシップに焦点を当てているため、オンボーディングは選択的です。成長戦略を設定し、卓越した才能には月額2,000ドルからの有料キャンペーンのオプションを提供します。このサービスは完全に任意であり、成功を加速させるために設計されています。',
+      description: '質の高いパートナーシップに焦点を当てているため、オンボーディングは選択的です。成長戦略を設定し、卓越した才能には有料キャンペーンのオプションを提供します。このサービスは完全に任意であり、成功を加速させるために設計されています。',
     },
     step4: {
       title: '指数関数的な成長',
@@ -187,6 +187,48 @@ export default {
     howWeWork: '私たちの働き方',
     contactUs: 'お問い合わせ',
   },
+  growth: {
+    title: '確かな成長ストーリー',
+    subtitle: 'パートナーからの実際の成果。私たちは単に管理するだけでなく、スケールさせます。',
+    stories: [
+      {
+        title: 'ゼロからトップ0.1%へ',
+        image: 'https://images.unsplash.com/photo-1551288049-bbb652167c8a?q=80&w=800&auto=format&fit=crop',
+        description: 'このクリエイターは新規アカウントからスタートしました。4ヶ月以内に、積極的なマーケティングと24時間365日のチャット対応により、月収25,000ドル以上までスケールさせました。',
+        metrics: [
+          { label: '収益', value: '$25,000+' },
+          { label: '成長', value: '新規アカウント' },
+          { label: '期間', value: '4ヶ月' }
+        ]
+      },
+      {
+        title: '自由を取り戻す',
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
+        description: '月収5,000ドルのクリエイターは燃え尽きていました。私たちが管理を引き継ぎ、収益を月収18,000ドルに増やし、労働時間を週4時間に短縮しました。',
+        metrics: [
+          { label: '収益', value: '$18,000+' },
+          { label: '労働量', value: '-80%' },
+          { label: 'ファン', value: '+3.2k' }
+        ]
+      }
+    ]
+  },
+  marketing: {
+    title_part1: '私たちはあなたの',
+    title_highlight: '存在感を拡大します',
+    subtitle: '独自の戦略とパートナーシップにより、あなたのコンテンツと存在感を高めます。',
+    applyNow: '今すぐ応募',
+    joinedBy: '参加クリエイター：',
+    creatorsPlus: '100名以上',
+    stats: {
+      lastWeek: '先週比 +10%',
+      following: 'フォロワー',
+      estimatedGrowth: '推定成長率',
+      engagementBoosted: 'エンゲージメント向上',
+      aiTargeting: 'AIターゲット設定',
+      engaged: 'エンゲージ済み',
+    }
+  },
   survey: {
     title_prefix: '',
     title_suffix: 'に応募する',
@@ -205,7 +247,9 @@ export default {
       q_age_error: '応募するには18歳以上である必要があります。',
       q_creator: 'アクティブなコンテンツクリエイターですか？',
       q_revenue: '収益を上げていますか？',
+      q_country: '国',
       q_earnings: '現在の月収（米ドル）',
+      country_placeholder: '国を選択してください...',
       earnings_placeholder: '範囲を選択...',
       earnings_o1: '1,000ドル未満',
       earnings_o2: '20,000ドル以上',
@@ -229,7 +273,7 @@ export default {
       check_campaigns_highlight2: '秘密保持契約（NDA）',
       check_campaigns_part3: 'の下で働くことに同意します。',
       check_profit_part1: '代理店の',
-      check_profit_highlight1: '35〜55%の利益分配',
+      check_profit_highlight1: '30〜40%の利益分配',
       check_profit_part2: 'を認め、正確な割合は面接中に話し合われることを理解しています。',
     },
     step3: {
