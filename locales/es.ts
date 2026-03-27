@@ -240,6 +240,7 @@ export default {
     next: 'Siguiente',
     submit: 'Enviar Solicitud',
     submitting: 'Enviando...',
+    submit_error: 'Algo salió mal al enviar tu solicitud. Por favor, inténtalo de nuevo en un momento.',
     step1: {
       title: 'Paso 1: Selección Inicial',
       subtitle: 'Comencemos con algunas preguntas rápidas.',

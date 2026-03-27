@@ -240,6 +240,7 @@ export default {
     next: 'Next',
     submit: 'Submit Application',
     submitting: 'Submitting...',
+    submit_error: 'Something went wrong while sending your application. Please try again in a moment.',
     step1: {
       title: 'Step 1: Initial Screening',
       subtitle: 'Let\'s start with a few quick questions.',

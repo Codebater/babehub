@@ -116,6 +116,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const totalSteps = 3;
 
@@ -135,6 +136,7 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
     useEffect(() => {
         if (isOpen) {
             setIsSubmitted(false);
+            setSubmitError(null);
             setCurrentStep(1);
             setFormData({
                 name: '',
@@ -213,20 +215,39 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        
+
         if (currentStep !== totalSteps || !canProceed()) {
             return;
         }
 
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            console.log("Form Submitted:", formData);
-            setIsSubmitting(false);
+        setSubmitError(null);
+
+        const apiBase =
+            (import.meta as ImportMeta & { env: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '';
+
+        try {
+            const res = await fetch(`${apiBase}/api/survey`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
+
+            const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string };
+
+            if (!res.ok) {
+                throw new Error(data.details || data.error || `Request failed (${res.status})`);
+            }
+
             setIsSubmitted(true);
-        }, 1500);
+        } catch (err) {
+            console.error('Survey submit failed:', err);
+            setSubmitError(err instanceof Error ? err.message : t('survey.submit_error'));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const renderStepContent = () => {
@@ -456,6 +477,11 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                                 {renderStepContent()}
                             </div>
 
+                            {submitError && (
+                                <p className="mt-4 text-sm text-red-500" role="alert">
+                                    {submitError}
+                                </p>
+                            )}
                             <div className="mt-8 pt-4 border-t border-border-color flex justify-between items-center">
                                 <button
                                     type="button"

@@ -240,6 +240,7 @@ export default {
     next: 'Suivant',
     submit: 'Soumettre la candidature',
     submitting: 'Envoi en cours...',
+    submit_error: 'Une erreur s’est produite lors de l’envoi de votre candidature. Veuillez réessayer dans un instant.',
     step1: {
       title: 'Étape 1 : Présélection',
       subtitle: 'Commençons par quelques questions rapides.',

@@ -10,6 +10,36 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/** Load .env then .env.local (local overrides) without extra dependencies */
+function loadEnvFiles() {
+  const tryLoad = (filename: string, override: boolean) => {
+    const full = path.join(__dirname, filename);
+    if (!fs.existsSync(full)) return;
+    const lines = fs.readFileSync(full, 'utf8').split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq <= 0) continue;
+      const key = trimmed.slice(0, eq).trim();
+      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+      let val = trimmed.slice(eq + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (override || process.env[key] === undefined) {
+        process.env[key] = val;
+      }
+    }
+  };
+  tryLoad('.env', false);
+  tryLoad('.env.local', true);
+}
+loadEnvFiles();
+
 const app = express();
 const PORT = 3000;
 
@@ -91,7 +121,10 @@ const getAirtableBase = () => {
 app.post('/api/survey', async (req, res) => {
   try {
     const base = getAirtableBase();
-    const tableName = process.env.AIRTABLE_TABLE_NAME || 'Survey Submissions';
+    const tableName =
+      process.env.AIRTABLE_TABLE_ID ||
+      process.env.AIRTABLE_TABLE_NAME ||
+      'Survey Submissions';
     const formData = req.body;
 
     // Map form data to Airtable fields

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, forwardRef, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, forwardRef, useMemo, useCallback } from 'react';
 import { useLanguage } from '../hooks/useLanguage';
 import TextReveal from './TextReveal';
 
@@ -12,8 +12,11 @@ interface StepProps {
 
 const Step = forwardRef<HTMLDivElement, StepProps>(({ number, title, description, isActive }, ref) => (
     <div ref={ref} className="relative pb-16 last:pb-0">
-        <div className={`absolute -left-5 top-0 flex items-center justify-center w-10 h-10 rounded-full transition-all duration-500
-            ${isActive ? 'bg-primary border-2 border-primary text-white shadow-lg shadow-primary/40 scale-110' : 'bg-secondary border-2 border-border-color text-primary scale-100'}`}>
+        <div
+            data-timeline-marker
+            className={`absolute -left-5 top-0 flex items-center justify-center w-10 h-10 rounded-full transition-all duration-500
+            ${isActive ? 'bg-primary border-2 border-primary text-white shadow-lg shadow-primary/40 scale-110' : 'bg-secondary border-2 border-border-color text-primary scale-100'}`}
+        >
             <span className="font-bold">{number}</span>
         </div>
         <div className={`pl-12 transition-all duration-700 ${isActive ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-2'}`}>
@@ -23,6 +26,7 @@ const Step = forwardRef<HTMLDivElement, StepProps>(({ number, title, description
     </div>
 ));
 
+Step.displayName = 'Step';
 
 const HowItWorks: React.FC = () => {
     const { t } = useLanguage();
@@ -37,7 +41,47 @@ const HowItWorks: React.FC = () => {
     const [activeStepIndex, setActiveStepIndex] = useState(-1);
     const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
     const pathRef = useRef<SVGPathElement>(null);
+    const basePathRef = useRef<SVGPathElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [railLayout, setRailLayout] = useState({ left: 0, top: 0, height: 0 });
+
+    const updateRailLayout = useCallback(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        const firstEl = stepRefs.current[0]?.querySelector<HTMLElement>('[data-timeline-marker]');
+        const lastEl = stepRefs.current[steps.length - 1]?.querySelector<HTMLElement>('[data-timeline-marker]');
+        if (!firstEl || !lastEl) return;
+
+        const c = container.getBoundingClientRect();
+        const first = firstEl.getBoundingClientRect();
+        const last = lastEl.getBoundingClientRect();
+
+        const firstCx = first.left + first.width / 2 - c.left;
+        const firstCy = first.top + first.height / 2 - c.top;
+        const lastCy = last.top + last.height / 2 - c.top;
+        const height = Math.max(0, lastCy - firstCy);
+
+        setRailLayout({ left: firstCx, top: firstCy, height });
+    }, [steps.length]);
+
+    useLayoutEffect(() => {
+        updateRailLayout();
+        const container = containerRef.current;
+        if (!container) return;
+
+        const ro = new ResizeObserver(() => updateRailLayout());
+        ro.observe(container);
+        stepRefs.current.forEach((el) => el && ro.observe(el));
+        window.addEventListener('resize', updateRailLayout);
+
+        const rafId = window.requestAnimationFrame(() => updateRailLayout());
+
+        return () => {
+            window.cancelAnimationFrame(rafId);
+            ro.disconnect();
+            window.removeEventListener('resize', updateRailLayout);
+        };
+    }, [updateRailLayout, steps, activeStepIndex]);
 
     useEffect(() => {
         stepRefs.current = stepRefs.current.slice(0, steps.length);
@@ -71,39 +115,42 @@ const HowItWorks: React.FC = () => {
 
     useEffect(() => {
         const path = pathRef.current;
-        if (!path) return;
+        const basePath = basePathRef.current;
+        if (!path || !basePath || railLayout.height <= 0) return;
 
-        let pathLength: number;
+        const h = Math.max(1, Math.round(railLayout.height));
+        const d = `M 1 0 L 1 ${h}`;
+        path.setAttribute('d', d);
+        basePath.setAttribute('d', d);
+
+        const pathLength = path.getTotalLength();
+        path.style.strokeDasharray = `${pathLength} ${pathLength}`;
+        path.style.strokeDashoffset = `${pathLength}`;
+
+        let layoutPathLength = pathLength;
 
         const updatePath = () => {
-            if (!pathLength) {
-                pathLength = path.getTotalLength();
-                path.style.strokeDasharray = `${pathLength} ${pathLength}`;
-                path.style.strokeDashoffset = `${pathLength}`;
-            }
-
             const container = containerRef.current;
             if (!container) return;
 
-            const { top, height } = container.getBoundingClientRect();
+            const { height } = container.getBoundingClientRect();
             const scrollY = window.scrollY;
             const viewportHeight = window.innerHeight;
 
-            const scrollPercent = (scrollY - (container.offsetTop - viewportHeight * 0.8)) / (height - viewportHeight * 0.2);
-            
-            const drawLength = pathLength * Math.max(0, Math.min(1, scrollPercent));
-            path.style.strokeDashoffset = (pathLength - drawLength).toString();
+            const scrollPercent =
+                (scrollY - (container.offsetTop - viewportHeight * 0.8)) / (height - viewportHeight * 0.2);
+
+            const drawLength = layoutPathLength * Math.max(0, Math.min(1, scrollPercent));
+            path.style.strokeDashoffset = (layoutPathLength - drawLength).toString();
         };
 
-        window.addEventListener('scroll', updatePath);
-        
-        const timeoutId = setTimeout(updatePath, 100); 
+        window.addEventListener('scroll', updatePath, { passive: true });
+        requestAnimationFrame(updatePath);
 
         return () => {
             window.removeEventListener('scroll', updatePath);
-            clearTimeout(timeoutId);
         };
-    }, []);
+    }, [railLayout.height]);
 
 
     return (
@@ -116,10 +163,25 @@ const HowItWorks: React.FC = () => {
                     </TextReveal>
                 </div>
                 <div ref={containerRef} className="max-w-2xl mx-auto relative">
-                    <div className="absolute top-0 left-[19px] h-full w-px z-0">
-                         <svg className="h-full" width="2" preserveAspectRatio="none">
-                            <path d="M 1 0 V 9999" stroke="#374151" strokeWidth="2" />
-                            <path ref={pathRef} d="M 1 0 V 9999" stroke="#F472B6" strokeWidth="3" />
+                    <div
+                        className="absolute z-0 w-[2px] -translate-x-1/2 pointer-events-none"
+                        style={{
+                            left: railLayout.left,
+                            top: railLayout.top,
+                            height: railLayout.height > 0 ? railLayout.height : undefined,
+                            visibility: railLayout.height > 0 ? 'visible' : 'hidden',
+                        }}
+                        aria-hidden
+                    >
+                        <svg
+                            className="block h-full w-[2px]"
+                            width="2"
+                            height="100%"
+                            viewBox={`0 0 2 ${Math.max(1, Math.round(railLayout.height))}`}
+                            preserveAspectRatio="none"
+                        >
+                            <path ref={basePathRef} d="M 1 0 L 1 1" stroke="#374151" strokeWidth="2" vectorEffect="nonScalingStroke" />
+                            <path ref={pathRef} d="M 1 0 L 1 1" stroke="#F472B6" strokeWidth="3" vectorEffect="nonScalingStroke" />
                         </svg>
                     </div>
 
