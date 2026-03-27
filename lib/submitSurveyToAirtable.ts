@@ -1,5 +1,3 @@
-import Airtable from 'airtable';
-
 export type SurveyFormBody = {
     name?: string;
     email?: string;
@@ -85,11 +83,16 @@ export async function submitSurveyToAirtable(formData: SurveyFormBody): Promise<
         throw new Error('Airtable configuration missing (AIRTABLE_API_KEY or AIRTABLE_BASE_ID)');
     }
 
-    Airtable.configure({ apiKey });
-    const base = Airtable.base(baseId);
-    const record = buildSurveyRecord(formData);
-
     try {
+        // Use dynamic import so module load failures surface as handled API errors.
+        const mod = await import('airtable');
+        const Airtable = (mod as { default?: { configure: (v: { apiKey: string }) => void; base: (id: string) => any } }).default;
+        if (!Airtable) {
+            throw new Error('Airtable module failed to load');
+        }
+        Airtable.configure({ apiKey });
+        const base = Airtable.base(baseId);
+        const record = buildSurveyRecord(formData);
         await base(tableName).create([{ fields: record }]);
     } catch (e) {
         throw new Error(formatAirtableError(e));

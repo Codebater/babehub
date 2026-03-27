@@ -235,7 +235,15 @@ const SurveyModal: React.FC<SurveyModalProps> = ({ isOpen, onClose }) => {
                 body: JSON.stringify(formData),
             });
 
-            const data = (await res.json().catch(() => ({}))) as { error?: string; details?: string };
+            const raw = await res.text();
+            let data: { error?: string; details?: string } = {};
+            try {
+                data = JSON.parse(raw) as { error?: string; details?: string };
+            } catch {
+                if (raw) {
+                    data.details = raw.slice(0, 300);
+                }
+            }
 
             if (!res.ok) {
                 throw new Error(data.details || data.error || `Request failed (${res.status})`);
