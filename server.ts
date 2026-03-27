@@ -3,8 +3,8 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
-import Airtable from 'airtable';
 import { createServer as createViteServer } from 'vite';
+import { submitSurveyToAirtable } from './lib/submitSurveyToAirtable';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -102,62 +102,15 @@ app.get('/api/images', (req, res) => {
   });
 });
 
-// Airtable integration
-let airtableBase: any = null;
-
-const getAirtableBase = () => {
-  if (!airtableBase) {
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    if (!apiKey || !baseId) {
-      throw new Error('Airtable configuration missing (AIRTABLE_API_KEY or AIRTABLE_BASE_ID)');
-    }
-    Airtable.configure({ apiKey });
-    airtableBase = Airtable.base(baseId);
-  }
-  return airtableBase;
-};
-
 app.post('/api/survey', async (req, res) => {
   try {
-    const base = getAirtableBase();
-    const tableName =
-      process.env.AIRTABLE_TABLE_ID ||
-      process.env.AIRTABLE_TABLE_NAME ||
-      'Survey Submissions';
-    const formData = req.body;
-
-    // Map form data to Airtable fields
-    const record = {
-      'Full Name': formData.name,
-      'Email': formData.email,
-      'WhatsApp': formData.whatsapp || '',
-      'Country': formData.country,
-      'Age Over 18': formData.isOver18 === 'yes',
-      'Active Creator': formData.isActiveCreator === 'yes',
-      'Revenue Generating': formData.isGeneratingRevenue === 'yes',
-      'Monthly Earnings': formData.monthlyEarnings,
-      'Platform': formData.socialPlatform,
-      'Handle': formData.socialHandle,
-      'Content Type': formData.contentType,
-      'Goals': formData.goals || '',
-      'Interested in Campaigns': formData.interestedInCampaigns,
-      'Profit Share Acknowledged': formData.agreesToProfitShare,
-      'Submission Date': new Date().toISOString()
-    };
-
-    await base(tableName).create([
-      {
-        fields: record
-      }
-    ]);
-
+    await submitSurveyToAirtable(req.body);
     res.json({ success: true });
   } catch (error) {
     console.error('Airtable Error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to submit to Airtable',
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 });
