@@ -21,17 +21,16 @@ export function buildSurveyRecord(formData: SurveyFormBody): Record<string, stri
     const whatsapp = formData.whatsapp?.trim();
 
     const record: Record<string, string | boolean> = {
-        'Full Name': formData.name ?? '',
+        'Name': formData.name ?? '',
         'Email': formData.email ?? '',
-        'Country': formData.country ?? '',
-        'Age Over 18': formData.isOver18 === 'yes',
+        'Over 18': formData.isOver18 === 'yes',
         'Active Creator': formData.isActiveCreator === 'yes',
-        'Revenue Generating': formData.isGeneratingRevenue === 'yes',
-        'Platform': formData.socialPlatform ?? '',
-        'Handle': formData.socialHandle ?? '',
+        'Generating Revenue': formData.isGeneratingRevenue === 'yes',
+        'Social Platform': formData.socialPlatform ?? '',
+        'Social Handle': formData.socialHandle ?? '',
         'Content Type': formData.contentType ?? '',
         'Interested in Campaigns': Boolean(formData.interestedInCampaigns),
-        'Profit Share Acknowledged': Boolean(formData.agreesToProfitShare),
+        'Agrees to Profit Share': Boolean(formData.agreesToProfitShare),
     };
 
     // Omit if your base uses a Created time column instead (set AIRTABLE_OMIT_SUBMISSION_DATE=1 on Vercel)
@@ -45,6 +44,10 @@ export function buildSurveyRecord(formData: SurveyFormBody): Record<string, stri
 
     if (goals) {
         record['Goals'] = goals;
+    }
+    // Add only if your table has this column.
+    if (formData.country?.trim() && process.env.AIRTABLE_COUNTRY_FIELD_NAME) {
+        record[process.env.AIRTABLE_COUNTRY_FIELD_NAME] = formData.country.trim();
     }
 
     if (formData.isGeneratingRevenue === 'yes' && formData.monthlyEarnings) {
