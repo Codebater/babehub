@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { FAQItem } from './types';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -93,6 +94,7 @@ const App: React.FC = () => {
             </div>
             
             <SurveyModal isOpen={isSurveyModalOpen} onClose={handleCloseModal} />
+            <Analytics />
         </div>
     );
 };
