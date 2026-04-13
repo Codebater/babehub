@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
+import { Analytics } from '@vercel/analytics/react';
 import { FAQItem } from './types';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -80,7 +81,9 @@ const App: React.FC = () => {
     return (
         <HelmetProvider>
             <Router>
-                <div className="bg-background font-sans transition-colors duration-700">
+                <>
+                    <Analytics />
+                    <div className="bg-background font-sans transition-colors duration-700">
                     <Preloader isLoading={isLoading} />
 
                     <div className={`transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
@@ -105,7 +108,8 @@ const App: React.FC = () => {
                     </div>
                     
                     <SurveyModal isOpen={isSurveyModalOpen} onClose={handleCloseModal} />
-                </div>
+                    </div>
+                </>
             </Router>
         </HelmetProvider>
     );
