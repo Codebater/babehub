@@ -3,6 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-site-verification" content="o5JrL8VSLTJcm1Y3liJ41MTvLIx6lzS-QlH7iHKd4hM" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
     <title>Babe Hub | The Best Model Agency for Top Creators</title>
     <meta name="description" content="Babe Hub is the #1 OnlyFans management agency helping creators and models scale their income to top 0.1%. Professional chatting, marketing, and brand building." />
     <meta name="keywords" content="OnlyFans management, OnlyFans agency, model management, OnlyFans growth, OnlyFans marketing, content creator agency, OnlyFans model agency, OnlyFans marketing agency, OnlyFans account manager, OnlyFans scaling, top 0.1% OnlyFans" />
@@ -138,6 +141,19 @@
       /* Ensure body transitions its own background smoothly */
       body {
         transition: background-color 0.7s ease, color 0.7s ease;
+      }
+      /* Logo marquee: high contrast on dark bg; readable when theme switches to pink */
+      .logo-cloud-marquee {
+        color: rgba(255, 255, 255, 0.92);
+      }
+      .logo-cloud-marquee .logo-cloud-marquee__label {
+        color: rgba(255, 255, 255, 0.65);
+      }
+      html.theme-pink .logo-cloud-marquee {
+        color: rgba(31, 41, 55, 0.88);
+      }
+      html.theme-pink .logo-cloud-marquee .logo-cloud-marquee__label {
+        color: rgba(55, 65, 81, 0.78);
       }
     </style>
     <script>
