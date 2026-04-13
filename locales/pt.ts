@@ -12,7 +12,7 @@ export default {
   hero: {
     title: {
       more: 'Mais',
-      withBest: 'com a melhor',
+      withBest: 'com a melhor Agência de Modelos',
       modelAgency: 'Agência de Modelos',
     },
     word: {
@@ -240,7 +240,6 @@ export default {
     next: 'Próximo',
     submit: 'Enviar Candidatura',
     submitting: 'Enviando...',
-    submit_error: 'Ocorreu um erro ao enviar sua candidatura. Tente novamente em alguns instantes.',
     step1: {
       title: 'Passo 1: Triagem Inicial',
       subtitle: 'Vamos começar com algumas perguntas rápidas.',

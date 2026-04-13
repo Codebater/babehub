@@ -23,6 +23,7 @@ const MarketingDashboard: React.FC<MarketingDashboardProps> = ({ onApplyClick })
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
+              <h3 className="sr-only">OnlyFans Marketing and Account Scaling Strategies</h3>
               <h2 className="text-5xl md:text-6xl font-bold text-text-main tracking-tight leading-tight mb-6">
                 {t('marketing.title_part1')}<span className="text-primary">{t('marketing.title_highlight')}</span>
               </h2>
@@ -46,7 +47,7 @@ const MarketingDashboard: React.FC<MarketingDashboardProps> = ({ onApplyClick })
                       key={i}
                       src={`https://api.dicebear.com/8.x/avataaars/svg?seed=${i}`}
                       className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
-                      alt="User"
+                      alt={`OnlyFans Model ${i}`}
                     />
                   ))}
                 </div>
@@ -63,7 +64,7 @@ const MarketingDashboard: React.FC<MarketingDashboardProps> = ({ onApplyClick })
             <div className="relative z-10 w-full max-w-[208px] h-full flex items-end justify-center">
               <img 
                 src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1000" 
-                alt="Model" 
+                alt="Professional OnlyFans Model Management & Growth Agency" 
                 className="w-full h-full object-cover rounded-xl shadow-xl"
                 referrerPolicy="no-referrer"
               />

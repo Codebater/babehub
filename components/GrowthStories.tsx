@@ -46,7 +46,7 @@ const GrowthStories: React.FC = () => {
               <div className="aspect-video relative overflow-hidden">
                 <img 
                   src={t(`growth.stories.${index}.image`)}
-                  alt={t(`growth.stories.${index}.title`)}
+                  alt={`${t(`growth.stories.${index}.title`)} - OnlyFans Growth Case Study`}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
                 />

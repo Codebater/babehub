@@ -131,6 +131,7 @@ export const BabeHubLogo = ({ className }: { className?: string }) => (
         viewBox="0 0 250 60"
         xmlns="http://www.w3.org/2000/svg"
     >
+        <title>Babe Hub - Premium OnlyFans Management Agency</title>
         <text
             x="0"
             y="45"

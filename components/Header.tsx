@@ -137,7 +137,7 @@ const Header: React.FC<HeaderProps> = ({ onApplyClick }) => {
                         <div className="overflow-hidden mt-12">
                             <button
                                 onClick={() => { onApplyClick(); setIsOpen(false); }}
-                                className="bg-primary hover:bg-pink-400 text-white font-bold py-3 px-12 rounded-full text-lg"
+                                className="bg-primary hover:bg-pink-400 text-white font-bold py-3 px-12 rounded-full text-lg mb-8"
                                 style={{
                                     transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
                                     transition: `transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)`,
@@ -146,6 +146,18 @@ const Header: React.FC<HeaderProps> = ({ onApplyClick }) => {
                             >
                                 {t('header.applyNow')}
                             </button>
+                        </div>
+                        <div className="overflow-hidden">
+                            <p 
+                                className="text-gray-500 text-xs tracking-widest uppercase font-medium"
+                                style={{
+                                    transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+                                    transition: `transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)`,
+                                    transitionDelay: isOpen ? `${600 + navItems.length * 75}ms` : `0s`
+                                }}
+                            >
+                                Operated by OFX LLC
+                            </p>
                         </div>
                     </nav>
                 </div>

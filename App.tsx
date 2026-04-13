@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { FAQItem } from './types';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -12,6 +14,7 @@ import Footer from './components/Footer';
 import SurveyModal from './components/SurveyModal';
 import { useLanguage } from './hooks/useLanguage';
 import Preloader from './components/Preloader';
+import DynamicSEOPage from './components/DynamicSEOPage';
 
 const getFaqData = (t: (key: string) => string): FAQItem[] => [
     { question: t('faq.cost.question'), answer: t('faq.cost.answer') },
@@ -75,25 +78,36 @@ const App: React.FC = () => {
     const faqData = getFaqData(t);
     
     return (
-        <div className="bg-background font-sans transition-colors duration-700">
-            <Preloader isLoading={isLoading} />
+        <HelmetProvider>
+            <Router>
+                <div className="bg-background font-sans transition-colors duration-700">
+                    <Preloader isLoading={isLoading} />
 
-            <div className={`transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-                <Header onApplyClick={handleApplyClick} />
-                <main>
-                    <Hero onApplyClick={handleApplyClick}/>
-                    <Benefits onApplyClick={handleApplyClick} sectionRef={benefitsRef} />
-                    <MarketingDashboard onApplyClick={handleApplyClick} />
-                    <LogoCloudMarquee />
-                    <HowItWorks />
-                    <FAQ faqItems={faqData} />
-                    <Apply onApplyClick={handleApplyClick} />
-                </main>
-                <Footer />
-            </div>
-            
-            <SurveyModal isOpen={isSurveyModalOpen} onClose={handleCloseModal} />
-        </div>
+                    <div className={`transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
+                        <Routes>
+                            <Route path="/" element={
+                                <>
+                                    <Header onApplyClick={handleApplyClick} />
+                                    <main>
+                                        <Hero onApplyClick={handleApplyClick}/>
+                                        <Benefits onApplyClick={handleApplyClick} sectionRef={benefitsRef} />
+                                        <MarketingDashboard onApplyClick={handleApplyClick} />
+                                        <LogoCloudMarquee />
+                                        <HowItWorks />
+                                        <FAQ faqItems={faqData} />
+                                        <Apply onApplyClick={handleApplyClick} />
+                                    </main>
+                                    <Footer />
+                                </>
+                            } />
+                            <Route path="/:slug" element={<DynamicSEOPage />} />
+                        </Routes>
+                    </div>
+                    
+                    <SurveyModal isOpen={isSurveyModalOpen} onClose={handleCloseModal} />
+                </div>
+            </Router>
+        </HelmetProvider>
     );
 };
 

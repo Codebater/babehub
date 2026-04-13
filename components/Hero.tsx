@@ -121,6 +121,9 @@ const Hero: React.FC<HeroProps> = ({ onApplyClick }) => {
                     
                     {/* Hero Text - Centered */}
                     <div className="relative text-center animate-fade-in-down z-30 max-w-xl">
+                        {/* Hidden SEO-optimized text for search engines */}
+                        <h2 className="sr-only">The #1 OnlyFans Management Agency for Top Creators and Models</h2>
+                        
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-text-main mb-6 tracking-tighter leading-tight">
                             {t('hero.title.more')}{' '}
                             <span className="inline-grid h-[1.25em] align-middle overflow-hidden">
@@ -154,6 +157,7 @@ const Hero: React.FC<HeroProps> = ({ onApplyClick }) => {
                         </TextReveal>
                         <button 
                             onClick={onApplyClick}
+                            aria-label="Apply to the #1 OnlyFans Management Agency"
                             className="bg-gradient-to-r from-primary to-red-500 hover:from-pink-500 hover:to-red-600 text-white font-bold py-4 px-10 rounded-full text-lg transition-all duration-300 transform hover:scale-105 shadow-lg shadow-primary/40">
                             {t('hero.cta')}
                         </button>

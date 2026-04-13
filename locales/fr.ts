@@ -12,7 +12,7 @@ export default {
   hero: {
     title: {
       more: 'Plus de',
-      withBest: 'avec la meilleure',
+      withBest: 'avec la meilleure Agence de mannequins',
       modelAgency: 'Agence de mannequins',
     },
     word: {
@@ -240,7 +240,6 @@ export default {
     next: 'Suivant',
     submit: 'Soumettre la candidature',
     submitting: 'Envoi en cours...',
-    submit_error: 'Une erreur s’est produite lors de l’envoi de votre candidature. Veuillez réessayer dans un instant.',
     step1: {
       title: 'Étape 1 : Présélection',
       subtitle: 'Commençons par quelques questions rapides.',

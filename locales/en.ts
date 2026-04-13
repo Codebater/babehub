@@ -12,7 +12,7 @@ export default {
   hero: {
     title: {
       more: 'More',
-      withBest: 'with the best',
+      withBest: 'with the best Model Agency',
       modelAgency: 'Model Agency',
     },
     word: {
@@ -20,7 +20,7 @@ export default {
       time: 'Time',
       money: 'Money',
     },
-    subtitle: 'Are you posting, chatting, and planning all by yourself? We scale your income, your earnings from DMs, and build your brand — so you never burn out again.',
+    subtitle: 'Are you an OnlyFans creator posting, chatting, and planning all by yourself? We scale your income, maximize your earnings from DMs, and build your personal brand — so you never burn out again.',
     cta: 'GET STARTED',
     card: {
       impressions: 'Tweet Impressions',
@@ -37,7 +37,7 @@ export default {
   },
   services: {
     title: 'What We Do For You',
-    subtitle: 'Focus on creating. We\'ll handle the rest, propelling your account to the top 0.1%.',
+    subtitle: 'Focus on creating content. We\'ll handle the rest, propelling your OnlyFans account to the top 0.1%.',
     management: {
       title: 'Expert Account Management',
       description: 'Full management of your OnlyFans page, including posting, fan interaction, and optimization, freeing you to focus on content.',
@@ -69,7 +69,7 @@ export default {
   },
   benefits: {
     title: 'More Freedom, More Earnings',
-    subtitle: 'Joining Babe Hub means reclaiming your time while exponentially growing your income. Our expertise becomes your unfair advantage.',
+    subtitle: 'Joining Babe Hub means reclaiming your time while exponentially growing your OnlyFans income. Our expertise becomes your unfair advantage.',
     income: {
       title: 'Scale Your Income to 5-6 Figures',
       description: 'Leverage our data-driven strategies and expert team to turn your content into a high-revenue business, reaching financial goals you\'ve only dreamed of.',
@@ -90,7 +90,7 @@ export default {
       title_part1: 'Ready to ',
       title_highlight: 'Elevate',
       title_part2: ' Your Career?',
-      subtitle: 'The top 1% have a team. Let us be yours. Apply for a confidential, no-obligation evaluation.',
+      subtitle: 'The top 1% of OnlyFans models have a team. Let us be yours. Apply for a confidential, no-obligation evaluation.',
       button: 'Grow With Us',
     }
   },
@@ -216,7 +216,7 @@ export default {
   marketing: {
     title_part1: 'We scale your ',
     title_highlight: 'Presence',
-    subtitle: 'We have our own driven strategies and partners to boost your content and your presence',
+    subtitle: 'We use data-driven marketing and exclusive partnerships to scale your OnlyFans presence and maximize your creator earnings.',
     applyNow: 'Apply Now',
     joinedBy: 'joined by ',
     creatorsPlus: '100 creators +',
@@ -240,7 +240,6 @@ export default {
     next: 'Next',
     submit: 'Submit Application',
     submitting: 'Submitting...',
-    submit_error: 'Something went wrong while sending your application. Please try again in a moment.',
     step1: {
       title: 'Step 1: Initial Screening',
       subtitle: 'Let\'s start with a few quick questions.',

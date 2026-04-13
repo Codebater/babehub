@@ -3,42 +3,12 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import cors from 'cors';
+import Airtable from 'airtable';
 import { createServer as createViteServer } from 'vite';
-import { submitSurveyToAirtable } from './lib/submitSurveyToAirtable';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-/** Load .env then .env.local (local overrides) without extra dependencies */
-function loadEnvFiles() {
-  const tryLoad = (filename: string, override: boolean) => {
-    const full = path.join(__dirname, filename);
-    if (!fs.existsSync(full)) return;
-    const lines = fs.readFileSync(full, 'utf8').split(/\r?\n/);
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
-      const eq = trimmed.indexOf('=');
-      if (eq <= 0) continue;
-      const key = trimmed.slice(0, eq).trim();
-      if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
-      let val = trimmed.slice(eq + 1).trim();
-      if (
-        (val.startsWith('"') && val.endsWith('"')) ||
-        (val.startsWith("'") && val.endsWith("'"))
-      ) {
-        val = val.slice(1, -1);
-      }
-      if (override || process.env[key] === undefined) {
-        process.env[key] = val;
-      }
-    }
-  };
-  tryLoad('.env', false);
-  tryLoad('.env.local', true);
-}
-loadEnvFiles();
 
 const app = express();
 const PORT = 3000;
@@ -102,18 +72,64 @@ app.get('/api/images', (req, res) => {
   });
 });
 
+// Airtable integration
+let airtableBase: any = null;
+
+const getAirtableBase = () => {
+  if (!airtableBase) {
+    const apiKey = process.env.AIRTABLE_API_KEY;
+    const baseId = process.env.AIRTABLE_BASE_ID;
+    if (!apiKey || !baseId) {
+      throw new Error('Airtable configuration missing (AIRTABLE_API_KEY or AIRTABLE_BASE_ID)');
+    }
+    Airtable.configure({ apiKey });
+    airtableBase = Airtable.base(baseId);
+  }
+  return airtableBase;
+};
+
 app.post('/api/survey', async (req, res) => {
   try {
-    await submitSurveyToAirtable(req.body);
+    const base = getAirtableBase();
+    const tableName = process.env.AIRTABLE_TABLE_NAME || 'Survey Submissions';
+    const formData = req.body;
+
+    // Map form data to Airtable fields
+    const record = {
+      'Full Name': formData.name,
+      'Email': formData.email,
+      'WhatsApp': formData.whatsapp || '',
+      'Country': formData.country,
+      'Age Over 18': formData.isOver18 === 'yes',
+      'Active Creator': formData.isActiveCreator === 'yes',
+      'Revenue Generating': formData.isGeneratingRevenue === 'yes',
+      'Monthly Earnings': formData.monthlyEarnings,
+      'Platform': formData.socialPlatform,
+      'Handle': formData.socialHandle,
+      'Content Type': formData.contentType,
+      'Goals': formData.goals || '',
+      'Interested in Campaigns': formData.interestedInCampaigns,
+      'Profit Share Acknowledged': formData.agreesToProfitShare,
+      'Submission Date': new Date().toISOString()
+    };
+
+    await base(tableName).create([
+      {
+        fields: record
+      }
+    ]);
+
     res.json({ success: true });
   } catch (error) {
     console.error('Airtable Error:', error);
-    res.status(500).json({
+    res.status(500).json({ 
       error: 'Failed to submit to Airtable',
-      details: error instanceof Error ? error.message : String(error),
+      details: error instanceof Error ? error.message : String(error)
     });
   }
 });
+
+import { seoPages } from './content/seoData.ts';
 
 // Vite middleware for development
 async function startServer() {
@@ -124,10 +140,45 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(__dirname, 'dist');
+    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
+    
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      const url = req.path.replace(/^\/|\/$/g, '');
+      const seoPage = seoPages.find(p => p.slug === url);
+      
+      const indexPath = path.join(distPath, 'index.html');
+      let html = fs.readFileSync(indexPath, 'utf8');
+
+      if (seoPage) {
+        // Replace Title
+        html = html.replace(
+          /<title>.*?<\/title>/, 
+          `<title>${seoPage.title}</title>`
+        );
+        // Replace Description
+        html = html.replace(
+          /<meta name="description" content=".*?" \/>/,
+          `<meta name="description" content="${seoPage.description}" />`
+        );
+        // Replace Keywords
+        html = html.replace(
+          /<meta name="keywords" content=".*?" \/>/,
+          `<meta name="keywords" content="${seoPage.keywords}" />`
+        );
+        // Replace OG Title
+        html = html.replace(
+          /<meta property="og:title" content=".*?" \/>/,
+          `<meta property="og:title" content="${seoPage.title}" />`
+        );
+        // Replace OG Description
+        html = html.replace(
+          /<meta property="og:description" content=".*?" \/>/,
+          `<meta property="og:description" content="${seoPage.description}" />`
+        );
+      }
+
+      res.send(html);
     });
   }
 

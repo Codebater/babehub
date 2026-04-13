@@ -12,8 +12,8 @@ export default {
   hero: {
     title: {
       more: 'より多くの',
-      withBest: '最高の',
-      modelAgency: 'モデル事務所で',
+      withBest: '最高のモデル事務所で',
+      modelAgency: 'モデル事務所',
     },
     word: {
       fans: 'ファンを',
@@ -240,7 +240,6 @@ export default {
     next: '次へ',
     submit: '応募を送信',
     submitting: '送信中...',
-    submit_error: '応募の送信中にエラーが発生しました。しばらくしてからもう一度お試しください。',
     step1: {
       title: 'ステップ1：一次審査',
       subtitle: 'いくつかの簡単な質問から始めましょう。',
