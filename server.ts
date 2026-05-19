@@ -90,41 +90,49 @@ const getAirtableBase = () => {
 
 app.post('/api/survey', async (req, res) => {
   try {
-    const base = getAirtableBase();
-    const tableName = process.env.AIRTABLE_TABLE_NAME || 'Survey Submissions';
-    const formData = req.body;
+    const formData = req.body ?? {};
+    if (!formData.name?.trim() || !formData.email?.trim()) {
+      return res.status(400).json({ error: 'Bad Request', details: 'Missing name or email' });
+    }
 
-    // Map form data to Airtable fields
-    const record = {
-      'Full Name': formData.name,
+    const base = getAirtableBase();
+    const tableName =
+      process.env.AIRTABLE_TABLE_ID ||
+      process.env.AIRTABLE_TABLE_NAME ||
+      'Survey Submissions';
+
+    const record: Record<string, string | boolean> = {
+      'Name': formData.name,
       'Email': formData.email,
-      'WhatsApp': formData.whatsapp || '',
-      'Country': formData.country,
-      'Age Over 18': formData.isOver18 === 'yes',
+      'Country': formData.country ?? '',
+      'Over 18': formData.isOver18 === 'yes',
       'Active Creator': formData.isActiveCreator === 'yes',
-      'Revenue Generating': formData.isGeneratingRevenue === 'yes',
-      'Monthly Earnings': formData.monthlyEarnings,
-      'Platform': formData.socialPlatform,
-      'Handle': formData.socialHandle,
-      'Content Type': formData.contentType,
-      'Goals': formData.goals || '',
-      'Interested in Campaigns': formData.interestedInCampaigns,
-      'Profit Share Acknowledged': formData.agreesToProfitShare,
-      'Submission Date': new Date().toISOString()
+      'Generating Revenue': formData.isGeneratingRevenue === 'yes',
+      'Social Platform': formData.socialPlatform ?? '',
+      'Social Handle': formData.socialHandle ?? '',
+      'Content Type': formData.contentType ?? '',
+      'Interested in Campaigns': Boolean(formData.interestedInCampaigns),
+      'Agrees to Profit Share': Boolean(formData.agreesToProfitShare),
+      'Submission Date': new Date().toISOString(),
     };
 
-    await base(tableName).create([
-      {
-        fields: record
-      }
-    ]);
+    if (formData.whatsapp?.trim()) {
+      record['WhatsApp'] = formData.whatsapp.trim();
+    }
+    if (formData.goals?.trim()) {
+      record['Goals'] = formData.goals.trim();
+    }
+    if (formData.isGeneratingRevenue === 'yes' && formData.monthlyEarnings) {
+      record['Monthly Earnings'] = formData.monthlyEarnings;
+    }
 
+    await base(tableName).create([{ fields: record }]);
     res.json({ success: true });
   } catch (error) {
     console.error('Airtable Error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to submit to Airtable',
-      details: error instanceof Error ? error.message : String(error)
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 });

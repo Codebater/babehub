@@ -23,6 +23,7 @@ export function buildSurveyRecord(formData: SurveyFormBody): Record<string, stri
     const record: Record<string, string | boolean> = {
         'Name': formData.name ?? '',
         'Email': formData.email ?? '',
+        'Country': formData.country?.trim() ?? '',
         'Over 18': formData.isOver18 === 'yes',
         'Active Creator': formData.isActiveCreator === 'yes',
         'Generating Revenue': formData.isGeneratingRevenue === 'yes',
@@ -44,10 +45,6 @@ export function buildSurveyRecord(formData: SurveyFormBody): Record<string, stri
 
     if (goals) {
         record['Goals'] = goals;
-    }
-    // Add only if your table has this column.
-    if (formData.country?.trim() && process.env.AIRTABLE_COUNTRY_FIELD_NAME) {
-        record[process.env.AIRTABLE_COUNTRY_FIELD_NAME] = formData.country.trim();
     }
 
     if (formData.isGeneratingRevenue === 'yes' && formData.monthlyEarnings) {
