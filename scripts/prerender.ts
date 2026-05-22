@@ -7,6 +7,9 @@
  * with the correct <title>, <meta>, <link rel="canonical">, and OG/Twitter tags
  * already injected — so crawlers never need to execute JavaScript.
  *
+ * Also generates:
+ *   dist/sitemap.xml  — all pre-rendered URLs + homepage
+ *
  * Vercel serves dist/<slug>/index.html when a request hits /<slug>,
  * taking priority over the catch-all rewrite in vercel.json.
  */
@@ -49,6 +52,11 @@ function replaceTitle(html: string, title: string): string {
 const template = readFileSync(join(DIST, 'index.html'), 'utf8');
 let count = 0;
 
+// Collect all URLs for the sitemap (start with homepage)
+const sitemapUrls: { loc: string; priority: string; changefreq: string }[] = [
+  { loc: `${DOMAIN}/`, priority: '1.0', changefreq: 'weekly' },
+];
+
 for (const page of seoPages) {
   const url = `${DOMAIN}/${page.slug}`;
 
@@ -77,6 +85,27 @@ for (const page of seoPages) {
 
   console.log(`  ✓  /${page.slug}`);
   count++;
+
+  sitemapUrls.push({ loc: url, priority: '0.8', changefreq: 'weekly' });
 }
 
 console.log(`\n✅  Pre-rendered ${count} SEO pages into dist/`);
+
+// ── sitemap.xml ───────────────────────────────────────────────────────────────
+
+const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+const sitemapEntries = sitemapUrls
+  .map(({ loc, priority, changefreq }) =>
+    `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`
+  )
+  .join('\n');
+
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${sitemapEntries}
+</urlset>
+`;
+
+writeFileSync(join(DIST, 'sitemap.xml'), sitemap, 'utf8');
+console.log(`✅  Generated sitemap.xml (${sitemapUrls.length} URLs)`);
