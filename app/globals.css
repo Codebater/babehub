@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background: #121212;
+  --color-secondary: #1e1e1e;
+  --color-card: #2a2a2a;
+  --color-primary: #f472b6;
+  --color-text-main: #e5e7eb;
+  --color-text-secondary: #9ca3af;
+  --color-border-color: #374151;
+}
+
+html.theme-pink {
+  --color-background: #fce7f3; /* tailwind pink-100 */
+  --color-secondary: #fbcfe8; /* tailwind pink-200 */
+  --color-card: #ffffff;
+  --color-primary: #ec4899; /* tailwind pink-500 */
+  --color-text-main: #111827; /* tailwind gray-900 */
+  --color-text-secondary: #4b5563; /* tailwind gray-600 */
+  --color-border-color: #f9a8d4; /* tailwind pink-300 */
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-main);
+  transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+/* Logo marquee: high contrast on dark bg; readable when theme switches to pink */
+.logo-cloud-marquee {
+  color: rgba(255, 255, 255, 0.92);
+}
+.logo-cloud-marquee .logo-cloud-marquee__label {
+  color: rgba(255, 255, 255, 0.65);
+}
+html.theme-pink .logo-cloud-marquee {
+  color: rgba(31, 41, 55, 0.88);
+}
+html.theme-pink .logo-cloud-marquee .logo-cloud-marquee__label {
+  color: rgba(55, 65, 81, 0.78);
+}
