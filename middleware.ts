@@ -18,6 +18,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Match all paths except: api routes, Next.js internals, static files.
-  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
+  // Match all paths except: api routes, /auth/* (Supabase callback handler
+  // that must NOT be locale-rewritten), Next.js internals, static files.
+  matcher: ['/((?!api|auth|_next|_vercel|.*\\..*).*)'],
 };
