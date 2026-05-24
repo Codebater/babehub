@@ -120,10 +120,8 @@ export default async function DashboardPage() {
           <QuickLink href={`/c/${profile.handle}`}>View public profile</QuickLink>
           {isCreator && <QuickLink href="/app/dashboard/tiers">Manage tiers</QuickLink>}
           {isCreator && <QuickLink href="/app/dashboard/posts">Your posts</QuickLink>}
+          <QuickLink href="/app/settings">Settings</QuickLink>
           <QuickLink href="/">Marketing site</QuickLink>
-          <QuickLink href="/app/settings" disabled>
-            Settings (soon)
-          </QuickLink>
           <QuickLink href="/app/payouts" disabled>
             Payouts (soon)
           </QuickLink>
