@@ -70,6 +70,12 @@ export default function Header({ onApplyClick }: HeaderProps) {
             </nav>
             <div className="flex items-center space-x-4">
               <LanguageSwitcher />
+              <a
+                href="/app/login"
+                className="hidden md:inline-block text-text-secondary hover:text-primary transition-colors duration-300 text-sm font-medium"
+              >
+                Sign in
+              </a>
               <button
                 onClick={onApplyClick}
                 className="hidden md:block border border-primary text-primary hover:bg-primary hover:text-white font-bold py-2 px-6 rounded-full transition-colors duration-300 text-sm"
@@ -159,6 +165,20 @@ export default function Header({ onApplyClick }: HeaderProps) {
               >
                 {t('header.applyNow')}
               </button>
+            </div>
+            <div className="overflow-hidden mb-6">
+              <a
+                href="/app/login"
+                onClick={() => setIsOpen(false)}
+                className="inline-block text-text-secondary hover:text-primary text-base font-medium"
+                style={{
+                  transform: isOpen ? 'translateY(0)' : 'translateY(100%)',
+                  transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
+                  transitionDelay: isOpen ? `${550 + navItems.length * 75}ms` : '0s',
+                }}
+              >
+                Sign in →
+              </a>
             </div>
             <div className="overflow-hidden">
               <p
