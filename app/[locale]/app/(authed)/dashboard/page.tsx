@@ -23,9 +23,15 @@ export default async function DashboardPage() {
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('handle, display_name, bio, avatar_url, role')
+    .select('handle, display_name, bio, avatar_url, role, onboarded_at')
     .eq('id', user.id)
     .single();
+
+  // Brand-new users haven't filled out the onboarding form yet — push them
+  // through it before they see the dashboard.
+  if (profile && !profile.onboarded_at) {
+    redirect('/app/onboarding');
+  }
 
   if (error || !profile) {
     // Trigger should have created this on signup. If it's missing the user

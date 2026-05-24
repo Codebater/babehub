@@ -201,6 +201,7 @@ export type Database = {
           handle: string
           id: string
           is_verified: boolean
+          onboarded_at: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
@@ -213,6 +214,7 @@ export type Database = {
           handle: string
           id: string
           is_verified?: boolean
+          onboarded_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
@@ -225,6 +227,7 @@ export type Database = {
           handle?: string
           id?: string
           is_verified?: boolean
+          onboarded_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
