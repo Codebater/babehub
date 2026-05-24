@@ -51,6 +51,43 @@ export async function sendMagicLink(_prev: LoginState, formData: FormData): Prom
 }
 
 /**
+ * Server Action: kick off the Google OAuth sign-in flow.
+ *
+ * Flow:
+ *   1. We call `signInWithOAuth({ provider: 'google' })` with redirectTo
+ *      set to our own /auth/callback.
+ *   2. Supabase returns a hosted URL — `data.url` — that points at Google's
+ *      consent screen with all the right query params baked in.
+ *   3. We redirect the browser there. Google handles consent, then bounces
+ *      back to Supabase's `auth/v1/callback`, which exchanges the OAuth
+ *      code for a Supabase session and finally redirects to our own
+ *      /auth/callback?code=... where the existing code-for-session
+ *      exchange completes.
+ *
+ * Requires: Google OAuth client configured in Supabase Auth → Providers.
+ * Without that, this call returns an error and we bounce back to /app/login.
+ */
+export async function signInWithGoogle(): Promise<void> {
+  const supabase = await createClient();
+  const origin = await getRequestOrigin();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error || !data?.url) {
+    redirect(
+      `/app/login?error=${encodeURIComponent(error?.message ?? 'oauth_unavailable')}`,
+    );
+  }
+
+  redirect(data.url);
+}
+
+/**
  * Server Action: end the session and redirect home. Wired to the dashboard's
  * sign-out button. Always succeeds, even if the user had no session.
  */
