@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { GridOfDotsIcon, XIcon, BabeHubLogo } from './IconComponents';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -70,12 +71,12 @@ export default function Header({ onApplyClick }: HeaderProps) {
             </nav>
             <div className="flex items-center space-x-4">
               <LanguageSwitcher />
-              <a
+              <Link
                 href="/app/login"
                 className="hidden md:inline-block text-text-secondary hover:text-primary transition-colors duration-300 text-sm font-medium"
               >
                 Sign in
-              </a>
+              </Link>
               <button
                 onClick={onApplyClick}
                 className="hidden md:block border border-primary text-primary hover:bg-primary hover:text-white font-bold py-2 px-6 rounded-full transition-colors duration-300 text-sm"
@@ -167,7 +168,7 @@ export default function Header({ onApplyClick }: HeaderProps) {
               </button>
             </div>
             <div className="overflow-hidden mb-6">
-              <a
+              <Link
                 href="/app/login"
                 onClick={() => setIsOpen(false)}
                 className="inline-block text-text-secondary hover:text-primary text-base font-medium"
@@ -178,7 +179,7 @@ export default function Header({ onApplyClick }: HeaderProps) {
                 }}
               >
                 Sign in →
-              </a>
+              </Link>
             </div>
             <div className="overflow-hidden">
               <p
