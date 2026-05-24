@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Lock, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 
 /**
  * `/c/{handle}` — public creator profile.
@@ -54,7 +55,19 @@ async function loadProfile(handle: string) {
     supabase.auth.getUser(),
   ]);
 
-  return { profile, tiers: tiers ?? [], posts: posts ?? [], viewer: user };
+  // Collect every media id referenced by the posts the viewer can actually
+  // see (RLS already filtered the array), then mint signed URLs in one
+  // batch. The `posts` bucket is private — only signed URLs work.
+  const mediaIds = (posts ?? []).flatMap((p) => p.media_ids ?? []);
+  const mediaUrlMap = await getSignedMediaUrls(mediaIds);
+
+  return {
+    profile,
+    tiers: tiers ?? [],
+    posts: posts ?? [],
+    viewer: user,
+    mediaUrlMap,
+  };
 }
 
 function formatPrice(priceCents: number, currency: string): string {
@@ -99,7 +112,7 @@ export default async function CreatorProfilePage({ params }: Props) {
   const result = await loadProfile(handle);
   if (!result) notFound();
 
-  const { profile, tiers, posts, viewer } = result;
+  const { profile, tiers, posts, viewer, mediaUrlMap } = result;
   const isOwnProfile = viewer?.id === profile.id;
   const isCreator = profile.role === 'creator';
 
@@ -243,30 +256,30 @@ export default async function CreatorProfilePage({ params }: Props) {
             ) : (
               <ul className="space-y-4">
                 {posts.map((post) => {
-                  const isLocked = Boolean(post.tier_required_id) && !post.body;
+                  const mediaUrls = (post.media_ids ?? [])
+                    .map((id) => mediaUrlMap.get(id))
+                    .filter((url): url is string => Boolean(url));
                   return (
                     <li
                       key={post.id}
-                      className="rounded-2xl border border-border-color bg-card p-5"
+                      className="overflow-hidden rounded-2xl border border-border-color bg-card"
                     >
-                      {isLocked ? (
-                        <div className="flex items-center gap-3 text-text-secondary">
-                          <Lock className="h-5 w-5 text-primary" />
-                          <span>Subscriber-only post — subscribe to unlock.</span>
-                        </div>
-                      ) : (
-                        <>
-                          <p className="whitespace-pre-wrap text-text-main">{post.body}</p>
-                          <p className="mt-3 text-xs text-text-secondary">
-                            {post.published_at && new Date(post.published_at).toLocaleString()}
-                            {post.tier_required_id && (
-                              <span className="ml-2 inline-flex items-center gap-1 text-primary">
-                                <Lock className="h-3 w-3" /> Subscriber post
-                              </span>
-                            )}
-                          </p>
-                        </>
+                      {post.body && (
+                        <p className="whitespace-pre-wrap p-5 text-text-main">{post.body}</p>
                       )}
+
+                      {mediaUrls.length > 0 && <PostImageGrid urls={mediaUrls} />}
+
+                      <div className="flex items-center gap-3 border-t border-border-color/40 px-5 py-3 text-xs text-text-secondary">
+                        <span>
+                          {post.published_at && new Date(post.published_at).toLocaleString()}
+                        </span>
+                        {post.tier_required_id && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
+                            <Lock className="h-3 w-3" /> Subscriber
+                          </span>
+                        )}
+                      </div>
                     </li>
                   );
                 })}
@@ -285,6 +298,47 @@ export default async function CreatorProfilePage({ params }: Props) {
           </section>
         )}
       </main>
+    </div>
+  );
+}
+
+/**
+ * Renders 1-10 images per post. Layout rules:
+ *   - 1 image  → full width, capped height
+ *   - 2 images → side-by-side
+ *   - 3 images → grid with the first spanning two rows
+ *   - 4+       → uniform 2- or 3-column grid
+ * All cells use object-cover so portrait + landscape mixes look consistent.
+ */
+function PostImageGrid({ urls }: { urls: string[] }) {
+  if (urls.length === 0) return null;
+
+  if (urls.length === 1) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={urls[0]}
+        alt=""
+        className="max-h-[600px] w-full object-cover"
+        loading="lazy"
+      />
+    );
+  }
+
+  const cols = urls.length === 2 ? 'grid-cols-2' : urls.length <= 4 ? 'grid-cols-2' : 'grid-cols-3';
+
+  return (
+    <div className={`grid ${cols} gap-1`}>
+      {urls.map((url, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={i}
+          src={url}
+          alt=""
+          className="aspect-square w-full object-cover"
+          loading="lazy"
+        />
+      ))}
     </div>
   );
 }
