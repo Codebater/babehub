@@ -104,14 +104,12 @@ export default async function DashboardPage() {
               or crypto (NOWPayments). Your fan account stays — you just unlock
               creator features.
             </p>
-            <button
-              type="button"
-              disabled
-              className="mt-6 cursor-not-allowed rounded-full bg-primary/50 px-6 py-3 font-bold text-white"
-              title="Onboarding flow lands in the next commit"
+            <Link
+              href="/app/onboarding"
+              className="mt-6 inline-block rounded-full bg-primary px-6 py-3 font-bold text-white transition-all hover:bg-pink-400 hover:scale-[1.02]"
             >
-              Become a creator (coming next)
-            </button>
+              Switch to creator →
+            </Link>
           </div>
         )}
       </section>
@@ -120,6 +118,8 @@ export default async function DashboardPage() {
         <h2 className="mb-4 text-lg font-bold text-text-main">Quick links</h2>
         <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <QuickLink href={`/c/${profile.handle}`}>View public profile</QuickLink>
+          {isCreator && <QuickLink href="/app/dashboard/tiers">Manage tiers</QuickLink>}
+          {isCreator && <QuickLink href="/app/dashboard/posts">Your posts</QuickLink>}
           <QuickLink href="/">Marketing site</QuickLink>
           <QuickLink href="/app/settings" disabled>
             Settings (soon)
