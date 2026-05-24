@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { loadFeedPage } from './actions';
+import { loadFeedPage } from './data';
 import PostCard from './PostCard';
 import LoadMoreButton from './LoadMoreButton';
 
