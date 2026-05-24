@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Lock, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
+import MediaTile, { type MediaItem } from '@/components/MediaTile';
 
 /**
  * `/c/{handle}` — public creator profile.
@@ -256,9 +257,9 @@ export default async function CreatorProfilePage({ params }: Props) {
             ) : (
               <ul className="space-y-4">
                 {posts.map((post) => {
-                  const mediaUrls = (post.media_ids ?? [])
+                  const mediaItems: MediaItem[] = (post.media_ids ?? [])
                     .map((id) => mediaUrlMap.get(id))
-                    .filter((url): url is string => Boolean(url));
+                    .filter((m): m is MediaItem => Boolean(m));
                   return (
                     <li
                       key={post.id}
@@ -268,7 +269,7 @@ export default async function CreatorProfilePage({ params }: Props) {
                         <p className="whitespace-pre-wrap p-5 text-text-main">{post.body}</p>
                       )}
 
-                      {mediaUrls.length > 0 && <PostImageGrid urls={mediaUrls} />}
+                      {mediaItems.length > 0 && <MediaTile items={mediaItems} />}
 
                       <div className="flex items-center gap-3 border-t border-border-color/40 px-5 py-3 text-xs text-text-secondary">
                         <span>
@@ -302,43 +303,5 @@ export default async function CreatorProfilePage({ params }: Props) {
   );
 }
 
-/**
- * Renders 1-10 images per post. Layout rules:
- *   - 1 image  → full width, capped height
- *   - 2 images → side-by-side
- *   - 3 images → grid with the first spanning two rows
- *   - 4+       → uniform 2- or 3-column grid
- * All cells use object-cover so portrait + landscape mixes look consistent.
- */
-function PostImageGrid({ urls }: { urls: string[] }) {
-  if (urls.length === 0) return null;
-
-  if (urls.length === 1) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={urls[0]}
-        alt=""
-        className="max-h-[600px] w-full object-cover"
-        loading="lazy"
-      />
-    );
-  }
-
-  const cols = urls.length === 2 ? 'grid-cols-2' : urls.length <= 4 ? 'grid-cols-2' : 'grid-cols-3';
-
-  return (
-    <div className={`grid ${cols} gap-1`}>
-      {urls.map((url, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={i}
-          src={url}
-          alt=""
-          className="aspect-square w-full object-cover"
-          loading="lazy"
-        />
-      ))}
-    </div>
-  );
-}
+// Image/video grid rendering moved to `components/MediaTile.tsx` in
+// Phase 1.2 — both /c/{handle} and /explore now use the shared component.

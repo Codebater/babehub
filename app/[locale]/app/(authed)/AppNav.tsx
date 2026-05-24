@@ -58,6 +58,9 @@ export default function AppNav({ profile, isCreator }: Props) {
             <Link href="/app/dashboard" className="transition-colors hover:text-text-main">
               Dashboard
             </Link>
+            <Link href="/explore" className="transition-colors hover:text-text-main">
+              Explore
+            </Link>
             {isCreator && (
               <>
                 <Link

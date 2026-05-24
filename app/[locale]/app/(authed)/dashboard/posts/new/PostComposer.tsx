@@ -2,7 +2,7 @@
 
 import { useActionState, useState, useRef, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
-import { ImagePlus, X, Loader2 } from 'lucide-react';
+import { ImagePlus, Play, X, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { createPost, deleteMedia, type PostState } from '../actions';
 
@@ -11,6 +11,8 @@ type Tier = { id: string; name: string; price_cents: number; currency: string };
 type Attachment = {
   /** Local-only id for keying React + tracking removal during upload. */
   localId: string;
+  /** 'image' or 'video' — drives thumbnail rendering and which size cap applies. */
+  kind: 'image' | 'video';
   /** Preview URL — local object URL while uploading and after. */
   previewUrl: string;
   /** Set once the upload + media row insert succeed. */
@@ -20,7 +22,8 @@ type Attachment = {
 };
 
 const MAX_ATTACHMENTS = 10;
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB per image
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB per image
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB per video (Supabase Free tier ceiling)
 
 function SubmitButtons({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -72,6 +75,7 @@ export default function PostComposer({ tiers }: { tiers: Tier[] }) {
 
     const drafts = picked.map<Attachment>((file) => ({
       localId: crypto.randomUUID(),
+      kind: file.type.startsWith('video/') ? 'video' : 'image',
       previewUrl: URL.createObjectURL(file),
       uploading: true,
     }));
@@ -80,15 +84,19 @@ export default function PostComposer({ tiers }: { tiers: Tier[] }) {
     await Promise.all(
       picked.map(async (file, idx) => {
         const localId = drafts[idx].localId;
+        const kind: 'image' | 'video' = file.type.startsWith('video/') ? 'video' : 'image';
         try {
-          if (!file.type.startsWith('image/')) {
-            throw new Error('Only image files are supported.');
+          if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+            throw new Error('Only image and video files are supported.');
           }
-          if (file.size > MAX_BYTES) {
-            throw new Error(`Image must be under ${(MAX_BYTES / 1024 / 1024).toFixed(0)} MB.`);
+          const cap = kind === 'video' ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES;
+          if (file.size > cap) {
+            throw new Error(
+              `${kind === 'video' ? 'Video' : 'Image'} must be under ${(cap / 1024 / 1024).toFixed(0)} MB.`,
+            );
           }
 
-          const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+          const ext = file.name.split('.').pop()?.toLowerCase() || (kind === 'video' ? 'mp4' : 'jpg');
           const storagePath = `${user.id}/${crypto.randomUUID()}.${ext}`;
 
           const { error: uploadError } = await supabase.storage
@@ -104,7 +112,7 @@ export default function PostComposer({ tiers }: { tiers: Tier[] }) {
             .from('media')
             .insert({
               owner_id: user.id,
-              kind: 'image',
+              kind,
               storage_bucket: 'posts',
               storage_path: storagePath,
               mime_type: file.type,
@@ -171,13 +179,13 @@ export default function PostComposer({ tiers }: { tiers: Tier[] }) {
         />
       </div>
 
-      {/* ── Image attachments ─────────────────────────────────────────────── */}
+      {/* ── Media attachments (images + videos) ───────────────────────────── */}
       <div>
         <div className="mb-2 flex items-center justify-between">
           <span className="text-sm font-medium text-text-secondary">
-            Images{' '}
+            Media{' '}
             <span className="text-xs text-text-secondary/70">
-              ({attachments.length}/{MAX_ATTACHMENTS})
+              ({attachments.length}/{MAX_ATTACHMENTS}) · img ≤ 10 MB · video ≤ 50 MB
             </span>
           </span>
           <button
@@ -187,14 +195,14 @@ export default function PostComposer({ tiers }: { tiers: Tier[] }) {
             className="flex items-center gap-1 rounded-full border border-border-color px-3 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             <ImagePlus className="h-3 w-3" />
-            Add images
+            Add images or videos
           </button>
         </div>
 
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           multiple
           className="hidden"
           onChange={(e) => {
@@ -210,12 +218,30 @@ export default function PostComposer({ tiers }: { tiers: Tier[] }) {
                 key={att.localId}
                 className="relative aspect-square overflow-hidden rounded-lg border border-border-color bg-secondary"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={att.previewUrl}
-                  alt=""
-                  className={`h-full w-full object-cover ${att.uploading ? 'opacity-40' : ''}`}
-                />
+                {att.kind === 'video' ? (
+                  <>
+                    <video
+                      src={att.previewUrl}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className={`h-full w-full object-cover ${att.uploading ? 'opacity-40' : ''}`}
+                    />
+                    {/* Play-icon overlay so videos are visually distinct from images */}
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <span className="rounded-full bg-black/60 p-2">
+                        <Play className="h-4 w-4 fill-white text-white" />
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={att.previewUrl}
+                    alt=""
+                    className={`h-full w-full object-cover ${att.uploading ? 'opacity-40' : ''}`}
+                  />
+                )}
                 {att.uploading && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <Loader2 className="h-5 w-5 animate-spin text-white" />

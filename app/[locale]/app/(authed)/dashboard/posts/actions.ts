@@ -47,28 +47,42 @@ export async function createPost(_prev: PostState, formData: FormData): Promise<
     tier_required_id = tier.id;
   }
 
-  // Media ownership check — refuse any media the user doesn't own. RLS
-  // already prevents writing other users' media into the array indirectly,
-  // but a server-side guard catches malformed/stale ids early.
+  // Media ownership check + kind lookup in a single round trip. RLS already
+  // prevents writing other users' media into the array indirectly, but a
+  // server-side guard catches malformed/stale ids early. We also need the
+  // `kind` column from each row so we can set `posts.kind` correctly below.
+  let mediaKinds: ('image' | 'video')[] = [];
   if (mediaIds.length > 0) {
     const { data: ownedMedia } = await supabase
       .from('media')
-      .select('id')
+      .select('id, kind')
       .eq('owner_id', user.id)
       .in('id', mediaIds);
-    const ownedIds = new Set((ownedMedia ?? []).map((m) => m.id));
-    const orphan = mediaIds.find((id) => !ownedIds.has(id));
+    const owned = new Map((ownedMedia ?? []).map((m) => [m.id, m.kind]));
+    const orphan = mediaIds.find((id) => !owned.has(id));
     if (orphan) {
-      return { error: 'One of the attached images is no longer available.', values };
+      return { error: 'One of the attached files is no longer available.', values };
     }
+    mediaKinds = mediaIds.map((id) => owned.get(id) as 'image' | 'video');
   }
 
   const publishNow = action === 'publish';
 
-  // Pick a post kind based on what's attached. The full media-aware feed
-  // can switch on this later (text vs gallery vs single image).
-  const kind: 'text' | 'image' | 'gallery' =
-    mediaIds.length === 0 ? 'text' : mediaIds.length === 1 ? 'image' : 'gallery';
+  // Pick `posts.kind` based on what's attached. Logic:
+  //   - no media          → 'text'
+  //   - any video         → 'video'   (video posts get the centerpiece
+  //                                    treatment on /explore)
+  //   - 1 image only      → 'image'
+  //   - 2+ images         → 'gallery'
+  const hasVideo = mediaKinds.includes('video');
+  const kind: 'text' | 'image' | 'video' | 'gallery' =
+    mediaIds.length === 0
+      ? 'text'
+      : hasVideo
+        ? 'video'
+        : mediaIds.length === 1
+          ? 'image'
+          : 'gallery';
 
   const { error } = await supabase.from('posts').insert({
     creator_id: user.id,
