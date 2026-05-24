@@ -203,14 +203,24 @@ export default async function CreatorProfilePage({ params }: Props) {
                         ))}
                       </ul>
                     )}
-                    <button
-                      type="button"
-                      disabled
-                      title="Checkout flow lands in the NOWPayments commit next"
-                      className="mt-auto cursor-not-allowed rounded-full bg-primary/40 py-2 text-sm font-bold text-white"
+                    {/* Subscribe button — posts to the NOWPayments create-invoice
+                        route, which 303-redirects the browser to the hosted
+                        crypto checkout. Unauthenticated viewers get bounced to
+                        /app/login first via the route's own session check. */}
+                    <form
+                      action="/api/nowpayments/create-invoice"
+                      method="POST"
+                      className="mt-auto"
                     >
-                      Subscribe (soon)
-                    </button>
+                      <input type="hidden" name="tier_id" value={tier.id} />
+                      <button
+                        type="submit"
+                        disabled={isOwnProfile}
+                        className="w-full rounded-full bg-primary py-2 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-pink-400 hover:scale-[1.02] disabled:cursor-not-allowed disabled:bg-pink-400/40 disabled:hover:scale-100"
+                      >
+                        {isOwnProfile ? "That's your tier" : 'Subscribe with crypto'}
+                      </button>
+                    </form>
                   </div>
                 );
               })}

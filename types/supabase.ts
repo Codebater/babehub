@@ -128,6 +128,86 @@ export type Database = {
           },
         ]
       }
+      payment_invoices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          creator_id: string
+          currency: string
+          id: string
+          metadata: Json
+          provider: Database["public"]["Enums"]["payment_provider"]
+          provider_invoice_id: string
+          provider_payment_id: string | null
+          status: string
+          subscriber_id: string
+          subscription_id: string | null
+          tier_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          creator_id: string
+          currency: string
+          id?: string
+          metadata?: Json
+          provider: Database["public"]["Enums"]["payment_provider"]
+          provider_invoice_id: string
+          provider_payment_id?: string | null
+          status?: string
+          subscriber_id: string
+          subscription_id?: string | null
+          tier_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          creator_id?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          provider?: Database["public"]["Enums"]["payment_provider"]
+          provider_invoice_id?: string
+          provider_payment_id?: string | null
+          status?: string
+          subscriber_id?: string
+          subscription_id?: string | null
+          tier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_invoices_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoices_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoices_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           body: string
