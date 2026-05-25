@@ -1,14 +1,20 @@
 import type { MetadataRoute } from 'next';
 import { routing } from '@/i18n/routing';
+import { ALL_POSTS } from '@/lib/blog/posts';
 
 const DOMAIN = 'https://babehub.net';
 
 /**
- * Sitemap covers the localized home pages — the legacy SEO-slug
- * pages were dropped in the Sprint-2 cleanup pass since the platform
- * pivoted away from the funnel-landing strategy. Add more entries
- * here as new public routes (/jobs, /creators) start carrying SEO
- * weight.
+ * Sitemap covers:
+ *   - Localized home pages (`/`, `/de`, `/es`, …)
+ *   - Public top-level routes (`/explore`, `/jobs`, `/blog`,
+ *     `/creators`) that carry SEO weight.
+ *   - One entry per blog post (`/blog/{slug}`) with the post's
+ *     publication date as lastmod.
+ *
+ * Per-creator profile (`/c/{handle}`) is intentionally excluded —
+ * those are user-generated and noindex by default until the profile
+ * editor toggles it on.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const today = new Date();
@@ -20,5 +26,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: locale === routing.defaultLocale ? 1.0 : 0.8,
   }));
 
-  return homeEntries;
+  const publicSurfaces: MetadataRoute.Sitemap = [
+    { url: `${DOMAIN}/explore`, lastModified: today, changeFrequency: 'hourly', priority: 0.9 },
+    { url: `${DOMAIN}/jobs`, lastModified: today, changeFrequency: 'daily', priority: 0.8 },
+    { url: `${DOMAIN}/blog`, lastModified: today, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${DOMAIN}/creators`, lastModified: today, changeFrequency: 'weekly', priority: 0.7 },
+  ];
+
+  const blogEntries: MetadataRoute.Sitemap = ALL_POSTS.map((post) => ({
+    url: `${DOMAIN}/blog/${post.slug}`,
+    lastModified: new Date(post.date + 'T00:00:00Z'),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  return [...homeEntries, ...publicSurfaces, ...blogEntries];
 }
