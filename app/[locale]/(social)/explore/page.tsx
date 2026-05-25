@@ -12,6 +12,7 @@ import LuxuryBanner from './LuxuryBanner';
 import FeaturedSlot from './FeaturedSlot';
 import { loadPrimaryCreator } from './primary-creator';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
+import AdStrip from '../_components/AdStrip';
 
 /**
  * `/explore` — public video discovery feed.
@@ -119,6 +120,14 @@ export default async function ExplorePage({ searchParams }: Props) {
     <main className="mx-auto max-w-7xl px-6 py-6">
       <div className="mb-6">
         <CategoryChips />
+      </div>
+
+      {/* Old-school ad strip — sits between the category nav and the
+          category hero so it reads as a clearly demarcated ad zone.
+          Click → opens the B2B BannerInquiryModal until a real
+          advertiser is plugged in. */}
+      <div className="mb-6">
+        <AdStrip placement="explore-top" />
       </div>
 
       {/* ── Category hero banners (each section "starts with the banner") ─ */}

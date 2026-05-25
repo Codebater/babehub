@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
 import { Briefcase, MapPin, Sparkles, Clock, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import AdStrip from '../_components/AdStrip';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +108,17 @@ export default async function JobsPage({ searchParams }: Props) {
           Post a job
         </Link>
       </header>
+
+      {/* Old-school ad strip — between the page header and the filter
+          chips. Same shape as the /explore-top placement so brand-side
+          surfaces feel like one family. */}
+      <div className="mb-6">
+        <AdStrip
+          placement="jobs-top"
+          headline="Hire faster — feature your job here"
+          sub="Premium placement at the top of the board. Pitch a slot in 60 seconds."
+        />
+      </div>
 
       {/* Filter chips */}
       <FilterChips

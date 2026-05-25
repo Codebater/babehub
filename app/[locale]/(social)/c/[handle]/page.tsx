@@ -8,6 +8,7 @@ import { loadFullInteractionsBatch } from '@/lib/interactions/load';
 import MediaTile, { type MediaItem } from '@/components/MediaTile';
 import PostInteractions from '@/components/PostInteractions';
 import ApplyButton from '../../_components/ApplyButton';
+import AdStrip from '../../_components/AdStrip';
 
 /**
  * `/c/{handle}` — public creator profile.
@@ -389,6 +390,16 @@ export default async function CreatorProfilePage({ params }: Props) {
               Set up
             </Link>
           </section>
+        )}
+
+        {/* Old-school ad strip — only on creator profiles (fans get a
+            cleaner bio-only layout below). Sits above the tiers/posts
+            section so it reads as a clearly demarcated ad zone instead
+            of looking like editorial chrome between content. */}
+        {isCreator && (
+          <div className="mt-10">
+            <AdStrip placement={`profile-${profile.handle}`} />
+          </div>
         )}
 
         {/* ── Tiers ───────────────────────────────────────────────────────── */}
