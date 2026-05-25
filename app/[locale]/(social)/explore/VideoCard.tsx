@@ -1,5 +1,6 @@
 import { Play, Eye, Clock } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
+import { formatCastingNumber } from '@/lib/casting/numbers';
 import type { FeedVideo } from './types';
 
 /**
@@ -13,7 +14,14 @@ import type { FeedVideo } from './types';
  * response that produced this card, so threading params avoids a second
  * API round-trip per page render.
  */
-export default function VideoCard({ video }: { video: FeedVideo }) {
+export default function VideoCard({
+  video,
+  castingNumber,
+}: {
+  video: FeedVideo;
+  /** When set, renders a casting-slate badge over the thumbnail. */
+  castingNumber?: number;
+}) {
   const thumb = video.default_thumb?.src ?? video.thumbs?.[0]?.src ?? '';
 
   const formatViews = (n: number): string => {
@@ -59,6 +67,20 @@ export default function VideoCard({ video }: { video: FeedVideo }) {
             <Play className="h-6 w-6 fill-white text-white" />
           </span>
         </div>
+
+        {castingNumber !== undefined && (
+          // Casting-slate badge, top-left. Black backdrop with a hairline
+          // border + tiny "CASTING" eyebrow + bold zero-padded number,
+          // monospace to evoke a real casting slate.
+          <div className="absolute left-2 top-2 flex flex-col items-start gap-0 rounded-md border border-white/30 bg-black/90 px-2 py-1 font-mono text-white shadow-xl backdrop-blur-sm">
+            <span className="text-[8px] font-bold uppercase leading-none tracking-[0.2em] text-white/80">
+              Casting
+            </span>
+            <span className="mt-0.5 text-base font-black leading-none tracking-tight">
+              N° {formatCastingNumber(castingNumber)}
+            </span>
+          </div>
+        )}
 
         <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white">
           <Clock className="h-3 w-3" />

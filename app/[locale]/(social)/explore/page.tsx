@@ -7,6 +7,7 @@ import CreatorVideoCard from './CreatorVideoCard';
 import LoadMoreButton from './LoadMoreButton';
 import SearchBar from './SearchBar';
 import CategoryChips from './CategoryChips';
+import { assignCastingNumbers } from '@/lib/casting/numbers';
 
 /**
  * `/explore` — public video discovery feed.
@@ -59,6 +60,16 @@ export default async function ExplorePage({ searchParams }: Props) {
   ]);
 
   const eporneFailed = 'error' in firstPage;
+
+  // Only show casting-slate numbers when the user is on the casting view.
+  // We compute the first batch's numbers server-side here; the
+  // LoadMoreButton continues numbering on the client with the same
+  // helper, threading the used-set so no two cards share a number.
+  const showCastingNumbers = query.toLowerCase() === 'casting';
+  const castingTaken = new Set<number>();
+  const castingNumberMap = showCastingNumbers && !eporneFailed
+    ? assignCastingNumbers(firstPage.videos, castingTaken)
+    : new Map<string, number>();
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
@@ -127,13 +138,23 @@ export default async function ExplorePage({ searchParams }: Props) {
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {firstPage.videos.map((video) => (
-              <VideoCard key={video.id} video={video} />
+              <VideoCard
+                key={video.id}
+                video={video}
+                castingNumber={
+                  showCastingNumbers ? castingNumberMap.get(video.id) : undefined
+                }
+              />
             ))}
 
             <LoadMoreButton
               initialPage={firstPage.page}
               initialHasMore={firstPage.hasMore}
               query={query || undefined}
+              showCastingNumbers={showCastingNumbers}
+              initialUsedNumbers={
+                showCastingNumbers ? Array.from(castingTaken) : []
+              }
             />
           </div>
         )}
