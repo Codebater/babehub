@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { Sparkles, Users, Megaphone } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
+import { Sparkles, Users } from 'lucide-react';
 import CategoryChips from '../explore/CategoryChips';
+import ApplyButton from '../_components/ApplyButton';
 
 /**
  * `/creators` — coming-soon teaser for the platform's curated creator
@@ -65,13 +65,10 @@ export default function CreatorsPage() {
             </p>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Link
-                href={'/#apply' as '/'}
-                className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-primary/40 transition-all hover:scale-[1.03] hover:bg-pink-400"
-              >
-                <Megaphone className="h-4 w-4" />
-                Apply to be featured
-              </Link>
+              <ApplyButton
+                label="Apply to be featured"
+                className="px-5 py-3 uppercase tracking-widest"
+              />
               <p className="text-xs text-white/50">
                 Two minutes · we&apos;ll reply within 48 hours
               </p>

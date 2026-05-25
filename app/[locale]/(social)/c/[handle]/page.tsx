@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, ShieldCheck, Megaphone } from 'lucide-react';
+import { Lock, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadFullInteractionsBatch } from '@/lib/interactions/load';
 import MediaTile, { type MediaItem } from '@/components/MediaTile';
 import PostInteractions from '@/components/PostInteractions';
+import ApplyButton from '../../_components/ApplyButton';
 
 /**
  * `/c/{handle}` — public creator profile.
@@ -176,16 +177,10 @@ export default async function CreatorProfilePage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-2 self-end pb-2">
             {isOwnProfile ? (
               <>
-                {/* Creator-self CTA: apply for the BabeHub agency / premium
-                    program via the marketing-site Apply form. Drives
-                    application volume from inside the platform itself. */}
-                <Link
-                  href="/#apply"
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:bg-pink-400 hover:scale-[1.02]"
-                >
-                  <Megaphone className="h-4 w-4" />
-                  Apply BabeHub
-                </Link>
+                {/* Creator-self CTA: opens the Apply survey modal in place
+                    via the (social) shell's SurveyModalProvider — no
+                    page navigation, no scroll jump. */}
+                <ApplyButton label="Apply BabeHub" />
                 <Link
                   href="/app/dashboard"
                   className="rounded-full border border-border-color px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"

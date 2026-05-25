@@ -15,6 +15,7 @@ import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import SidebarLink from './SidebarLink';
 import ProfileMenu from './ProfileMenu';
+import SurveyModalProvider from './SurveyModalProvider';
 
 /**
  * Shared layout for the social-media surfaces: /explore and /c/{handle}.
@@ -56,6 +57,7 @@ export default async function SocialLayout({ children }: { children: React.React
   const isCreator = profile?.role === 'creator';
 
   return (
+    <SurveyModalProvider>
     <div className="min-h-screen bg-background md:flex">
       {/* ── Desktop sidebar ────────────────────────────────────────────── */}
       <aside className="hidden md:fixed md:left-0 md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:border-r md:border-border-color md:bg-card/40 md:p-4">
@@ -182,5 +184,6 @@ export default async function SocialLayout({ children }: { children: React.React
         )}
       </nav>
     </div>
+    </SurveyModalProvider>
   );
 }

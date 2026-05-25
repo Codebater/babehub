@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { signOut } from '../app/(public)/login/actions';
-import SurveyModal from '../(marketing)/_components/SurveyModal';
+import { useSurveyModal } from './SurveyModalProvider';
 
 /**
  * Signed-in profile pill at the bottom of the desktop sidebar. Click
@@ -41,10 +41,9 @@ type Props = {
 
 export default function ProfileMenu({ profile, isCreator }: Props) {
   const [open, setOpen] = useState(false);
-  // The Apply BabeHub button opens the marketing site's SurveyModal
-  // directly — no navigation to /#apply needed. Modal state lives
-  // here so it stays mounted across menu open/close transitions.
-  const [surveyOpen, setSurveyOpen] = useState(false);
+  // Apply modal trigger comes from the shell-wide provider so every
+  // page inside (social) opens the same modal instance.
+  const { openApply } = useSurveyModal();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -85,7 +84,7 @@ export default function ProfileMenu({ profile, isCreator }: Props) {
             type="button"
             onClick={() => {
               setOpen(false);
-              setSurveyOpen(true);
+              openApply();
             }}
             className="mb-1 flex w-full items-center gap-3 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:bg-pink-400 hover:scale-[1.02]"
             role="menuitem"
@@ -196,11 +195,6 @@ export default function ProfileMenu({ profile, isCreator }: Props) {
         />
       </button>
 
-      {/* Apply modal — same component the marketing site uses. Rendered
-          here so the popover Apply BabeHub button can open it directly
-          without a page navigation. Mounted regardless of `open` so the
-          modal animation isn't cancelled when the menu closes. */}
-      <SurveyModal isOpen={surveyOpen} onClose={() => setSurveyOpen(false)} />
     </div>
   );
 }

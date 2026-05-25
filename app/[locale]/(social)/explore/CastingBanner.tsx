@@ -1,5 +1,7 @@
+'use client';
+
 import { Clapperboard, Megaphone, ArrowRight } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
+import { useSurveyModal } from '../SurveyModalProvider';
 
 /**
  * Section banner shown only on /explore?q=casting.
@@ -12,6 +14,7 @@ import { Link } from '@/i18n/navigation';
  * Server component — no client state needed.
  */
 export default function CastingBanner() {
+  const { openApply } = useSurveyModal();
   return (
     <section
       aria-label="Casting room"
@@ -54,13 +57,14 @@ export default function CastingBanner() {
           </p>
 
           <div className="mt-5 flex flex-wrap items-center gap-3">
-            <Link
-              href={'/#apply' as '/'}
+            <button
+              type="button"
+              onClick={openApply}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-primary/40 transition-all hover:scale-[1.03] hover:bg-pink-400"
             >
               Apply to be cast
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </button>
             <p className="text-xs text-white/50">
               Two minutes · we&apos;ll reply within 48 hours
             </p>

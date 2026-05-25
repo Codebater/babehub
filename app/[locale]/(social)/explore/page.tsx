@@ -9,6 +9,7 @@ import CategoryChips from './CategoryChips';
 import CastingBanner from './CastingBanner';
 import LiveCamsBanner from './LiveCamsBanner';
 import LuxuryBanner from './LuxuryBanner';
+import FeaturedSlot from './FeaturedSlot';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
 
 /**
@@ -83,6 +84,35 @@ export default async function ExplorePage({ searchParams }: Props) {
     ? assignCastingNumbers(firstPage.videos, castingTaken)
     : new Map<string, number>();
 
+  // Featured "Apply to be featured" slot placement.
+  //   - Live Cams view: the first 4 grid spots are reserved for slots.
+  //   - Casting / Luxury / default: ONE randomly placed slot mixed
+  //     into the first batch. Position is derived from a stable hash
+  //     of the first video id so it doesn't jump every render but
+  //     varies by query.
+  const featuredTheme: 'casting' | 'livecams' | 'luxury' | 'default' =
+    showCastingNumbers
+      ? 'casting'
+      : showLiveCamsBanner
+        ? 'livecams'
+        : showLuxuryBanner
+          ? 'luxury'
+          : 'default';
+  const liveCamsLeadingSlots = showLiveCamsBanner ? 4 : 0;
+  let randomFeaturedIndex = -1;
+  if (
+    !eporneFailed &&
+    !showLiveCamsBanner &&
+    firstPage.videos.length > 0
+  ) {
+    const seed = firstPage.videos[0]?.id ?? query;
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) {
+      h = (Math.imul(h, 31) + seed.charCodeAt(i)) | 0;
+    }
+    randomFeaturedIndex = Math.abs(h) % firstPage.videos.length;
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-6 py-6">
       <div className="mb-6">
@@ -131,15 +161,31 @@ export default async function ExplorePage({ searchParams }: Props) {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {firstPage.videos.map((video) => (
-              <VideoCard
-                key={video.id}
-                video={video}
-                castingNumber={
-                  showCastingNumbers ? castingNumberMap.get(video.id) : undefined
-                }
-              />
+            {/* Live Cams: 4 leading "Apply for a live slot" placeholders */}
+            {Array.from({ length: liveCamsLeadingSlots }).map((_, i) => (
+              <FeaturedSlot key={`lc-slot-${i}`} theme="livecams" />
             ))}
+
+            {firstPage.videos.flatMap((video, i) => {
+              const items = [];
+              // Random "Apply to be featured" slot mixed into the
+              // Casting / Luxury / default grids (one per first batch).
+              if (i === randomFeaturedIndex) {
+                items.push(
+                  <FeaturedSlot key={`feat-${i}`} theme={featuredTheme} />,
+                );
+              }
+              items.push(
+                <VideoCard
+                  key={video.id}
+                  video={video}
+                  castingNumber={
+                    showCastingNumbers ? castingNumberMap.get(video.id) : undefined
+                  }
+                />,
+              );
+              return items;
+            })}
 
             <LoadMoreButton
               initialPage={firstPage.page}
