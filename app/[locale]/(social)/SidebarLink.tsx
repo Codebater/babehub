@@ -2,14 +2,16 @@
 
 import { usePathname } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
-import type { LucideIcon } from 'lucide-react';
 
 /**
- * Sidebar/mobile-tab nav link with active-state styling.
+ * Sidebar / mobile-tab nav link with active-state styling.
  *
- * Client component (needs usePathname). The parent layout is a server
- * component that hands down the route + icon + label as props; this
- * component just adds the live "am I the active route?" class.
+ * Client component (needs usePathname). The parent server component
+ * passes the icon as `children` (already-rendered JSX) — we deliberately
+ * avoid taking the icon as a `LucideIcon` component prop because
+ * Server→Client component props must be serializable, and React
+ * function components are not. (Original bug: "Error: Functions cannot
+ * be passed directly to Client Components".)
  *
  * Two visual variants:
  *   - `compact={false}` (default) → full sidebar item: icon + label
@@ -17,23 +19,21 @@ import type { LucideIcon } from 'lucide-react';
  */
 export default function SidebarLink({
   href,
-  icon: Icon,
   label,
   compact = false,
+  children,
 }: {
   href: string;
-  icon: LucideIcon;
   label: string;
   compact?: boolean;
+  /** Icon JSX, e.g. `<Compass className="h-5 w-5" />`. */
+  children: React.ReactNode;
 }) {
   const pathname = usePathname();
 
-  // Strip the locale prefix from the pathname for comparison — usePathname
-  // returns the canonical path without the locale segment when using
-  // next-intl's navigation helpers, but be defensive in case it doesn't.
   const isActive =
     pathname === href ||
-    (href !== '/explore' && pathname?.startsWith(href + '/')) ||
+    (href !== '/' && href !== '/explore' && pathname?.startsWith(href + '/')) ||
     (href === '/explore' && pathname === '/explore');
 
   if (compact) {
@@ -44,7 +44,7 @@ export default function SidebarLink({
           isActive ? 'text-primary' : 'text-text-secondary hover:text-text-main'
         }`}
       >
-        <Icon className="h-5 w-5" />
+        {children}
         {label}
       </Link>
     );
@@ -59,7 +59,7 @@ export default function SidebarLink({
           : 'text-text-secondary hover:bg-secondary hover:text-text-main'
       }`}
     >
-      <Icon className="h-5 w-5" />
+      {children}
       {label}
     </Link>
   );

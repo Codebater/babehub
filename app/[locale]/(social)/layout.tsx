@@ -64,26 +64,30 @@ export default async function SocialLayout({ children }: { children: React.React
         </Link>
 
         <nav className="flex-1 space-y-1">
-          <SidebarLink href="/explore" icon={Compass} label="Explore" />
+          <SidebarLink href="/explore" label="Explore">
+            <Compass className="h-5 w-5" />
+          </SidebarLink>
           {profile && (
             <>
-              <SidebarLink
-                href={`/c/${profile.handle}`}
-                icon={User}
-                label="My profile"
-              />
-              <SidebarLink href="/app/dashboard" icon={LayoutDashboard} label="Dashboard" />
+              <SidebarLink href={`/c/${profile.handle}`} label="My profile">
+                <User className="h-5 w-5" />
+              </SidebarLink>
+              <SidebarLink href="/app/dashboard" label="Dashboard">
+                <LayoutDashboard className="h-5 w-5" />
+              </SidebarLink>
               {isCreator && (
-                <SidebarLink
-                  href="/app/dashboard/posts/new"
-                  icon={Plus}
-                  label="New post"
-                />
+                <SidebarLink href="/app/dashboard/posts/new" label="New post">
+                  <Plus className="h-5 w-5" />
+                </SidebarLink>
               )}
-              <SidebarLink href="/app/settings" icon={Settings} label="Settings" />
+              <SidebarLink href="/app/settings" label="Settings">
+                <Settings className="h-5 w-5" />
+              </SidebarLink>
             </>
           )}
-          <SidebarLink href="/" icon={Home} label="Marketing site" />
+          <SidebarLink href="/" label="Marketing site">
+            <Home className="h-5 w-5" />
+          </SidebarLink>
         </nav>
 
         {profile ? (
@@ -153,33 +157,30 @@ export default async function SocialLayout({ children }: { children: React.React
 
       {/* ── Mobile bottom tab bar ─────────────────────────────────────── */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-border-color bg-card/95 px-2 py-2 backdrop-blur md:hidden">
-        <SidebarLink compact href="/explore" icon={Compass} label="Explore" />
+        <SidebarLink compact href="/explore" label="Explore">
+          <Compass className="h-5 w-5" />
+        </SidebarLink>
         {profile ? (
           <>
-            <SidebarLink
-              compact
-              href={`/c/${profile.handle}`}
-              icon={User}
-              label="Profile"
-            />
+            <SidebarLink compact href={`/c/${profile.handle}`} label="Profile">
+              <User className="h-5 w-5" />
+            </SidebarLink>
             {isCreator && (
-              <SidebarLink
-                compact
-                href="/app/dashboard/posts/new"
-                icon={Plus}
-                label="New"
-              />
+              <SidebarLink compact href="/app/dashboard/posts/new" label="New">
+                <Plus className="h-5 w-5" />
+              </SidebarLink>
             )}
-            <SidebarLink
-              compact
-              href="/app/dashboard"
-              icon={LayoutDashboard}
-              label="Dashboard"
-            />
-            <SidebarLink compact href="/app/settings" icon={Settings} label="Settings" />
+            <SidebarLink compact href="/app/dashboard" label="Dashboard">
+              <LayoutDashboard className="h-5 w-5" />
+            </SidebarLink>
+            <SidebarLink compact href="/app/settings" label="Settings">
+              <Settings className="h-5 w-5" />
+            </SidebarLink>
           </>
         ) : (
-          <SidebarLink compact href="/app/login" icon={LogIn} label="Sign in" />
+          <SidebarLink compact href="/app/login" label="Sign in">
+            <LogIn className="h-5 w-5" />
+          </SidebarLink>
         )}
       </nav>
     </div>
