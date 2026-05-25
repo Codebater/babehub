@@ -7,6 +7,7 @@ import CreatorVideoCard from './CreatorVideoCard';
 import LoadMoreButton from './LoadMoreButton';
 import SearchBar from './SearchBar';
 import CategoryChips from './CategoryChips';
+import CastingBanner from './CastingBanner';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
 
 /**
@@ -112,6 +113,9 @@ export default async function ExplorePage({ searchParams }: Props) {
           </div>
         </section>
       )}
+
+      {/* ── Casting hero banner (only on /explore?q=casting) ────────────── */}
+      {showCastingNumbers && <CastingBanner />}
 
       {/* ── Trending eporner grid ─────────────────────────────────────────── */}
       <section>

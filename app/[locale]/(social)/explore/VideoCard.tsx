@@ -69,16 +69,27 @@ export default function VideoCard({
         </div>
 
         {castingNumber !== undefined && (
-          // Casting-slate badge, top-left. Black backdrop with a hairline
-          // border + tiny "CASTING" eyebrow + bold zero-padded number,
-          // monospace to evoke a real casting slate.
-          <div className="absolute left-2 top-2 flex flex-col items-start gap-0 rounded-md border border-white/30 bg-black/90 px-2 py-1 font-mono text-white shadow-xl backdrop-blur-sm">
-            <span className="text-[8px] font-bold uppercase leading-none tracking-[0.2em] text-white/80">
-              Casting
-            </span>
-            <span className="mt-0.5 text-base font-black leading-none tracking-tight">
-              N° {formatCastingNumber(castingNumber)}
-            </span>
+          // Casting-slate badge, top-left. Real clapperboard look:
+          // black/white diagonal-striped ribbon on top + black body with
+          // bold zero-padded TAKE number. Sized so it reads even at
+          // small card widths.
+          <div className="absolute left-2 top-2 overflow-hidden rounded-md border border-white/40 bg-black font-mono text-white shadow-2xl">
+            <div
+              className="h-2 w-full"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(-30deg, #ffffff 0 8px, #000000 8px 16px)',
+              }}
+              aria-hidden
+            />
+            <div className="px-2.5 py-1.5">
+              <p className="text-[8px] font-bold uppercase leading-none tracking-[0.25em] text-white/70">
+                Casting · Take
+              </p>
+              <p className="mt-1 text-lg font-black leading-none tracking-tight">
+                {formatCastingNumber(castingNumber)}
+              </p>
+            </div>
           </div>
         )}
 
