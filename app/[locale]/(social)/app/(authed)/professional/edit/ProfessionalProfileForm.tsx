@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { Loader2, Save, AlertCircle, CheckCircle2, ExternalLink } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { saveProfessionalProfile } from './actions';
-import ChipPicker from './ChipPicker';
+import ChipPicker from '../../../../_components/ChipPicker';
 import { PRESET_CATEGORIES, PRESET_SKILLS, PRESET_LANGUAGES } from './chips-data';
 
 /**
@@ -342,8 +342,13 @@ export default function ProfessionalProfileForm({
   );
 }
 
+// Readable in light AND dark OS color schemes: explicit dark zinc
+// background + white text + bordered. The native browser controls
+// (select, textarea, number) ignore the platform's theme tokens and
+// fall back to OS colors otherwise — which is how a few inputs ended
+// up white-on-white for users on light-mode systems.
 const inputClass =
-  'w-full rounded-xl border border-border-color bg-card/60 px-3 py-2 text-sm text-text-main placeholder:text-text-secondary focus:border-primary focus:outline-none';
+  'w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-primary focus:outline-none [color-scheme:dark]';
 
 function Field({
   label,

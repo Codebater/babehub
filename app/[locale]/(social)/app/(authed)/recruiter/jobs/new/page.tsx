@@ -1,6 +1,49 @@
 import { Link } from '@/i18n/navigation';
 import { requireRecruiter } from '@/lib/auth/guards';
 import { createJobAndRedirect } from '@/lib/jobs/actions';
+import ChipPicker from '../../../../../_components/ChipPicker';
+
+// Job-side preset vocabulary. Categories overlap with the
+// professional-profile presets on purpose so a creator's profile
+// categories can be matched against open jobs (Sprint 6 matching).
+// Tags are job-specific qualifiers — cadence, format, work style —
+// distinct from a creator's personal skills.
+const JOB_CATEGORIES = [
+  'casting',
+  'live cams',
+  'luxury shoots',
+  'ugc',
+  'modeling',
+  'photography',
+  'videography',
+  'brand deals',
+  'content creation',
+  'streaming',
+  'fashion',
+  'fitness',
+  'beauty',
+  'lifestyle',
+] as const;
+
+const JOB_TAGS = [
+  'one-off',
+  'weekly',
+  'monthly',
+  'long-term',
+  'long-form',
+  'short-form',
+  'in-person',
+  'remote',
+  'no nudity',
+  'soft nudity',
+  'explicit',
+  'paid travel',
+  'recurring',
+  'urgent',
+  'flexible hours',
+  'evenings',
+  'weekends',
+] as const;
 
 export const dynamic = 'force-dynamic';
 
@@ -113,23 +156,21 @@ export default async function NewJobPage({ searchParams }: Props) {
           </Field>
         </div>
 
-        <Field label="Categories" hint="Up to 8, comma-separated.">
-          <input
-            name="categories"
-            type="text"
-            className={inputClass}
-            placeholder="casting, ugc, modeling"
-          />
-        </Field>
+        <ChipPicker
+          name="categories"
+          label="Categories"
+          hint="Click to pick the bucket this job lives in. Drives sidebar filters + recruiter ranking."
+          presets={JOB_CATEGORIES}
+          limit={8}
+        />
 
-        <Field label="Tags" hint="Up to 12, comma-separated. Helps search find you.">
-          <input
-            name="tags"
-            type="text"
-            className={inputClass}
-            placeholder="long-form, weekly, in-person"
-          />
-        </Field>
+        <ChipPicker
+          name="tags"
+          label="Tags"
+          hint="Cadence, format, work style. Helps the right candidates self-select."
+          presets={JOB_TAGS}
+          limit={12}
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Visibility">
@@ -176,8 +217,12 @@ export default async function NewJobPage({ searchParams }: Props) {
   );
 }
 
+// Explicit dark color scheme so the native select / number / textarea
+// don't fall back to OS light colors (which is how a few inputs ended
+// up white-on-white before). `[color-scheme:dark]` tells the browser
+// to render the native dropdown arrow + caret in dark too.
 const inputClass =
-  'w-full rounded-xl border border-border-color bg-card/60 px-3 py-2 text-sm text-text-main placeholder:text-text-secondary focus:border-primary focus:outline-none';
+  'w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-primary focus:outline-none [color-scheme:dark]';
 
 function Field({
   label,

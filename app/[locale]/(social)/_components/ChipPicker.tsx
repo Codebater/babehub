@@ -4,19 +4,20 @@ import { useMemo, useState } from 'react';
 import { X, Plus } from 'lucide-react';
 
 /**
- * Multi-select chip picker.
+ * Multi-select chip picker. Shared across the social shell — used by
+ * the professional-profile editor (categories / skills / languages)
+ * and the job composer (categories / tags).
  *
- * Click a chip to toggle. Selected chips stay pinned at the top with a
- * primary fill; unselected suggestions sit below in a softer tone. A
- * small "+ Add custom" input lets users add tags that aren't in the
- * preset list — common when the platform's category vocabulary lags
- * behind what users actually want to describe themselves as.
+ * Click a chip to toggle. Selected chips stay pinned at the top with
+ * a primary fill; unselected suggestions sit below in a softer tone.
+ * A small "+ Add custom" input lets users add tags that aren't in
+ * the preset list — common when the platform's vocabulary lags
+ * behind what users actually want to describe.
  *
- * The component renders a hidden `<input>` with the same `name` as the
- * surrounding form expects, storing the selection as a comma-separated
- * string. That matches the server action's existing parser — no
- * server-side change needed to migrate from the old free-text CSV
- * input.
+ * The component renders a hidden `<input>` with the same `name` as
+ * the surrounding form expects, storing the selection as a
+ * comma-separated string. That matches the server actions' existing
+ * CSV parser — no backend change to migrate a free-text input.
  */
 type Props = {
   /** Form field name; rendered as a hidden input. */
@@ -39,8 +40,6 @@ type Props = {
   allowCustom?: boolean;
 };
 
-// Normalise everything to lowercase + trim so duplicates can't sneak in
-// across the suggestion list, initial selection, and user-typed adds.
 function normalize(s: string): string {
   return s.trim().toLowerCase();
 }
@@ -69,9 +68,8 @@ export default function ChipPicker({
 
   const selectedSet = useMemo(() => new Set(selected), [selected]);
 
-  // Suggestions = preset list minus already-selected, plus any
-  // selected-but-non-preset values (so existing custom tags survive a
-  // round-trip without disappearing into a separate list).
+  // Suggestions = preset list minus already-selected (so users don't
+  // see duplicate "Add" buttons for things they've already picked).
   const suggestions = useMemo(() => {
     const out: string[] = [];
     const seen = new Set<string>();
@@ -89,7 +87,7 @@ export default function ChipPicker({
     if (!n) return;
     setSelected((prev) => {
       if (prev.includes(n)) return prev.filter((x) => x !== n);
-      if (prev.length >= limit) return prev; // hard cap
+      if (prev.length >= limit) return prev;
       return [...prev, n];
     });
   };
@@ -114,12 +112,9 @@ export default function ChipPicker({
       </div>
       {hint && <p className="mb-2 text-xs text-text-secondary">{hint}</p>}
 
-      {/* Hidden form field — the server action reads this name and
-          parses comma-separated. No backend change vs the old free-text
-          input pattern. */}
       <input type="hidden" name={name} value={hiddenValue} />
 
-      {/* Selected pill row — clicking removes. */}
+      {/* Selected pills — clicking removes. */}
       {selected.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-1.5">
           {selected.map((v) => (
@@ -144,7 +139,7 @@ export default function ChipPicker({
               key={`sug-${v}`}
               type="button"
               onClick={() => toggle(v)}
-              className="inline-flex items-center gap-1 rounded-full border border-border-color bg-card/40 px-3 py-1 text-xs text-text-secondary transition-colors hover:border-primary hover:text-primary"
+              className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-900/60 px-3 py-1 text-xs text-zinc-200 transition-colors hover:border-primary hover:text-primary"
             >
               <Plus className="h-3 w-3" />
               {v}
@@ -168,13 +163,13 @@ export default function ChipPicker({
             }}
             maxLength={40}
             placeholder="Add custom…"
-            className="flex-1 rounded-xl border border-border-color bg-card/60 px-3 py-1.5 text-sm text-text-main placeholder:text-text-secondary focus:border-primary focus:outline-none"
+            className="flex-1 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-white placeholder:text-zinc-500 focus:border-primary focus:outline-none"
           />
           <button
             type="button"
             onClick={addCustom}
             disabled={!draft.trim() || selected.length >= limit}
-            className="rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-secondary transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full border border-zinc-700 bg-zinc-900/60 px-3 py-1.5 text-xs font-bold text-zinc-200 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add
           </button>
