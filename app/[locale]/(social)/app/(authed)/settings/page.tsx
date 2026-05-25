@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { requireOnboarded } from '@/lib/auth/guards';
 import SettingsForm from './SettingsForm';
 import ImageUploader from './ImageUploader';
@@ -9,21 +8,19 @@ export default async function SettingsPage() {
   const { user, profile } = await requireOnboarded();
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link
-        href="/app/dashboard"
-        className="text-sm text-text-secondary transition-colors hover:text-primary"
-      >
-        ← Back to dashboard
-      </Link>
-
-      <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main">Settings</h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Update how you appear across Babe Hub. Changes go live immediately.
-      </p>
+    <main className="mx-auto max-w-3xl px-6 py-10">
+      <header className="mb-8">
+        <p className="text-sm uppercase tracking-widest text-text-secondary">Account</p>
+        <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Update how you appear across Babe Hub. Changes go live immediately.
+        </p>
+      </header>
 
       {/* ── Cover banner ──────────────────────────────────────────────────── */}
-      <section className="mt-8">
+      <section>
         <h2 className="mb-2 text-sm font-bold uppercase tracking-widest text-text-secondary">
           Cover banner
         </h2>

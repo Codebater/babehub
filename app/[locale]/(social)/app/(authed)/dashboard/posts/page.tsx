@@ -26,25 +26,21 @@ export default async function PostsPage() {
   const published = (posts ?? []).filter((p) => p.published_at);
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-8 flex items-center justify-between gap-4">
+    <main className="mx-auto max-w-5xl px-6 py-10">
+      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <Link
-            href="/app/dashboard"
-            className="text-sm text-text-secondary transition-colors hover:text-primary"
-          >
-            ← Back to dashboard
-          </Link>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main">Posts</h1>
+          <p className="text-sm uppercase tracking-widest text-text-secondary">Content</p>
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+            Your posts
+          </h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Write text posts now; image and video upload land next. Anything you
-            publish without a tier is public on your profile; tier-gated posts
-            unlock for active subscribers only.
+            Anything you publish without a tier is public on your profile and
+            shows up on /explore. Tier-gated posts unlock for active subscribers only.
           </p>
         </div>
         <Link
           href="/app/dashboard/posts/new"
-          className="flex shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-pink-400 hover:scale-[1.02]"
+          className="flex shrink-0 items-center gap-2 self-start rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-pink-400 hover:scale-[1.02] sm:self-auto"
         >
           <Plus className="h-4 w-4" />
           New post

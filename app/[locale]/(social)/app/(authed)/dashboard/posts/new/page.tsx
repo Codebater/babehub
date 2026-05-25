@@ -15,19 +15,24 @@ export default async function NewPostPage() {
     .order('sort_order', { ascending: true });
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <Link
-        href="/app/dashboard/posts"
-        className="text-sm text-text-secondary transition-colors hover:text-primary"
-      >
-        ← All posts
-      </Link>
-      <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main">New post</h1>
-      <p className="mt-1 text-sm text-text-secondary">
-        Write text now. Image and video upload land in the next iteration.
-      </p>
+    <main className="mx-auto max-w-3xl px-6 py-10">
+      <header className="mb-8">
+        <Link
+          href="/app/dashboard/posts"
+          className="text-sm text-text-secondary transition-colors hover:text-primary"
+        >
+          ← All posts
+        </Link>
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+          New post
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Write something, attach images or a video, then publish public or
+          tier-locked.
+        </p>
+      </header>
 
-      <div className="mt-8 rounded-2xl border border-border-color bg-card p-6">
+      <div className="rounded-2xl border border-border-color bg-card p-6">
         <PostComposer tiers={tiers ?? []} />
       </div>
     </main>

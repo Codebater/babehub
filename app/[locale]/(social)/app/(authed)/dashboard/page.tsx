@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { signOut } from '../../../../app/(public)/login/actions';
 
 /**
  * `/app/dashboard` — first authenticated screen after sign-in.
@@ -53,27 +52,16 @@ export default async function DashboardPage() {
   const isCreator = profile.role === 'creator';
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-10 flex items-center justify-between gap-4">
-        <div>
-          <p className="text-sm uppercase tracking-widest text-text-secondary">Dashboard</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main">
-            Welcome, {profile.display_name || profile.handle}
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            @{profile.handle} · role:{' '}
-            <span className="font-medium capitalize text-primary">{profile.role}</span>
-          </p>
-        </div>
-
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="rounded-full border border-border-color px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"
-          >
-            Sign out
-          </button>
-        </form>
+    <main className="mx-auto max-w-7xl px-6 py-10">
+      <header className="mb-10">
+        <p className="text-sm uppercase tracking-widest text-text-secondary">Dashboard</p>
+        <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+          Welcome, {profile.display_name || profile.handle}
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          @{profile.handle} · role:{' '}
+          <span className="font-medium capitalize text-primary">{profile.role}</span>
+        </p>
       </header>
 
       <section className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -114,19 +102,18 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section className="mt-12">
-        <h2 className="mb-4 text-lg font-bold text-text-main">Quick links</h2>
-        <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <QuickLink href={`/c/${profile.handle}`}>View public profile</QuickLink>
-          {isCreator && <QuickLink href="/app/dashboard/tiers">Manage tiers</QuickLink>}
-          {isCreator && <QuickLink href="/app/dashboard/posts">Your posts</QuickLink>}
-          <QuickLink href="/app/settings">Settings</QuickLink>
-          <QuickLink href="/">Marketing site</QuickLink>
-          <QuickLink href="/app/payouts" disabled>
-            Payouts (soon)
-          </QuickLink>
-        </ul>
-      </section>
+      {isCreator && (
+        <section className="mt-12">
+          <h2 className="mb-4 text-lg font-bold text-text-main">Creator tools</h2>
+          <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            <QuickLink href="/app/dashboard/tiers">Manage tiers</QuickLink>
+            <QuickLink href="/app/dashboard/posts">Your posts</QuickLink>
+            <QuickLink href="/app/payouts" disabled>
+              Payouts (soon)
+            </QuickLink>
+          </ul>
+        </section>
+      )}
     </main>
   );
 }

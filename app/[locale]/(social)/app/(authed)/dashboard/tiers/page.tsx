@@ -27,24 +27,17 @@ export default async function TiersPage() {
     .order('sort_order', { ascending: true });
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-8 flex items-center justify-between gap-4">
-        <div>
-          <Link
-            href="/app/dashboard"
-            className="text-sm text-text-secondary transition-colors hover:text-primary"
-          >
-            ← Back to dashboard
-          </Link>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main">
-            Subscription tiers
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Set the prices fans pay to subscribe to your content. You can have up to
-            5 active tiers at a time. Existing subscribers stay subscribed at the
-            price they signed up at.
-          </p>
-        </div>
+    <main className="mx-auto max-w-5xl px-6 py-10">
+      <header className="mb-8">
+        <p className="text-sm uppercase tracking-widest text-text-secondary">Monetization</p>
+        <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+          Subscription tiers
+        </h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          Set the prices fans pay to subscribe to your content. You can have up to
+          5 active tiers at a time. Existing subscribers stay subscribed at the
+          price they signed up at.
+        </p>
       </header>
 
       <section className="mb-10">
