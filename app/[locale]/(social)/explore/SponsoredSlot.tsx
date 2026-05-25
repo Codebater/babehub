@@ -9,14 +9,16 @@ import { useSurveyModal } from '../SurveyModalProvider';
  * (which sits inside the grid as a single cell) — this one spans the
  * whole grid width so it reads as a sponsored billboard, not a video.
  *
- * Click → opens the SurveyModal in place (apply to advertise here).
+ * Click → opens the B2B BannerInquiryModal in place (this is brand
+ * inventory, not creator outreach — the creator-side Apply BabeHub
+ * funnel asks completely different questions).
  */
 export default function SponsoredSlot() {
-  const { openApply } = useSurveyModal();
+  const { openBanner } = useSurveyModal();
   return (
     <button
       type="button"
-      onClick={openApply}
+      onClick={openBanner}
       className="group relative col-span-full mt-2 flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-black via-zinc-900 to-pink-950/40 p-5 text-left transition-transform hover:scale-[1.01] sm:gap-6 sm:p-6"
     >
       <span

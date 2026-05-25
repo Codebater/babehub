@@ -77,9 +77,12 @@ function toErrorMessage(err: unknown): string {
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as SurveyFormBody;
-    if (!body.name?.trim() || !body.email?.trim()) {
+    // Anonymous-friendly: only the email is required so we have one
+    // reliable contact channel. Name and social handle are optional and
+    // get persisted as empty strings to Airtable when omitted.
+    if (!body.email?.trim()) {
       return NextResponse.json(
-        { error: 'Bad Request', details: 'Missing name or email' },
+        { error: 'Bad Request', details: 'Missing email' },
         { status: 400 },
       );
     }

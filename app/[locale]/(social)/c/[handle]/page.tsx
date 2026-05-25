@@ -230,14 +230,16 @@ export default async function CreatorProfilePage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-2 self-end pb-2">
             {isOwnProfile ? (
               <>
-                {/* Owner sees three actions:
+                {/* Owner sees two actions:
                        1. Apply BabeHub — opens the survey modal in place
                        2. Dashboard      — creator-only, links to the
-                                            posting/tier surfaces
-                       3. Edit profile   — single canonical destination
-                                            for editing identity + pro
-                                            data (replaces the old
-                                            "Edit on dashboard" link). */}
+                                            posting/tier surfaces (also
+                                            the only entry point to the
+                                            profile editor since the
+                                            sidebar's Profile item already
+                                            covers that destination).
+                    The previous "Edit profile" pill was dropped — it
+                    duplicated the sidebar's Profile menu entry. */}
                 <ApplyButton label="Apply BabeHub" />
                 {isCreator && (
                   <Link
@@ -247,12 +249,6 @@ export default async function CreatorProfilePage({ params }: Props) {
                     Dashboard
                   </Link>
                 )}
-                <Link
-                  href="/app/professional/edit"
-                  className="rounded-full border border-border-color px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"
-                >
-                  Edit profile
-                </Link>
               </>
             ) : !viewer ? (
               <Link

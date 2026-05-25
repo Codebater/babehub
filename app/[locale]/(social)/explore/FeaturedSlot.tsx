@@ -10,8 +10,10 @@ import { useSurveyModal } from '../SurveyModalProvider';
  * view getting four such slots at the start of the grid (the user's
  * specific ask).
  *
- * Click → opens the SurveyModal via the shell-wide context. No
- * navigation, no scroll jump.
+ * Click → opens the B2B BannerInquiryModal via the shell-wide
+ * context. The slot is inventory pitched at brands & casting partners,
+ * not creators applying — the creator funnel has its own modal +
+ * questions, kept separate to avoid mixing the two pipelines.
  *
  * Three subtle variants matching the section banners so the slot
  * doesn't feel like a foreign element when spliced into a themed grid:
@@ -65,13 +67,13 @@ const THEMES: Record<Theme, {
 };
 
 export default function FeaturedSlot({ theme = 'default' as Theme }: { theme?: Theme }) {
-  const { openApply } = useSurveyModal();
+  const { openBanner } = useSurveyModal();
   const t = THEMES[theme];
 
   return (
     <button
       type="button"
-      onClick={openApply}
+      onClick={openBanner}
       className={`group relative flex flex-col overflow-hidden rounded-2xl border text-left transition-transform hover:scale-[1.02] ${t.border} ${t.bg}`}
     >
       {/* Soft glow blob */}

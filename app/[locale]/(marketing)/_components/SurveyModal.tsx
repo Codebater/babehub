@@ -188,9 +188,15 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         );
       }
       case 2:
-        return formData.socialPlatform.trim() !== '' && formData.socialHandle.trim() !== '' && formData.contentType.trim() !== '';
+        // socialHandle is optional now — anonymous applicants who don't
+        // want to expose a profile handle should still be able to
+        // submit; platform + content type are kept required because
+        // they shape the rest of the funnel and have safe fallbacks.
+        return formData.socialPlatform.trim() !== '' && formData.contentType.trim() !== '';
       case 3:
-        return formData.name.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+        // Name is optional — only the email is required so we can
+        // actually reply. Everything else is "anonymous-by-default".
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
       default:
         return false;
     }
@@ -359,8 +365,11 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                         </SelectField>
                       </div>
                       <div>
-                        <label htmlFor="socialHandle" className="block text-sm font-medium text-text-secondary mb-1">{t('survey.step2.q_handle')}</label>
-                        <InputField type="text" name="socialHandle" id="socialHandle" value={formData.socialHandle} onChange={handleChange} placeholder="@username" required />
+                        <label htmlFor="socialHandle" className="block text-sm font-medium text-text-secondary mb-1">
+                          {t('survey.step2.q_handle')}{' '}
+                          <span className="text-xs text-text-secondary/70">(optional)</span>
+                        </label>
+                        <InputField type="text" name="socialHandle" id="socialHandle" value={formData.socialHandle} onChange={handleChange} placeholder="@username — leave blank to stay anonymous" />
                       </div>
                     </div>
                     <div>
@@ -415,8 +424,11 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                     <h3 className="text-xl font-bold text-text-main">{t('survey.step3.title')}</h3>
                     <p className="text-text-secondary">{t('survey.step3.subtitle')}</p>
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">{t('survey.step3.q_name')}</label>
-                      <InputField type="text" name="name" id="name" value={formData.name} onChange={handleChange} placeholder={t('survey.step3.name_placeholder')} required />
+                      <label htmlFor="name" className="block text-sm font-medium text-text-secondary mb-1">
+                        {t('survey.step3.q_name')}{' '}
+                        <span className="text-xs text-text-secondary/70">(optional)</span>
+                      </label>
+                      <InputField type="text" name="name" id="name" value={formData.name} onChange={handleChange} placeholder={t('survey.step3.name_placeholder')} />
                     </div>
                     <div>
                       <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1">{t('survey.step3.q_email')}</label>
