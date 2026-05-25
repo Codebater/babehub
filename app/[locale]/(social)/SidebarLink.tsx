@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 
 /**
@@ -21,20 +21,43 @@ export default function SidebarLink({
   href,
   label,
   compact = false,
+  matchQuery,
   children,
 }: {
   href: string;
   label: string;
   compact?: boolean;
+  /**
+   * If set, the link is only "active" when both the path matches AND the
+   * current ?q= search param equals this value. Used so e.g. the Casting
+   * link (/explore?q=casting) doesn't fight with the plain Explore link
+   * (/explore) for the highlight when both have the same pathname.
+   *
+   * Pass an empty string to require that NO ?q= is present (plain Explore).
+   */
+  matchQuery?: string;
   /** Icon JSX, e.g. `<Compass className="h-5 w-5" />`. */
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const isActive =
-    pathname === href ||
-    (href !== '/' && href !== '/explore' && pathname?.startsWith(href + '/')) ||
-    (href === '/explore' && pathname === '/explore');
+  // Strip the query off `href` for pathname comparison since usePathname
+  // returns the path only. Links like "/explore?q=casting" still need to
+  // be compared against pathname === "/explore".
+  const hrefPath = href.split('?')[0];
+  const currentQuery = searchParams?.get('q') ?? '';
+
+  const pathMatches =
+    pathname === hrefPath ||
+    (hrefPath !== '/' && hrefPath !== '/explore' && pathname?.startsWith(hrefPath + '/')) ||
+    (hrefPath === '/explore' && pathname === '/explore');
+
+  // If matchQuery was passed, also require the search param to match
+  // exactly. Otherwise plain pathname match is enough.
+  const queryMatches = matchQuery === undefined ? true : currentQuery === matchQuery;
+
+  const isActive = pathMatches && queryMatches;
 
   if (compact) {
     return (

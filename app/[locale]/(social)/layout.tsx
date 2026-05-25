@@ -7,6 +7,7 @@ import {
   LogIn,
   LogOut,
   Home,
+  Clapperboard,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -64,7 +65,7 @@ export default async function SocialLayout({ children }: { children: React.React
         </Link>
 
         <nav className="flex-1 space-y-1">
-          <SidebarLink href="/explore" label="Explore">
+          <SidebarLink href="/explore" label="Explore" matchQuery="">
             <Compass className="h-5 w-5" />
           </SidebarLink>
           {profile && (
@@ -88,6 +89,16 @@ export default async function SocialLayout({ children }: { children: React.React
           <SidebarLink href="/" label="Marketing site">
             <Home className="h-5 w-5" />
           </SidebarLink>
+
+          {/* ── Categories ───────────────────────────────────────────────── */}
+          <div className="pt-4">
+            <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-text-secondary/70">
+              Categories
+            </p>
+            <SidebarLink href="/explore?q=casting" label="Casting" matchQuery="casting">
+              <Clapperboard className="h-5 w-5" />
+            </SidebarLink>
+          </div>
         </nav>
 
         {profile ? (
