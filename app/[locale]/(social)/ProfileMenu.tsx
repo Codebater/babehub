@@ -236,44 +236,58 @@ export default function ProfileMenu({
         </div>
       )}
 
-      {/* ── Trigger ───────────────────────────────────────────────────── */}
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors ${
+      {/* ── Trigger ─────────────────────────────────────────────────────
+          Two distinct hit areas so the click-on-user-→-profile expectation
+          works AND the menu stays reachable:
+            • Avatar + name = a <Link> straight to /c/{handle}
+            • Chevron       = a separate button that toggles the popover
+          Wrapped in a flex row that shares the same hover bg, but each
+          half handles its own click. */}
+      <div
+        className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 transition-colors ${
           open ? 'bg-secondary' : 'hover:bg-secondary'
         }`}
       >
-        <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
-          {profile.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
-              {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+        <Link
+          href={`/c/${profile.handle}` as '/c/[handle]'}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
+          <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
+            {profile.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
+                {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+              </span>
+            )}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-bold text-text-main">
+              {profile.display_name || profile.handle}
             </span>
-          )}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-bold text-text-main">
-            {profile.display_name || profile.handle}
+            <span className="block truncate text-xs text-text-secondary">
+              @{profile.handle}
+            </span>
           </span>
-          <span className="block truncate text-xs text-text-secondary">
-            @{profile.handle}
-          </span>
-        </span>
-        <ChevronUp
-          className={`h-4 w-4 shrink-0 text-text-secondary transition-transform ${
-            open ? '' : 'rotate-180'
-          }`}
-        />
-      </button>
+        </Link>
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={open}
+          aria-label="Open profile menu"
+          onClick={() => setOpen((v) => !v)}
+          className="-mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-card hover:text-primary"
+        >
+          <ChevronUp
+            className={`h-4 w-4 transition-transform ${open ? '' : 'rotate-180'}`}
+          />
+        </button>
+      </div>
 
     </div>
   );

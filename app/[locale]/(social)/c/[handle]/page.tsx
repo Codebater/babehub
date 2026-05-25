@@ -230,15 +230,28 @@ export default async function CreatorProfilePage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-2 self-end pb-2">
             {isOwnProfile ? (
               <>
-                {/* Creator-self CTA: opens the Apply survey modal in place
-                    via the (social) shell's SurveyModalProvider — no
-                    page navigation, no scroll jump. */}
+                {/* Owner sees three actions:
+                       1. Apply BabeHub — opens the survey modal in place
+                       2. Dashboard      — creator-only, links to the
+                                            posting/tier surfaces
+                       3. Edit profile   — single canonical destination
+                                            for editing identity + pro
+                                            data (replaces the old
+                                            "Edit on dashboard" link). */}
                 <ApplyButton label="Apply BabeHub" />
+                {isCreator && (
+                  <Link
+                    href="/app/dashboard"
+                    className="rounded-full border border-border-color px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"
+                  >
+                    Dashboard
+                  </Link>
+                )}
                 <Link
-                  href="/app/dashboard"
+                  href="/app/professional/edit"
                   className="rounded-full border border-border-color px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:border-primary hover:text-primary"
                 >
-                  Edit on dashboard →
+                  Edit profile
                 </Link>
               </>
             ) : !viewer ? (

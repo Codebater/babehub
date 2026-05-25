@@ -79,7 +79,12 @@ export default async function CreatorApplicationsPage() {
                     </Link>
                     {poster && (
                       <p className="mt-1 text-xs text-text-secondary">
-                        @{poster.handle}
+                        <Link
+                          href={`/c/${poster.handle}` as '/c/[handle]'}
+                          className="hover:text-primary hover:underline"
+                        >
+                          @{poster.handle}
+                        </Link>
                         {job?.categories?.length ? ` · ${job.categories.join(', ')}` : ''}
                         {' · '}
                         {job?.location_kind}
