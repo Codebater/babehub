@@ -41,3 +41,45 @@ html.theme-pink .logo-cloud-marquee {
 html.theme-pink .logo-cloud-marquee .logo-cloud-marquee__label {
   color: rgba(55, 65, 81, 0.78);
 }
+
+/* ------------------------------------------------------------------ */
+/* Global form-control readability                                    */
+/*                                                                    */
+/* Native form controls (<select>, <textarea>, <input type="number">) */
+/* ignore our Tailwind theme tokens and fall back to OS palette. On   */
+/* light-mode browsers/OS that meant several authed forms rendered    */
+/* with light backgrounds + light text — close to white-on-white.     */
+/*                                                                    */
+/* Force the dark palette + color-scheme platform-wide. The pink-theme*/
+/* marketing scroll section overrides back to light below so the      */
+/* marketing site's own input styles still work when the Benefits     */
+/* section flips html.theme-pink.                                     */
+/* ------------------------------------------------------------------ */
+input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+select,
+textarea {
+  color-scheme: dark;
+  background-color: #18181b; /* zinc-900 */
+  color: #ffffff;
+  border-color: #3f3f46; /* zinc-700 */
+}
+input::placeholder,
+textarea::placeholder {
+  color: #71717a; /* zinc-500 */
+}
+
+/* Marketing pink-theme override — the Benefits scroll section flips
+   html.theme-pink, in which case the marketing components want light
+   inputs to match the pink background. */
+html.theme-pink input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']):not([type='color']),
+html.theme-pink select,
+html.theme-pink textarea {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #111827; /* gray-900 */
+  border-color: #f9a8d4; /* pink-300 */
+}
+html.theme-pink input::placeholder,
+html.theme-pink textarea::placeholder {
+  color: #6b7280; /* gray-500 */
+}
