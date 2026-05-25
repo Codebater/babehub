@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase/server';
  * optionally `?next=...`) to this URL after a user clicks the magic link or
  * completes an OAuth flow. We exchange the code for a session (which sets
  * the auth cookies via the cookie-aware server client), then redirect to
- * the requested next page — defaulting to `/app/dashboard`.
+ * the requested next page — defaulting to `/explore` (the platform's
+ * main discovery surface for both fans and creators).
  *
  * This route is intentionally OUTSIDE `app/[locale]/` so it doesn't get
  * locale-rewritten, and is excluded from the next-intl middleware matcher
@@ -15,7 +16,7 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/app/dashboard';
+  const next = searchParams.get('next') ?? '/explore';
 
   if (!code) {
     // No code = either an error or someone hit the URL directly.
@@ -34,6 +35,6 @@ export async function GET(request: NextRequest) {
   // Honor `?next=/some/path` if provided (e.g. deep-link after sign-in),
   // but only if it's a relative path on this origin (defense against
   // open-redirect abuse).
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/app/dashboard';
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/explore';
   return NextResponse.redirect(`${origin}${safeNext}`);
 }

@@ -4,8 +4,8 @@ import LoginForm from './LoginForm';
 
 /**
  * `/app/login`. Public; redirects already-signed-in users straight to the
- * dashboard so we never show the magic-link form to someone with an active
- * session.
+ * explore feed (platform's main surface) so we never show the magic-link
+ * form to someone with an active session.
  */
 export default async function LoginPage({
   searchParams,
@@ -20,7 +20,7 @@ export default async function LoginPage({
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(next && next.startsWith('/') ? next : '/app/dashboard');
+    redirect(next && next.startsWith('/') ? next : '/explore');
   }
 
   return (
