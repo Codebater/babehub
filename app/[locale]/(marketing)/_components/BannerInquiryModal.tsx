@@ -62,33 +62,56 @@ const TextareaField = (props: React.TextareaHTMLAttributes<HTMLTextAreaElement>)
 );
 
 /**
- * Picker for the inquiry kind (Banner / Featured job / Collab).
- * Mirrors the SurveyModal's ChoiceBox visual exactly so the two modals
- * read as siblings.
+ * Multi-select picker for placement kinds. Brands often want a
+ * combined deal (banner + featured job, or collab + banner) — toggling
+ * each chip lets them pick one, two, or all three in a single inquiry
+ * without forcing them to submit three separate forms.
+ *
+ * Clicking a selected box deselects it; the parent enforces "at least
+ * one selected" via canProceed.
  */
 function ChoiceBox({
   label,
   hint,
   value,
-  selectedValue,
-  onSelect,
+  selectedValues,
+  onToggle,
 }: {
   label: string;
   hint: string;
   value: InquiryKind;
-  selectedValue: InquiryKind | '';
-  onSelect: (value: InquiryKind) => void;
+  selectedValues: InquiryKind[];
+  onToggle: (value: InquiryKind) => void;
 }) {
-  const isSelected = selectedValue === value;
+  const isSelected = selectedValues.includes(value);
   return (
     <div
-      onClick={() => onSelect(value)}
-      className={`flex-1 cursor-pointer rounded-lg border p-4 text-center transition-all duration-200 ${
+      onClick={() => onToggle(value)}
+      role="checkbox"
+      aria-checked={isSelected}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          onToggle(value);
+        }
+      }}
+      className={`relative flex-1 cursor-pointer rounded-lg border p-4 text-center transition-all duration-200 ${
         isSelected
           ? 'border-primary bg-primary/20 text-text-main shadow-md'
           : 'border-border-color bg-secondary text-text-secondary hover:border-gray-500'
       }`}
     >
+      {/* Tiny checkmark in the corner so multi-select state is obvious
+          even when more than one tile is highlighted. */}
+      {isSelected && (
+        <span
+          aria-hidden
+          className="absolute right-2 top-2 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white"
+        >
+          ✓
+        </span>
+      )}
       <span className="block font-medium">{label}</span>
       <span className="mt-1 block text-xs text-text-secondary">{hint}</span>
     </div>
@@ -107,8 +130,18 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   );
 }
 
-const INITIAL_FORM = {
-  kind: '' as InquiryKind | '',
+const INITIAL_FORM: {
+  kinds: InquiryKind[];
+  company: string;
+  website: string;
+  budget: string;
+  timeline: string;
+  message: string;
+  name: string;
+  email: string;
+  telegram: string;
+} = {
+  kinds: [],
   company: '',
   website: '',
   budget: '',
@@ -154,17 +187,24 @@ export default function BannerInquiryModal({ isOpen, onClose }: Props) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleKindSelect = (value: InquiryKind) => {
-    setFormData((prev) => ({ ...prev, kind: value }));
+  const handleKindToggle = (value: InquiryKind) => {
+    setFormData((prev) => {
+      const isOn = prev.kinds.includes(value);
+      return {
+        ...prev,
+        kinds: isOn ? prev.kinds.filter((k) => k !== value) : [...prev.kinds, value],
+      };
+    });
   };
 
-  // Step 1 just needs the inquiry kind. Everything else (message,
-  // budget, website, etc.) is optional — that's the "anonymous-by-
-  // default" pitch. Step 2 only needs a working email.
+  // Step 1 needs at least one placement kind picked (multi-select).
+  // Everything else (message, budget, website, etc.) is optional —
+  // that's the "anonymous-by-default" pitch. Step 2 only needs a
+  // working email.
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.kind !== '';
+        return formData.kinds.length > 0;
       case 2:
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
       default:
@@ -277,29 +317,30 @@ export default function BannerInquiryModal({ isOpen, onClose }: Props) {
                   <div className={stepContentClass} style={animationStyle}>
                     <h3 className="text-xl font-bold text-text-main">What do you want to do?</h3>
                     <p className="text-text-secondary">
-                      Pick the placement. Everything below is optional — leave whatever
-                      you&apos;re not ready to share, and we&apos;ll figure the rest out together.
+                      Pick one or several — most brands combine placements. Everything
+                      below is optional — leave whatever you&apos;re not ready to share,
+                      and we&apos;ll figure the rest out together.
                     </p>
 
                     <div className="flex flex-col gap-3 sm:flex-row">
                       <ChoiceBox
                         value="banner"
-                        selectedValue={formData.kind}
-                        onSelect={handleKindSelect}
+                        selectedValues={formData.kinds}
+                        onToggle={handleKindToggle}
                         label="Sponsored banner"
                         hint="High-traffic placement on /explore"
                       />
                       <ChoiceBox
                         value="featured_job"
-                        selectedValue={formData.kind}
-                        onSelect={handleKindSelect}
+                        selectedValues={formData.kinds}
+                        onToggle={handleKindToggle}
                         label="Featured job"
                         hint="Promote a casting / shoot"
                       />
                       <ChoiceBox
                         value="collab"
-                        selectedValue={formData.kind}
-                        onSelect={handleKindSelect}
+                        selectedValues={formData.kinds}
+                        onToggle={handleKindToggle}
                         label="Creator collab"
                         hint="Brand × creator campaign"
                       />

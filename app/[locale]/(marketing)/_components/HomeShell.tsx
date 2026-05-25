@@ -12,6 +12,7 @@ import FAQ from './FAQ';
 import Apply from './Apply';
 import Footer from './Footer';
 import SurveyModal from './SurveyModal';
+import BannerInquiryModal from './BannerInquiryModal';
 
 /**
  * Marketing home shell. Mirrors the old `App.tsx` orchestration minus the
@@ -31,6 +32,10 @@ export default function HomeShell() {
   const searchParams = useSearchParams();
   const isEmbedded = searchParams?.get('embed') === '1';
   const [isSurveyModalOpen, setIsSurveyModalOpen] = useState(false);
+  // Separate state for the B2B banner-inquiry modal. The "Ready to
+  // Elevate" section at the bottom of the page is the brand-side apply
+  // CTA — it opens this modal instead of the creator-side survey.
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
   const benefitsRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -54,6 +59,8 @@ export default function HomeShell() {
 
   const open = () => setIsSurveyModalOpen(true);
   const close = () => setIsSurveyModalOpen(false);
+  const openBanner = () => setIsBannerModalOpen(true);
+  const closeBanner = () => setIsBannerModalOpen(false);
 
   return (
     <div className="bg-background font-sans transition-colors duration-700">
@@ -65,11 +72,12 @@ export default function HomeShell() {
         <LogoCloudMarquee />
         <HowItWorks />
         <FAQ />
-        <Apply onApplyClick={open} />
+        <Apply onApplyClick={openBanner} />
       </main>
       {!isEmbedded && <Footer />}
 
       <SurveyModal isOpen={isSurveyModalOpen} onClose={close} />
+      <BannerInquiryModal isOpen={isBannerModalOpen} onClose={closeBanner} />
     </div>
   );
 }

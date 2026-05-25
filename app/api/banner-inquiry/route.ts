@@ -20,6 +20,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 type BannerInquiryBody = {
+  /**
+   * Multi-select array — brands can pick one, two, or all three of
+   * banner / featured_job / collab in a single inquiry. The pre-multi
+   * shape used a single `kind` string; we still accept that as a
+   * fallback so old client builds don't break mid-deploy.
+   */
+  kinds?: string[];
   kind?: string;
   company?: string;
   website?: string;
@@ -38,8 +45,18 @@ const KIND_LABELS: Record<string, string> = {
 };
 
 function buildRecord(body: BannerInquiryBody): Record<string, string> {
+  // Normalize: array > single-string fallback > empty. Joined into a
+  // comma-separated label so Airtable single-line text columns can
+  // hold the value without schema changes.
+  const kinds = Array.isArray(body.kinds) && body.kinds.length
+    ? body.kinds
+    : body.kind
+      ? [body.kind]
+      : [];
+  const kindLabel = kinds.map((k) => KIND_LABELS[k] ?? k).join(', ');
+
   const record: Record<string, string> = {
-    Kind: body.kind ? KIND_LABELS[body.kind] ?? body.kind : '',
+    Kind: kindLabel,
     Email: body.email ?? '',
     Name: body.name ?? '',
     Company: body.company ?? '',
