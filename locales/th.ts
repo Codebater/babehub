@@ -33,7 +33,7 @@ export default {
     }
   },
   logoCloud: {
-    inspiredBy: 'ได้รับแรงบันดาลใจจาก',
+    inspiredBy: 'ปรากฏใน',
   },
   services: {
     title: 'เราทำอะไรให้คุณบ้าง',

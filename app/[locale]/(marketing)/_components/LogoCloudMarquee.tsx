@@ -1,14 +1,85 @@
 import { useTranslations } from 'next-intl';
-import { LinkedInIcon } from './IconComponents';
 
+/**
+ * Adult-industry brand wordmarks rendered as typography (no logo
+ * images so we sidestep trademark / hotlink concerns and keep the
+ * marquee snappy). Each entry mimics the brand's actual styling
+ * within plain CSS — Pornhub's signature orange block, Brazzers' bold
+ * tracking, CzechCasting's serif look, OnlyFans' two-tone wordmark.
+ */
 const logos = [
-  { name: 'Vogue', component: <span className="font-serif text-3xl font-bold tracking-widest uppercase">Vogue</span> },
-  { name: 'ELLE', component: <span className="font-sans text-4xl font-extrabold uppercase">ELLE</span> },
-  { name: 'Allure', component: <span className="font-serif text-3xl italic">Allure</span> },
-  { name: 'GQ', component: <span className="text-3xl font-bold font-serif">GQ</span> },
-  { name: 'LinkedIn', component: <LinkedInIcon className="h-7 w-7" /> },
-  { name: 'Los Angeles', component: <span className="text-2xl font-semibold tracking-tight">Los Angeles</span> },
-  { name: 'Forbes', component: <span className="text-3xl font-bold">Forbes</span> },
+  {
+    name: 'Pornhub',
+    component: (
+      <span className="inline-flex items-baseline gap-1 font-sans text-3xl font-black tracking-tight">
+        <span>Porn</span>
+        <span className="rounded-md bg-amber-500 px-2 py-0.5 leading-none text-black">
+          hub
+        </span>
+      </span>
+    ),
+  },
+  {
+    name: 'Brazzers',
+    component: (
+      <span className="font-sans text-3xl font-black uppercase tracking-tight">
+        BRAZZERS
+      </span>
+    ),
+  },
+  {
+    name: 'CzechCasting',
+    component: (
+      <span className="font-serif text-2xl font-bold tracking-tight">
+        Czech<span className="text-primary">Casting</span>
+      </span>
+    ),
+  },
+  {
+    name: 'xHamster',
+    component: (
+      <span className="font-sans text-3xl font-black tracking-tighter">
+        <span className="text-primary">x</span>Hamster
+      </span>
+    ),
+  },
+  {
+    name: 'OnlyFans',
+    component: (
+      <span className="inline-flex items-baseline gap-0.5 font-sans text-3xl font-black tracking-tight">
+        <span>Only</span>
+        <span className="text-sky-400">Fans</span>
+      </span>
+    ),
+  },
+  {
+    name: 'Stripchat',
+    component: (
+      <span className="font-sans text-3xl font-black uppercase tracking-tight">
+        Strip<span className="text-primary">chat</span>
+      </span>
+    ),
+  },
+  {
+    name: 'RealityKings',
+    component: (
+      <span className="font-serif text-2xl italic">Reality Kings</span>
+    ),
+  },
+  {
+    name: 'BangBros',
+    component: (
+      <span className="font-sans text-3xl font-black uppercase tracking-tight">
+        BangBros
+      </span>
+    ),
+  },
+  {
+    name: 'NaughtyAmerica',
+    component: (
+      <span className="font-serif text-2xl italic">Naughty America</span>
+    ),
+  },
 ];
 
 export default function LogoCloudMarquee() {

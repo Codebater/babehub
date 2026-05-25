@@ -33,7 +33,7 @@ export default {
     }
   },
   logoCloud: {
-    inspiredBy: 'Inspirado Por',
+    inspiredBy: 'Visto em',
   },
   services: {
     title: 'O Que Fazemos Por Você',

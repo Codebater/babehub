@@ -33,7 +33,7 @@ export default {
     }
   },
   logoCloud: {
-    inspiredBy: 'インスパイア元',
+    inspiredBy: '掲載媒体',
   },
   services: {
     title: '私たちがあなたのためにすること',
