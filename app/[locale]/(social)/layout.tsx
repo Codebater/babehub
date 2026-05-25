@@ -38,23 +38,32 @@ export default async function SocialLayout({ children }: { children: React.React
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Phase 2 introduces a second role column (`roles user_role[]`) on
+  // profiles. The singular `role` stays as the active role for the
+  // legacy `requireCreator()` guard; `roles[]` is additive and feeds
+  // the new "Recruiter mode" toggle in the ProfileMenu popover.
   let profile: {
     handle: string;
     display_name: string;
     avatar_url: string | null;
-    role: 'fan' | 'creator' | 'chatter' | 'admin';
+    role: string;
+    roles: string[];
   } | null = null;
 
   if (user) {
     const { data } = await supabase
       .from('profiles')
-      .select('handle, display_name, avatar_url, role')
+      .select('handle, display_name, avatar_url, role, roles')
       .eq('id', user.id)
       .maybeSingle();
     if (data) profile = data;
   }
 
   const isCreator = profile?.role === 'creator';
+  const isRecruiter =
+    profile?.roles?.some((r) =>
+      ['recruiter', 'agency', 'brand', 'service_provider'].includes(r),
+    ) ?? false;
 
   return (
     <SurveyModalProvider>
@@ -109,6 +118,7 @@ export default async function SocialLayout({ children }: { children: React.React
               avatar_url: profile.avatar_url,
             }}
             isCreator={isCreator}
+            isRecruiter={isRecruiter}
           />
         ) : (
           <div className="space-y-2 border-t border-border-color/40 pt-4">

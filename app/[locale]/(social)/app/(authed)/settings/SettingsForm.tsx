@@ -24,7 +24,10 @@ export default function SettingsForm({
   role,
 }: {
   defaults: { handle: string; display_name: string; bio: string };
-  role: 'fan' | 'creator' | 'chatter' | 'admin';
+  // Widened in Phase 2 — the user_role enum now also includes
+  // recruiter / agency / brand / service_provider. The form only
+  // branches on creator vs everything-else.
+  role: string;
 }) {
   const [state, formAction] = useActionState(updateProfileText, initial);
   const [isPending, startTransition] = useTransition();

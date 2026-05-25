@@ -54,3 +54,34 @@ export async function requireCreator(): Promise<GuardResult> {
   if (result.profile.role !== 'creator') redirect('/app/dashboard');
   return result;
 }
+
+/**
+ * Require a signed-in, onboarded user whose `roles[]` contains
+ * 'recruiter' (or 'agency', 'brand', 'service_provider' — any of the
+ * "buy side" roles). We check the roles[] array rather than the
+ * singular `role` column because Phase 2 lets a single user be both a
+ * creator AND a recruiter simultaneously; the primary role stays in
+ * `profiles.role`, the secondary roles live in `profiles.roles[]`.
+ */
+const BUY_SIDE_ROLES = ['recruiter', 'agency', 'brand', 'service_provider'] as const;
+
+export async function requireRecruiter(): Promise<GuardResult> {
+  const result = await requireOnboarded();
+  const has = (result.profile.roles ?? []).some((r) =>
+    (BUY_SIDE_ROLES as readonly string[]).includes(r),
+  );
+  if (!has) redirect('/app/dashboard');
+  return result;
+}
+
+/**
+ * Require a signed-in, onboarded user with admin privileges
+ * (`profiles.role === 'admin'`). The 'admin' value has been in the
+ * user_role enum since Phase 1 but only Phase 2 admin queues actually
+ * read it.
+ */
+export async function requireAdmin(): Promise<GuardResult> {
+  const result = await requireOnboarded();
+  if (result.profile.role !== 'admin') redirect('/app/dashboard');
+  return result;
+}

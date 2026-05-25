@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import {
   ChevronUp,
   User,
@@ -10,10 +10,13 @@ import {
   Settings,
   LogOut,
   Megaphone,
+  Briefcase,
+  Loader2,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { signOut } from '../app/(public)/login/actions';
 import { useSurveyModal } from './SurveyModalProvider';
+import { toggleRole } from './app/(authed)/professional/edit/actions';
 
 /**
  * Signed-in profile pill at the bottom of the desktop sidebar. Click
@@ -37,14 +40,30 @@ type Props = {
     avatar_url: string | null;
   };
   isCreator: boolean;
+  /**
+   * True when the viewer's profile.roles[] already contains at least
+   * one buy-side role (recruiter / agency / brand / service_provider).
+   * Drives the "Recruiter mode" toggle in the menu.
+   */
+  isRecruiter?: boolean;
 };
 
-export default function ProfileMenu({ profile, isCreator }: Props) {
+export default function ProfileMenu({ profile, isCreator, isRecruiter = false }: Props) {
   const [open, setOpen] = useState(false);
+  const [pending, startTransition] = useTransition();
   // Apply modal trigger comes from the shell-wide provider so every
   // page inside (social) opens the same modal instance.
   const { openApply } = useSurveyModal();
   const ref = useRef<HTMLDivElement>(null);
+
+  const enableRecruiterMode = () => {
+    setOpen(false);
+    startTransition(async () => {
+      // Default the buy-side role to 'recruiter'. Users can pick
+      // 'agency' / 'brand' later from a dedicated settings screen.
+      await toggleRole('recruiter', 'add');
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -132,6 +151,15 @@ export default function ProfileMenu({ profile, isCreator }: Props) {
             </Link>
           )}
           <Link
+            href="/app/professional/edit"
+            onClick={close}
+            className={itemClass}
+            role="menuitem"
+          >
+            <Briefcase className="h-4 w-4" />
+            Professional profile
+          </Link>
+          <Link
             href="/app/settings"
             onClick={close}
             className={itemClass}
@@ -140,6 +168,39 @@ export default function ProfileMenu({ profile, isCreator }: Props) {
             <Settings className="h-4 w-4" />
             Settings
           </Link>
+
+          {/* Recruiter-mode toggle. Visible only when the user hasn't
+              already opted into a buy-side role — appends 'recruiter' to
+              profiles.roles[] (additive, doesn't change profile.role).
+              Once switched on, the menu surfaces a "Recruiter dashboard"
+              entry instead (Sprint 2). */}
+          {!isRecruiter && (
+            <button
+              type="button"
+              onClick={enableRecruiterMode}
+              disabled={pending}
+              className={`${itemClass} disabled:opacity-60`}
+              role="menuitem"
+            >
+              {pending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Briefcase className="h-4 w-4 text-primary" />
+              )}
+              Switch on recruiter mode
+            </button>
+          )}
+          {isRecruiter && (
+            <Link
+              href="/app/recruiter/dashboard"
+              onClick={close}
+              className={itemClass}
+              role="menuitem"
+            >
+              <Briefcase className="h-4 w-4 text-primary" />
+              Recruiter dashboard
+            </Link>
+          )}
 
           <div className="my-1 border-t border-border-color/40" />
 

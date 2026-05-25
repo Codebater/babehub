@@ -202,6 +202,54 @@ export type Database = {
           },
         ]
       }
+      portfolio_items: {
+        Row: {
+          created_at: string
+          description: string
+          external_url: string | null
+          id: string
+          media_id: string | null
+          sort_order: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          external_url?: string | null
+          id?: string
+          media_id?: string | null
+          sort_order?: number
+          title?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          external_url?: string | null
+          id?: string
+          media_id?: string | null
+          sort_order?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_items_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           body: string
@@ -265,6 +313,74 @@ export type Database = {
           },
         ]
       }
+      professional_profiles: {
+        Row: {
+          about: string
+          availability: string
+          categories: string[]
+          collaboration_status: string
+          created_at: string
+          currency: string
+          experience: Json
+          headline: string
+          hourly_rate_cents: number | null
+          languages: string[]
+          links: Json
+          region: string | null
+          search_doc: unknown
+          skills: string[]
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          about?: string
+          availability?: string
+          categories?: string[]
+          collaboration_status?: string
+          created_at?: string
+          currency?: string
+          experience?: Json
+          headline?: string
+          hourly_rate_cents?: number | null
+          languages?: string[]
+          links?: Json
+          region?: string | null
+          search_doc?: unknown
+          skills?: string[]
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          about?: string
+          availability?: string
+          categories?: string[]
+          collaboration_status?: string
+          created_at?: string
+          currency?: string
+          experience?: Json
+          headline?: string
+          hourly_rate_cents?: number | null
+          languages?: string[]
+          links?: Json
+          region?: string | null
+          search_doc?: unknown
+          skills?: string[]
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "professional_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -277,6 +393,7 @@ export type Database = {
           is_verified: boolean
           onboarded_at: string | null
           role: Database["public"]["Enums"]["user_role"]
+          roles: Database["public"]["Enums"]["user_role"][]
           updated_at: string
         }
         Insert: {
@@ -290,6 +407,7 @@ export type Database = {
           is_verified?: boolean
           onboarded_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          roles?: Database["public"]["Enums"]["user_role"][]
           updated_at?: string
         }
         Update: {
@@ -303,6 +421,7 @@ export type Database = {
           is_verified?: boolean
           onboarded_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          roles?: Database["public"]["Enums"]["user_role"][]
           updated_at?: string
         }
         Relationships: []
@@ -536,7 +655,15 @@ export type Database = {
         | "canceled"
         | "incomplete"
         | "trialing"
-      user_role: "fan" | "creator" | "chatter" | "admin"
+      user_role:
+        | "fan"
+        | "creator"
+        | "chatter"
+        | "admin"
+        | "recruiter"
+        | "agency"
+        | "brand"
+        | "service_provider"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -675,7 +802,16 @@ export const Constants = {
         "incomplete",
         "trialing",
       ],
-      user_role: ["fan", "creator", "chatter", "admin"],
+      user_role: [
+        "fan",
+        "creator",
+        "chatter",
+        "admin",
+        "recruiter",
+        "agency",
+        "brand",
+        "service_provider",
+      ],
     },
   },
 } as const

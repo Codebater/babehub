@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, ShieldCheck, Heart } from 'lucide-react';
+import { Lock, ShieldCheck, Heart, Briefcase, MapPin, Languages, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadFullInteractionsBatch } from '@/lib/interactions/load';
@@ -90,6 +90,18 @@ async function loadProfile(handle: string) {
     totalLikes = count ?? 0;
   }
 
+  // Phase 2 — professional identity (1:1 with profiles). Visibility is
+  // enforced by RLS, so this query returns null for recruiters_only
+  // profiles viewed by anonymous users and for private profiles
+  // viewed by anyone other than the owner.
+  const { data: professional } = await supabase
+    .from('professional_profiles')
+    .select(
+      'headline, about, hourly_rate_cents, currency, region, languages, skills, categories, collaboration_status, availability, links, visibility',
+    )
+    .eq('user_id', profile.id)
+    .maybeSingle();
+
   return {
     profile,
     tiers: tiers ?? [],
@@ -98,6 +110,7 @@ async function loadProfile(handle: string) {
     viewer: user,
     mediaUrlMap,
     interactionsMap,
+    professional,
   };
 }
 
@@ -143,7 +156,16 @@ export default async function CreatorProfilePage({ params }: Props) {
   const result = await loadProfile(handle);
   if (!result) notFound();
 
-  const { profile, tiers, posts, viewer, mediaUrlMap, interactionsMap, totalLikes } = result;
+  const {
+    profile,
+    tiers,
+    posts,
+    viewer,
+    mediaUrlMap,
+    interactionsMap,
+    totalLikes,
+    professional,
+  } = result;
   const isOwnProfile = viewer?.id === profile.id;
   const isCreator = profile.role === 'creator';
 
@@ -232,6 +254,132 @@ export default async function CreatorProfilePage({ params }: Props) {
 
         {profile.bio && (
           <p className="mt-6 max-w-2xl text-text-main leading-relaxed">{profile.bio}</p>
+        )}
+
+        {/* ── Professional profile (Phase 2) ────────────────────────────── */}
+        {professional && (
+          <section className="mt-8 overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-black via-zinc-900 to-zinc-950 p-6 shadow-xl">
+            <div className="mb-3 flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-primary" />
+              <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+                Professional
+              </p>
+              {professional.availability === 'available' && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-green-400">
+                  <span className="relative inline-flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
+                  </span>
+                  Available
+                </span>
+              )}
+              {professional.availability === 'busy' && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                  Limited capacity
+                </span>
+              )}
+              {professional.availability === 'unavailable' && (
+                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-red-400">
+                  Unavailable
+                </span>
+              )}
+            </div>
+
+            {professional.headline && (
+              <h2 className="text-xl font-black tracking-tight text-white sm:text-2xl">
+                {professional.headline}
+              </h2>
+            )}
+
+            {professional.about && (
+              <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-white/70 sm:text-base">
+                {professional.about}
+              </p>
+            )}
+
+            {/* Meta strip */}
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-white/60">
+              {professional.region && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 text-primary/80" />
+                  {professional.region}
+                </span>
+              )}
+              {professional.languages.length > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Languages className="h-3.5 w-3.5 text-primary/80" />
+                  {professional.languages.slice(0, 4).join(' · ')}
+                </span>
+              )}
+              {typeof professional.hourly_rate_cents === 'number' &&
+                professional.hourly_rate_cents > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                    {(professional.hourly_rate_cents / 100).toLocaleString(undefined, {
+                      style: 'currency',
+                      currency: (professional.currency || 'USD').toUpperCase(),
+                      maximumFractionDigits: 0,
+                    })}{' '}
+                    / hr
+                  </span>
+                )}
+            </div>
+
+            {/* Skill + category chips */}
+            {(professional.skills.length > 0 || professional.categories.length > 0) && (
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {professional.categories.slice(0, 8).map((cat) => (
+                  <span
+                    key={`cat-${cat}`}
+                    className="rounded-full bg-primary/15 px-2.5 py-1 text-[11px] font-bold text-primary"
+                  >
+                    {cat}
+                  </span>
+                ))}
+                {professional.skills.slice(0, 12).map((skill) => (
+                  <span
+                    key={`skill-${skill}`}
+                    className="rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] text-white/80"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Edit shortcut for the owner */}
+            {isOwnProfile && (
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link
+                  href="/app/professional/edit"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-bold text-white transition-colors hover:border-primary hover:text-primary"
+                >
+                  Edit professional profile →
+                </Link>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Owner sees a "Set up professional profile" CTA when none exists */}
+        {!professional && isOwnProfile && (
+          <section className="mt-8 flex flex-col gap-3 rounded-2xl border border-dashed border-border-color bg-secondary/40 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-text-main">
+                Add your professional profile
+              </p>
+              <p className="mt-1 text-xs text-text-secondary">
+                Skills, rates, region, availability — recruiters can find you when this is filled in.
+              </p>
+            </div>
+            <Link
+              href="/app/professional/edit"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold text-white shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] hover:bg-pink-400"
+            >
+              <Briefcase className="h-3.5 w-3.5" />
+              Set up
+            </Link>
+          </section>
         )}
 
         {/* ── Tiers ───────────────────────────────────────────────────────── */}

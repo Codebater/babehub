@@ -52,7 +52,10 @@ const initial: OnboardingState = {};
 export default function OnboardingForm({
   initial: initialValues,
 }: {
-  initial: { handle: string; display_name: string; bio: string; role: 'fan' | 'creator' | 'chatter' | 'admin' };
+  // `role` accepts every value in the user_role enum (Phase 2 added
+  // recruiter / agency / brand / service_provider). The form only
+  // distinguishes creator vs everything-else, so we just widen the type.
+  initial: { handle: string; display_name: string; bio: string; role: string };
 }) {
   const [state, formAction] = useActionState(saveOnboarding, initial);
 
