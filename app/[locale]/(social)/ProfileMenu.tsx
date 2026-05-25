@@ -12,6 +12,7 @@ import {
   Megaphone,
   Briefcase,
   Loader2,
+  FileText,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { signOut } from '../app/(public)/login/actions';
@@ -150,6 +151,15 @@ export default function ProfileMenu({ profile, isCreator, isRecruiter = false }:
               New post
             </Link>
           )}
+          <Link
+            href="/app/creator/applications"
+            onClick={close}
+            className={itemClass}
+            role="menuitem"
+          >
+            <FileText className="h-4 w-4" />
+            My applications
+          </Link>
           <Link
             href="/app/professional/edit"
             onClick={close}

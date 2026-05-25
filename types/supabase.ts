@@ -63,6 +63,149 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          applicant_id: string
+          created_at: string
+          decided_at: string | null
+          id: string
+          intro_media_ids: string[]
+          intro_message: string
+          job_id: string
+          status: Database["public"]["Enums"]["application_status"]
+          token_boost: number
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          applicant_id: string
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          intro_media_ids?: string[]
+          intro_message?: string
+          job_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+          token_boost?: number
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          applicant_id?: string
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          intro_media_ids?: string[]
+          intro_message?: string
+          job_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          token_boost?: number
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          budget_max_cents: number | null
+          budget_min_cents: number | null
+          categories: string[]
+          created_at: string
+          currency: string
+          description: string
+          expires_at: string | null
+          featured_until: string | null
+          id: string
+          location_kind: Database["public"]["Enums"]["job_location_kind"]
+          location_text: string | null
+          moderation_status: Database["public"]["Enums"]["moderation_status"]
+          poster_id: string
+          promoted_score: number
+          published_at: string | null
+          requires_verification: boolean
+          search_doc: unknown
+          status: Database["public"]["Enums"]["job_status"]
+          tags: string[]
+          title: string
+          token_cost: number
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          budget_max_cents?: number | null
+          budget_min_cents?: number | null
+          categories?: string[]
+          created_at?: string
+          currency?: string
+          description?: string
+          expires_at?: string | null
+          featured_until?: string | null
+          id?: string
+          location_kind?: Database["public"]["Enums"]["job_location_kind"]
+          location_text?: string | null
+          moderation_status?: Database["public"]["Enums"]["moderation_status"]
+          poster_id: string
+          promoted_score?: number
+          published_at?: string | null
+          requires_verification?: boolean
+          search_doc?: unknown
+          status?: Database["public"]["Enums"]["job_status"]
+          tags?: string[]
+          title: string
+          token_cost?: number
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          budget_max_cents?: number | null
+          budget_min_cents?: number | null
+          categories?: string[]
+          created_at?: string
+          currency?: string
+          description?: string
+          expires_at?: string | null
+          featured_until?: string | null
+          id?: string
+          location_kind?: Database["public"]["Enums"]["job_location_kind"]
+          location_text?: string | null
+          moderation_status?: Database["public"]["Enums"]["moderation_status"]
+          poster_id?: string
+          promoted_score?: number
+          published_at?: string | null
+          requires_verification?: boolean
+          search_doc?: unknown
+          status?: Database["public"]["Enums"]["job_status"]
+          tags?: string[]
+          title?: string
+          token_cost?: number
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media: {
         Row: {
           blurhash: string | null
@@ -171,36 +314,7 @@ export type Database = {
           tier_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "payment_invoices_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_invoices_subscriber_id_fkey"
-            columns: ["subscriber_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_invoices_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "payment_invoices_tier_id_fkey"
-            columns: ["tier_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_tiers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       portfolio_items: {
         Row: {
@@ -233,22 +347,7 @@ export type Database = {
           title?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "portfolio_items_media_id_fkey"
-            columns: ["media_id"]
-            isOneToOne: false
-            referencedRelation: "media"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portfolio_items_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       posts: {
         Row: {
@@ -296,22 +395,7 @@ export type Database = {
           tier_required_id?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "posts_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "posts_tier_required_id_fkey"
-            columns: ["tier_required_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_tiers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       professional_profiles: {
         Row: {
@@ -371,15 +455,7 @@ export type Database = {
           user_id?: string
           visibility?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "professional_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -466,15 +542,7 @@ export type Database = {
           sort_order?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "subscription_tiers_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       subscriptions: {
         Row: {
@@ -522,29 +590,7 @@ export type Database = {
           tier_id?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_creator_id_fkey"
-            columns: ["creator_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_subscriber_id_fkey"
-            columns: ["subscriber_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "subscriptions_tier_id_fkey"
-            columns: ["tier_id"]
-            isOneToOne: false
-            referencedRelation: "subscription_tiers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       video_comments: {
         Row: {
@@ -631,22 +677,26 @@ export type Database = {
         Relationships: []
       }
     }
-    Views: {
-      [_ in never]: never
-    }
+    Views: { [_ in never]: never }
     Functions: {
       has_active_subscription: {
-        Args: {
-          fan_id: string
-          required_tier_id?: string
-          target_creator_id: string
-        }
+        Args: { fan_id: string; required_tier_id?: string; target_creator_id: string }
         Returns: boolean
       }
     }
     Enums: {
+      application_status:
+        | "pending"
+        | "viewed"
+        | "shortlisted"
+        | "accepted"
+        | "rejected"
+        | "withdrawn"
       content_provider: "creator_post" | "eporner"
+      job_location_kind: "remote" | "onsite" | "hybrid"
+      job_status: "draft" | "published" | "paused" | "expired" | "closed"
       media_kind: "image" | "video"
+      moderation_status: "pending" | "approved" | "rejected" | "flagged"
       payment_provider: "stripe" | "nowpayments"
       post_kind: "text" | "image" | "video" | "gallery"
       subscription_status:
@@ -665,14 +715,11 @@ export type Database = {
         | "brand"
         | "service_provider"
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    CompositeTypes: { [_ in never]: never }
   }
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
@@ -685,19 +732,15 @@ export type Tables<
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -713,18 +756,14 @@ export type TablesInsert<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends { Insert: infer I }
       ? I
       : never
     : never
@@ -738,18 +777,14 @@ export type TablesUpdate<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends { Update: infer U }
       ? U
       : never
     : never
@@ -763,9 +798,7 @@ export type Enums<
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
@@ -780,9 +813,7 @@ export type CompositeTypes<
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
@@ -791,8 +822,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      application_status: [
+        "pending",
+        "viewed",
+        "shortlisted",
+        "accepted",
+        "rejected",
+        "withdrawn",
+      ],
       content_provider: ["creator_post", "eporner"],
+      job_location_kind: ["remote", "onsite", "hybrid"],
+      job_status: ["draft", "published", "paused", "expired", "closed"],
       media_kind: ["image", "video"],
+      moderation_status: ["pending", "approved", "rejected", "flagged"],
       payment_provider: ["stripe", "nowpayments"],
       post_kind: ["text", "image", "video", "gallery"],
       subscription_status: [
