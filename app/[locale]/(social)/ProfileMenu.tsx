@@ -6,7 +6,6 @@ import {
   Star,
   LayoutDashboard,
   Plus,
-  Settings,
   LogOut,
   Megaphone,
   Briefcase,
@@ -46,9 +45,19 @@ type Props = {
    * Drives the "Recruiter mode" toggle in the menu.
    */
   isRecruiter?: boolean;
+  /**
+   * True when the viewer has a `professional_profiles` row. Drives
+   * the smart "Profile" menu entry: yes → /c/{handle}, no → setup.
+   */
+  hasProfessionalProfile?: boolean;
 };
 
-export default function ProfileMenu({ profile, isCreator, isRecruiter = false }: Props) {
+export default function ProfileMenu({
+  profile,
+  isCreator,
+  isRecruiter = false,
+  hasProfessionalProfile = false,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   // Apply modal trigger comes from the shell-wide provider so every
@@ -155,23 +164,28 @@ export default function ProfileMenu({ profile, isCreator, isRecruiter = false }:
             <FileText className="h-4 w-4" />
             My applications
           </Link>
+          {/* Single "Profile" entry — smart-routed:
+                 • Pro profile set up → go to the public /c/{handle}
+                 • Not set up yet     → go to the Profile editor
+              The Settings entry is gone — those fields (cover, avatar,
+              handle, display_name, bio) now live in the same editor. */}
           <Link
-            href="/app/professional/edit"
+            href={
+              hasProfessionalProfile
+                ? (`/c/${profile.handle}` as '/c/[handle]')
+                : '/app/professional/edit'
+            }
             onClick={close}
             className={itemClass}
             role="menuitem"
           >
             <Briefcase className="h-4 w-4" />
-            Professional profile
-          </Link>
-          <Link
-            href="/app/settings"
-            onClick={close}
-            className={itemClass}
-            role="menuitem"
-          >
-            <Settings className="h-4 w-4" />
-            Settings
+            Profile
+            {!hasProfessionalProfile && (
+              <span className="ml-auto rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+                Set up
+              </span>
+            )}
           </Link>
 
           {/* Recruiter-mode toggle. Visible only when the user hasn't

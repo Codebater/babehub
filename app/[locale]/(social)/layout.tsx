@@ -51,13 +51,25 @@ export default async function SocialLayout({ children }: { children: React.React
     roles: string[];
   } | null = null;
 
+  let hasProfessionalProfile = false;
   if (user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('handle, display_name, avatar_url, role, roles')
-      .eq('id', user.id)
-      .maybeSingle();
+    const [{ data }, { data: pro }] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('handle, display_name, avatar_url, role, roles')
+        .eq('id', user.id)
+        .maybeSingle(),
+      // Lightweight existence check — drives the smart Profile link in
+      // the ProfileMenu: if a pro row exists, click goes to the public
+      // /c/{handle}; otherwise it goes to /app/professional/edit setup.
+      supabase
+        .from('professional_profiles')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle(),
+    ]);
     if (data) profile = data;
+    hasProfessionalProfile = Boolean(pro);
   }
 
   const isCreator = profile?.role === 'creator';
@@ -123,6 +135,7 @@ export default async function SocialLayout({ children }: { children: React.React
             }}
             isCreator={isCreator}
             isRecruiter={isRecruiter}
+            hasProfessionalProfile={hasProfessionalProfile}
           />
         ) : (
           <div className="space-y-2 border-t border-border-color/40 pt-4">

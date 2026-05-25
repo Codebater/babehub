@@ -1,13 +1,14 @@
 import type { MetadataRoute } from 'next';
-import { seoPages } from '@/content/seoData';
 import { routing } from '@/i18n/routing';
 
 const DOMAIN = 'https://babehub.net';
 
 /**
- * Replaces the legacy sitemap.xml generation from `scripts/prerender.ts`.
- * Includes the localized home pages + every SEO slug. Each entry uses
- * `weekly` change frequency and the current ISO date as `lastModified`.
+ * Sitemap covers the localized home pages — the legacy SEO-slug
+ * pages were dropped in the Sprint-2 cleanup pass since the platform
+ * pivoted away from the funnel-landing strategy. Add more entries
+ * here as new public routes (/jobs, /creators) start carrying SEO
+ * weight.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const today = new Date();
@@ -19,12 +20,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: locale === routing.defaultLocale ? 1.0 : 0.8,
   }));
 
-  const slugEntries: MetadataRoute.Sitemap = seoPages.map((page) => ({
-    url: `${DOMAIN}/${page.slug}`,
-    lastModified: today,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }));
-
-  return [...homeEntries, ...slugEntries];
+  return homeEntries;
 }
