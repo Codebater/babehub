@@ -1,4 +1,5 @@
-import { Clapperboard } from 'lucide-react';
+import { Clapperboard, Megaphone, ArrowRight } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 
 /**
  * Section banner shown only on /explore?q=casting.
@@ -33,7 +34,7 @@ export default function CastingBanner() {
         aria-hidden
       />
 
-      <div className="relative mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="relative mt-4 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-white/60">
             <Clapperboard className="h-3.5 w-3.5" />
@@ -42,11 +43,28 @@ export default function CastingBanner() {
           <h2 className="mt-2 text-3xl font-black tracking-tight text-white sm:text-4xl md:text-5xl">
             Auditions in Session
           </h2>
-          <p className="mt-2 max-w-xl text-sm text-white/70 sm:text-base">
-            Every video below is a numbered take from an open call. Spot your
-            favorite, drop a comment, and save the ones you want to see cast
-            again.
+          <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
+            <Megaphone className="h-3.5 w-3.5" />
+            Now searching new auditions
           </p>
+          <p className="mt-3 max-w-xl text-sm text-white/70 sm:text-base">
+            Every video below is a numbered take from an open call. Want to
+            be the next take? Apply to be cast — we&apos;re reviewing
+            applications now.
+          </p>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <Link
+              href={'/#apply' as '/'}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-black uppercase tracking-widest text-white shadow-lg shadow-primary/40 transition-all hover:scale-[1.03] hover:bg-pink-400"
+            >
+              Apply to be cast
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <p className="text-xs text-white/50">
+              Two minutes · we&apos;ll reply within 48 hours
+            </p>
+          </div>
         </div>
 
         <div className="hidden shrink-0 rounded-xl border border-white/20 bg-black/60 px-4 py-3 text-right font-mono shadow-2xl backdrop-blur-sm sm:block">

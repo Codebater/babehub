@@ -85,14 +85,8 @@ export default async function SocialLayout({ children }: { children: React.React
                   <Plus className="h-5 w-5" />
                 </SidebarLink>
               )}
-              <SidebarLink href="/app/settings" label="Settings">
-                <Settings className="h-5 w-5" />
-              </SidebarLink>
             </>
           )}
-          <SidebarLink href="/" label="Marketing site">
-            <Home className="h-5 w-5" />
-          </SidebarLink>
 
           {/* ── Categories ───────────────────────────────────────────────── */}
           <div className="pt-4">
@@ -102,38 +96,51 @@ export default async function SocialLayout({ children }: { children: React.React
             <SidebarLink href="/explore?q=casting" label="Casting" matchQuery="casting">
               <Clapperboard className="h-5 w-5" />
             </SidebarLink>
+            <SidebarLink href="/" label="Marketing site">
+              <Home className="h-5 w-5" />
+            </SidebarLink>
           </div>
         </nav>
 
         {profile ? (
           <div className="border-t border-border-color/40 pt-4">
-            <Link
-              href={`/c/${profile.handle}`}
-              className="mb-3 flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-secondary"
-            >
-              <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
-                    {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+            <div className="mb-3 flex items-center gap-2">
+              <Link
+                href={`/c/${profile.handle}`}
+                className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-secondary"
+              >
+                <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
+                  {profile.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
+                      {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-sm font-bold text-text-main">
+                    {profile.display_name || profile.handle}
                   </span>
-                )}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-bold text-text-main">
-                  {profile.display_name || profile.handle}
+                  <span className="block truncate text-xs text-text-secondary">
+                    @{profile.handle}
+                  </span>
                 </span>
-                <span className="block truncate text-xs text-text-secondary">
-                  @{profile.handle}
-                </span>
-              </span>
-            </Link>
+              </Link>
+              <Link
+                href="/app/settings"
+                title="Settings"
+                aria-label="Settings"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-text-secondary transition-colors hover:bg-secondary hover:text-primary"
+              >
+                <Settings className="h-4 w-4" />
+              </Link>
+            </div>
             <form action={signOut}>
               <button
                 type="submit"
