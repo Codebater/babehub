@@ -13,15 +13,73 @@ interface BenefitsProps {
 export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
   const t = useTranslations();
 
+  // Each card gets its own banner theme matching one of the platform's
+  // section banners (Luxury / Casting / Live Cams). Distinct gradients +
+  // glow colors so the scroll-stack feels like a tour through the
+  // platform's section palettes instead of a uniform card stack.
   const benefitCards = useMemo(
     () => [
-      { id: 'income', icon: <DollarSignIcon className="w-8 h-8 text-primary" />, title: t('benefits.income.title'), description: t('benefits.income.description') },
-      { id: 'time', icon: <ClockIcon className="w-8 h-8 text-primary" />, title: t('benefits.time.title'), description: t('benefits.time.description') },
-      { id: 'growth', icon: <TrendingUpIcon className="w-8 h-8 text-primary" />, title: t('benefits.growth.title'), description: t('benefits.growth.description') },
-      { id: 'security', icon: <CheckIcon className="w-8 h-8 text-primary" strokeWidth="2" />, title: t('benefits.security.title'), description: t('benefits.security.description') },
+      {
+        id: 'income',
+        theme: 'luxury' as const,
+        icon: <DollarSignIcon className="w-8 h-8 text-amber-300" />,
+        title: t('benefits.income.title'),
+        description: t('benefits.income.description'),
+      },
+      {
+        id: 'time',
+        theme: 'casting' as const,
+        icon: <ClockIcon className="w-8 h-8 text-white" />,
+        title: t('benefits.time.title'),
+        description: t('benefits.time.description'),
+      },
+      {
+        id: 'growth',
+        theme: 'livecams' as const,
+        icon: <TrendingUpIcon className="w-8 h-8 text-red-300" />,
+        title: t('benefits.growth.title'),
+        description: t('benefits.growth.description'),
+      },
+      {
+        id: 'security',
+        theme: 'luxury' as const,
+        icon: <CheckIcon className="w-8 h-8 text-amber-300" strokeWidth="2" />,
+        title: t('benefits.security.title'),
+        description: t('benefits.security.description'),
+      },
     ],
     [t],
   );
+
+  // Tailwind class bundles per theme. Each maps to one of the section
+  // banner palettes on /explore. Background gradient + ambient glow
+  // colors + icon tile border picked to match its banner.
+  const CARD_THEMES = {
+    luxury: {
+      bg: 'bg-gradient-to-br from-black via-zinc-900 to-purple-950/60',
+      border: 'border-amber-300/20',
+      iconBg: 'bg-amber-300/10',
+      iconBorder: 'border-amber-300/30',
+      glow1: 'bg-amber-300/20',
+      glow2: 'bg-purple-500/20',
+    },
+    casting: {
+      bg: 'bg-gradient-to-br from-zinc-950 via-black to-zinc-900',
+      border: 'border-white/10',
+      iconBg: 'bg-white/10',
+      iconBorder: 'border-white/30',
+      glow1: 'bg-white/10',
+      glow2: 'bg-primary/15',
+    },
+    livecams: {
+      bg: 'bg-gradient-to-br from-black via-red-950/60 to-black',
+      border: 'border-red-500/20',
+      iconBg: 'bg-red-500/15',
+      iconBorder: 'border-red-500/30',
+      glow1: 'bg-red-500/25',
+      glow2: 'bg-red-500/15',
+    },
+  } as const;
 
   const allCards = useMemo(() => [...benefitCards, { type: 'cta' as const, id: 'cta' }], [benefitCards]);
   const numCards = allCards.length;
@@ -78,10 +136,14 @@ export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
                 const translateY = initialY + (finalY - initialY) * localProgress;
                 const scale = 1 + (finalScale - 1) * localProgress;
                 const opacity = localProgress > 0 ? 1 : 0;
+                const theme =
+                  'icon' in card ? CARD_THEMES[card.theme] : null;
                 return (
                   <div
                     key={card.id}
-                    className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40 transition-all duration-500 ease-out"
+                    className={`w-full max-w-3xl overflow-hidden rounded-3xl border shadow-2xl shadow-black/40 transition-all duration-500 ease-out ${
+                      theme ? theme.border : 'border-white/10'
+                    }`}
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -93,18 +155,23 @@ export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
                       willChange: 'transform, opacity',
                     }}
                   >
-                    {'icon' in card ? (
-                      // Benefit card — banner-style: dark gradient + soft primary
-                      // glow blob in the corner + bigger typography. Same visual
-                      // language as the Casting / Live Cams / Luxury hero banners
+                    {'icon' in card && theme ? (
+                      // Themed benefit card — luxury / casting / live cams
+                      // gradient matching the corresponding section banner
                       // on /explore.
-                      <div className="relative h-full overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-8">
+                      <div className={`relative h-full overflow-hidden rounded-3xl ${theme.bg} p-8`}>
                         <div
-                          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
+                          className={`pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full ${theme.glow1} blur-3xl`}
+                          aria-hidden
+                        />
+                        <div
+                          className={`pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full ${theme.glow2} blur-3xl`}
                           aria-hidden
                         />
                         <div className="relative flex flex-col items-start space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
-                          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm">
+                          <div
+                            className={`flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border ${theme.iconBorder} ${theme.iconBg} backdrop-blur-sm`}
+                          >
                             {card.icon}
                           </div>
                           <div>
@@ -153,29 +220,38 @@ export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
           </div>
         </div>
 
-        {/* Mobile — same banner-style cards as the desktop scroll-stack
-            so the visual language stays consistent at narrow widths. */}
+        {/* Mobile — same themed cards as the desktop scroll-stack so
+            the visual language stays consistent at narrow widths. */}
         <div className="space-y-6 md:hidden">
-          {benefitCards.map((card) => (
-            <div
-              key={card.id}
-              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-6 shadow-2xl shadow-black/40"
-            >
+          {benefitCards.map((card) => {
+            const theme = CARD_THEMES[card.theme];
+            return (
               <div
-                className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl"
-                aria-hidden
-              />
-              <div className="relative flex flex-col items-start space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
-                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm">
-                  {card.icon}
-                </div>
-                <div>
-                  <h3 className="mb-2 text-xl font-black tracking-tight text-white">{card.title}</h3>
-                  <p className="text-sm leading-relaxed text-white/70">{card.description}</p>
+                key={card.id}
+                className={`relative overflow-hidden rounded-3xl border shadow-2xl shadow-black/40 ${theme.border} ${theme.bg} p-6`}
+              >
+                <div
+                  className={`pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full ${theme.glow1} blur-3xl`}
+                  aria-hidden
+                />
+                <div
+                  className={`pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full ${theme.glow2} blur-3xl`}
+                  aria-hidden
+                />
+                <div className="relative flex flex-col items-start space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
+                  <div
+                    className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border ${theme.iconBorder} ${theme.iconBg} backdrop-blur-sm`}
+                  >
+                    {card.icon}
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-xl font-black tracking-tight text-white">{card.title}</h3>
+                    <p className="text-sm leading-relaxed text-white/70">{card.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-black via-zinc-900 to-black p-8 py-12 text-center shadow-2xl shadow-black/40">
             <div
               className="pointer-events-none absolute inset-x-0 top-0 h-3"

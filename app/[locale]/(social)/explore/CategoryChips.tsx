@@ -23,13 +23,18 @@ export default function CategoryChips() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentQ = searchParams?.get('q') ?? '';
+  // Chips always navigate to /explore?q=… regardless of current route —
+  // they're a global category switcher, not a per-page filter. Otherwise
+  // clicking Casting from /creators would push /creators?q=casting which
+  // wouldn't do anything.
+  const onExplore = pathname?.endsWith('/explore') ?? false;
+  const currentQ = onExplore ? (searchParams?.get('q') ?? '') : '';
 
   const go = (q: string) => {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
     const qs = params.toString();
-    router.push(qs ? `${pathname}?${qs}` : (pathname ?? '/explore'));
+    router.push(qs ? `/explore?${qs}` : '/explore');
   };
 
   return (
