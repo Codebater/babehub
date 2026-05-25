@@ -68,7 +68,7 @@ export default {
     }
   },
   benefits: {
-    title: 'Mehr Freiheit, mehr Einnahmen',
+    title: 'Bist du ein Talent?',
     subtitle: 'Bei Babe Hub gewinnst du deine Zeit zurück, während du dein Einkommen exponentiell steigerst. Unsere Expertise wird zu deinem unfairen Vorteil.',
     income: {
       title: 'Skaliere dein Einkommen auf 5-6 Stellen',
@@ -216,7 +216,7 @@ export default {
   marketing: {
     title_part1: 'Wir skalieren deine ',
     title_highlight: 'Präsenz',
-    subtitle: 'Wir haben unsere eigenen Strategien und Partner, um deine Inhalte und deine Präsenz zu steigern',
+    subtitle: 'Wir generieren täglich über 1.000 Seitenaufrufe und kooperieren mit Instagram-Partnerkanälen mit insgesamt über 20.000 Followern, um deine Präsenz und deine Einnahmen zu skalieren.',
     applyNow: 'Jetzt bewerben',
     joinedBy: 'dabei sind ',
     creatorsPlus: '100+ Creator',

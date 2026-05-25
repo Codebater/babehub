@@ -68,7 +68,7 @@ export default {
     }
   },
   benefits: {
-    title: 'Más Libertad, Más Ganancias',
+    title: '¿Eres un talento?',
     subtitle: 'Unirte a Babe Hub significa recuperar tu tiempo mientras creces exponencialmente tus ingresos. Nuestra experiencia se convierte en tu ventaja injusta.',
     income: {
       title: 'Escala tus Ingresos a 5-6 Cifras',
@@ -216,7 +216,7 @@ export default {
   marketing: {
     title_part1: 'Escalamos tu ',
     title_highlight: 'Presencia',
-    subtitle: 'Tenemos nuestras propias estrategias y socios para impulsar tu contenido y tu presencia',
+    subtitle: 'Generamos más de 1.000 clics de página al día y colaboramos con canales de Instagram con más de 20.000 seguidores en total para impulsar tu presencia y maximizar tus ingresos.',
     applyNow: 'Aplicar ahora',
     joinedBy: 'unido por ',
     creatorsPlus: '100 creadores +',

@@ -68,7 +68,7 @@ export default {
     }
   },
   benefits: {
-    title: 'More Freedom, More Earnings',
+    title: 'Are you a talent?',
     subtitle: 'Joining Babe Hub means reclaiming your time while exponentially growing your OnlyFans income. Our expertise becomes your unfair advantage.',
     income: {
       title: 'Scale Your Income to 5-6 Figures',
@@ -216,7 +216,7 @@ export default {
   marketing: {
     title_part1: 'We scale your ',
     title_highlight: 'Presence',
-    subtitle: 'We use data-driven marketing and exclusive partnerships to scale your OnlyFans presence and maximize your creator earnings.',
+    subtitle: 'We drive 1,000+ page clicks every day and partner with Instagram channels totalling 20,000+ followers to scale your presence and maximize your creator earnings.',
     applyNow: 'Apply Now',
     joinedBy: 'joined by ',
     creatorsPlus: '100 creators +',

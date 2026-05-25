@@ -68,7 +68,7 @@ export default {
     }
   },
   benefits: {
-    title: 'Plus de liberté, plus de revenus',
+    title: 'Êtes-vous un talent ?',
     subtitle: 'Rejoindre Babe Hub signifie récupérer votre temps tout en augmentant de manière exponentielle vos revenus. Notre expertise devient votre avantage déloyal.',
     income: {
       title: 'Augmentez vos revenus à 5-6 chiffres',
@@ -216,7 +216,7 @@ export default {
   marketing: {
     title_part1: 'Nous développons votre ',
     title_highlight: 'Présence',
-    subtitle: 'Nous avons nos propres stratégies et partenaires pour booster votre contenu et votre présence',
+    subtitle: 'Nous générons plus de 1 000 clics de page par jour et collaborons avec des canaux Instagram partenaires totalisant plus de 20 000 abonnés pour booster votre présence et maximiser vos revenus.',
     applyNow: 'Postuler maintenant',
     joinedBy: 'rejoint par ',
     creatorsPlus: '100 créateurs +',

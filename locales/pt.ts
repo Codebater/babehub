@@ -68,7 +68,7 @@ export default {
     }
   },
   benefits: {
-    title: 'Mais Liberdade, Mais Ganhos',
+    title: 'Você é um talento?',
     subtitle: 'Juntar-se à Babe Hub significa recuperar seu tempo while aumentando exponencialmente sua renda. Nossa expertise se torna sua vantagem injusta.',
     income: {
       title: 'Escale Sua Renda para 5-6 Dígitos',
@@ -216,7 +216,7 @@ export default {
   marketing: {
     title_part1: 'Nós escalamos sua ',
     title_highlight: 'Presença',
-    subtitle: 'Temos as nossas próprias estratégias e parcerias para impulsionar o seu conteúdo e a sua presença.',
+    subtitle: 'Geramos mais de 1.000 cliques por dia e fazemos parceria com canais do Instagram que somam mais de 20.000 seguidores para impulsionar a sua presença e maximizar os seus ganhos.',
     applyNow: 'Candidate-se Agora',
     joinedBy: 'Juntou-se a ',
     creatorsPlus: '100+ criadores',
