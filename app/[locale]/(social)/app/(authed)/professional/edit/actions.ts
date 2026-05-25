@@ -65,19 +65,13 @@ export async function saveProfessionalProfile(
 ): Promise<SaveProfessionalProfileResult> {
   const { user, profile, supabase } = await requireOnboarded();
 
-  // Editor now sends `hourly_rate` in whole currency units (1 = 1 EUR);
-  // multiply by 100 before persisting in professional_profiles
-  // .hourly_rate_cents. The legacy `hourly_rate_cents` field name is
-  // kept as a fallback so any in-flight draft doesn't lose its value.
+  // Editor sends `hourly_rate` in whole currency units (1 = 1 EUR);
+  // multiply by 100 before persisting in professional_profiles.hourly_rate_cents.
   const rawWhole = (formData.get('hourly_rate') as string | null)?.trim() ?? '';
-  const rawCents = (formData.get('hourly_rate_cents') as string | null)?.trim() ?? '';
   let rate: number | null = null;
   if (rawWhole) {
     const n = Number(rawWhole);
     if (Number.isFinite(n) && n >= 0) rate = Math.round(n * 100);
-  } else if (rawCents) {
-    const n = Number(rawCents);
-    if (Number.isFinite(n) && n >= 0) rate = Math.round(n);
   }
 
   const visibility = (formData.get('visibility') as string) || 'public';

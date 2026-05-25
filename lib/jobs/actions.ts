@@ -36,17 +36,10 @@ function csvToArray(raw: string, limit = 20): string[] {
   return out;
 }
 
-function parseCents(raw: string | null): number | null {
-  if (!raw) return null;
-  const n = Number(raw);
-  if (!Number.isFinite(n) || n < 0) return null;
-  return Math.round(n);
-}
-
 /**
  * Parse a whole-currency-unit input (e.g. "500" for €500) and return
- * cents (50000). Recruiters enter budgets in whole EUR/USD, the DB
- * stores cents — this is the conversion shim.
+ * cents (50000). Recruiters enter budgets in whole EUR, the DB stores
+ * cents.
  */
 function parseWholeUnitsToCents(raw: string | null): number | null {
   if (!raw) return null;
@@ -83,24 +76,14 @@ export async function createJob(formData: FormData): Promise<JobActionResult> {
       ? visibilityRaw
       : 'public';
 
-  // Composer now sends `budget_min` / `budget_max` in whole currency
-  // units (1 = 1 EUR). Multiply by 100 to land in the cents column.
-  // The legacy `budget_min_cents` / `budget_max_cents` names are kept
-  // as a fallback for any existing draft form still in flight.
-  const budgetMinRaw =
-    (formData.get('budget_min') as string | null) ??
-    (formData.get('budget_min_cents') as string | null);
-  const budgetMaxRaw =
-    (formData.get('budget_max') as string | null) ??
-    (formData.get('budget_max_cents') as string | null);
-  const usesLegacyCents =
-    !formData.get('budget_min') && !!formData.get('budget_min_cents');
-  const budget_min_cents = usesLegacyCents
-    ? parseCents(budgetMinRaw)
-    : parseWholeUnitsToCents(budgetMinRaw);
-  const budget_max_cents = usesLegacyCents
-    ? parseCents(budgetMaxRaw)
-    : parseWholeUnitsToCents(budgetMaxRaw);
+  // Composer sends `budget_min` / `budget_max` in whole currency
+  // units (1 = 1 EUR). Multiply by 100 for the cents column.
+  const budget_min_cents = parseWholeUnitsToCents(
+    (formData.get('budget_min') as string | null) ?? null,
+  );
+  const budget_max_cents = parseWholeUnitsToCents(
+    (formData.get('budget_max') as string | null) ?? null,
+  );
 
   const insertRow = {
     poster_id: user.id,

@@ -33,34 +33,6 @@ export type CreatorFeedVideo = {
   };
 };
 
-/**
- * Discriminated union the unified <VideoModal> accepts.
- *   - 'iframe' → eporner-style embed (uses <iframe src>)
- *   - 'video'  → creator-uploaded video with a signed URL (uses <video src>)
- *                Includes the creator handle so the modal can render a
- *                "View creator profile →" CTA for subscription conversion.
- */
-export type ModalPayload =
-  | {
-      kind: 'iframe';
-      embed: string;
-      title: string;
-      /** Public URL on the source platform (eporner.com). */
-      sourceUrl: string;
-      /** Eporner video id — used as content_id for the interactions table. */
-      contentId: string;
-      /** Thumbnail cached on the favorite row for the /favorites list. */
-      thumbUrl?: string;
-      /** Comma-separated keywords for the footer chip line. Optional. */
-      keywords?: string;
-    }
-  | {
-      kind: 'video';
-      src: string;
-      title: string;
-      /** posts.id — used as content_id for the interactions table. */
-      contentId: string;
-      creatorHandle: string;
-      creatorName: string;
-      thumbUrl?: string;
-    };
+// `ModalPayload` + `VideoModal` removed in Sprint 2e cleanup. Cards
+// now navigate to /v/{provider}/{contentId} instead of opening an
+// inline modal. The video-page route owns its own per-provider props.
