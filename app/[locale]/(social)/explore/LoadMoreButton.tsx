@@ -5,7 +5,9 @@ import { Loader2 } from 'lucide-react';
 import { loadMoreFeed } from './actions';
 import type { FeedVideo } from './types';
 import VideoCard from './VideoCard';
+import SponsoredSlot from './SponsoredSlot';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
+import type { PrimaryCreator } from './primary-creator';
 
 /**
  * "Load more" pagination for /explore. Holds the cursor (next page
@@ -30,16 +32,22 @@ export default function LoadMoreButton({
   query,
   showCastingNumbers = false,
   initialUsedNumbers = [],
+  primaryCreator = null,
 }: {
   initialPage: number;
   initialHasMore: boolean;
   query?: string;
   showCastingNumbers?: boolean;
   initialUsedNumbers?: number[];
+  /** Primary platform creator — used to attribute every catalog card. */
+  primaryCreator?: PrimaryCreator | null;
 }) {
   const [nextPage, setNextPage] = useState(initialPage + 1);
   const [hasMore, setHasMore] = useState(initialHasMore);
-  const [extra, setExtra] = useState<FeedVideo[]>([]);
+  // Each batch we load gets an index here, so we can splice in a
+  // sponsored-slot card between batches without re-keying the whole
+  // list when the user clicks Load more again.
+  const [batches, setBatches] = useState<FeedVideo[][]>([]);
   const [castingMap, setCastingMap] = useState<Map<string, number>>(
     () => new Map(),
   );
@@ -50,7 +58,7 @@ export default function LoadMoreButton({
   // without forcing re-renders on every assignment.
   const usedNumbersRef = useRef<Set<number>>(new Set(initialUsedNumbers));
 
-  if (!hasMore && extra.length === 0) return null;
+  if (!hasMore && batches.length === 0) return null;
 
   const onClick = () => {
     setError(null);
@@ -65,7 +73,7 @@ export default function LoadMoreButton({
             return merged;
           });
         }
-        setExtra((prev) => [...prev, ...next.videos]);
+        setBatches((prev) => [...prev, next.videos]);
         setNextPage(next.page + 1);
         setHasMore(next.hasMore);
       } catch {
@@ -76,13 +84,19 @@ export default function LoadMoreButton({
 
   return (
     <>
-      {extra.map((video) => (
-        <VideoCard
-          key={video.id}
-          video={video}
-          castingNumber={showCastingNumbers ? castingMap.get(video.id) : undefined}
-        />
-      ))}
+      {batches.flatMap((batch, batchIdx) => [
+        // Sponsored billboard above every loaded batch — "Your banner
+        // here". Spans the whole grid width via col-span-full.
+        <SponsoredSlot key={`sponsor-${batchIdx}`} />,
+        ...batch.map((video) => (
+          <VideoCard
+            key={video.id}
+            video={video}
+            castingNumber={showCastingNumbers ? castingMap.get(video.id) : undefined}
+            primaryCreator={primaryCreator}
+          />
+        )),
+      ])}
 
       {hasMore && (
         <div className="col-span-full mt-4 flex justify-center">

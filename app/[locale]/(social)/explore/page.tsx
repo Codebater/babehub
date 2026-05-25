@@ -10,6 +10,7 @@ import CastingBanner from './CastingBanner';
 import LiveCamsBanner from './LiveCamsBanner';
 import LuxuryBanner from './LuxuryBanner';
 import FeaturedSlot from './FeaturedSlot';
+import { loadPrimaryCreator } from './primary-creator';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
 
 /**
@@ -62,11 +63,12 @@ export default async function ExplorePage({ searchParams }: Props) {
   const query = q?.trim() ?? '';
 
   // Load both sources in parallel — independent of each other.
-  const [firstPage, featured] = await Promise.all([
+  const [firstPage, featured, primaryCreator] = await Promise.all([
     loadFeedPage(1, { query: query || 'all' }).catch((err: unknown) => ({
       error: err instanceof Error ? err.message : String(err),
     })),
     loadFeaturedCreatorVideos(10).catch(() => [] as Awaited<ReturnType<typeof loadFeaturedCreatorVideos>>),
+    loadPrimaryCreator().catch(() => null),
   ]);
 
   const eporneFailed = 'error' in firstPage;
@@ -182,6 +184,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                   castingNumber={
                     showCastingNumbers ? castingNumberMap.get(video.id) : undefined
                   }
+                  primaryCreator={primaryCreator}
                 />,
               );
               return items;
@@ -195,6 +198,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               initialUsedNumbers={
                 showCastingNumbers ? Array.from(castingTaken) : []
               }
+              primaryCreator={primaryCreator}
             />
           </div>
         )}

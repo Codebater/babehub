@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, ShieldCheck } from 'lucide-react';
+import { Lock, ShieldCheck, Heart } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadFullInteractionsBatch } from '@/lib/interactions/load';
@@ -71,9 +71,29 @@ async function loadProfile(handle: string) {
   const postIds = (posts ?? []).map((p) => p.id);
   const interactionsMap = await loadFullInteractionsBatch('creator_post', postIds);
 
+  // Combined likes across every published post by this creator — not
+  // just the 20 most-recent we render. Two cheap queries: list all
+  // ids, then count `video_likes` rows that target them.
+  const { data: allCreatorPosts } = await supabase
+    .from('posts')
+    .select('id')
+    .eq('creator_id', profile.id)
+    .not('published_at', 'is', null);
+  const allCreatorPostIds = (allCreatorPosts ?? []).map((p) => p.id);
+  let totalLikes = 0;
+  if (allCreatorPostIds.length > 0) {
+    const { count } = await supabase
+      .from('video_likes')
+      .select('content_id', { count: 'exact', head: true })
+      .eq('provider', 'creator_post')
+      .in('content_id', allCreatorPostIds);
+    totalLikes = count ?? 0;
+  }
+
   return {
     profile,
     tiers: tiers ?? [],
+    totalLikes,
     posts: posts ?? [],
     viewer: user,
     mediaUrlMap,
@@ -123,7 +143,7 @@ export default async function CreatorProfilePage({ params }: Props) {
   const result = await loadProfile(handle);
   if (!result) notFound();
 
-  const { profile, tiers, posts, viewer, mediaUrlMap, interactionsMap } = result;
+  const { profile, tiers, posts, viewer, mediaUrlMap, interactionsMap, totalLikes } = result;
   const isOwnProfile = viewer?.id === profile.id;
   const isCreator = profile.role === 'creator';
 
@@ -171,6 +191,17 @@ export default async function CreatorProfilePage({ params }: Props) {
                 )}
               </h1>
               <p className="text-text-secondary">@{profile.handle}</p>
+              {/* Total likes across every published post — accumulated
+                  from the video_likes table for content_id IN (all of
+                  this creator's posts), so it's the true combined number
+                  not just the visible 20-post slice. */}
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-text-secondary">
+                <Heart className="h-4 w-4 fill-red-500/30 text-red-400" />
+                <span className="font-bold text-text-main">
+                  {totalLikes.toLocaleString()}
+                </span>
+                <span>{totalLikes === 1 ? 'like' : 'likes'} across all videos</span>
+              </p>
             </div>
           </div>
 
