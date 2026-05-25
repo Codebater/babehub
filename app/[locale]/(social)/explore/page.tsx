@@ -6,6 +6,7 @@ import VideoCard from './VideoCard';
 import CreatorVideoCard from './CreatorVideoCard';
 import LoadMoreButton from './LoadMoreButton';
 import SearchBar from './SearchBar';
+import CategoryChips from './CategoryChips';
 
 /**
  * `/explore` — public video discovery feed.
@@ -75,6 +76,10 @@ export default async function ExplorePage({ searchParams }: Props) {
           Sign in
         </Link>
       </header>
+
+      <div className="mb-4">
+        <CategoryChips />
+      </div>
 
       <div className="mb-10">
         <SearchBar initialQuery={query} />

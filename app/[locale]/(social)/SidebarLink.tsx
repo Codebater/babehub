@@ -42,10 +42,23 @@ export default function SidebarLink({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  // Strip the query off `href` for pathname comparison since usePathname
-  // returns the path only. Links like "/explore?q=casting" still need to
-  // be compared against pathname === "/explore".
-  const hrefPath = href.split('?')[0];
+  // next-intl's Link expects either a string pathname OR an object
+  // { pathname, query }. If the caller passed "/explore?q=casting" as a
+  // single string, next-intl treats the literal "?q=casting" as part of
+  // the path which routes to a 404. Parse the query out and pass the
+  // object form so the route lands on /explore and the query is preserved.
+  const [hrefPath, hrefQueryString = ''] = href.split('?');
+  const hrefQuery: Record<string, string> = {};
+  if (hrefQueryString) {
+    new URLSearchParams(hrefQueryString).forEach((value, key) => {
+      hrefQuery[key] = value;
+    });
+  }
+  const linkHref =
+    Object.keys(hrefQuery).length > 0
+      ? { pathname: hrefPath as '/explore', query: hrefQuery }
+      : (hrefPath as '/explore');
+
   const currentQuery = searchParams?.get('q') ?? '';
 
   const pathMatches =
@@ -62,7 +75,7 @@ export default function SidebarLink({
   if (compact) {
     return (
       <Link
-        href={href}
+        href={linkHref}
         className={`flex flex-col items-center gap-0.5 rounded-md px-3 py-1.5 text-[10px] font-medium transition-colors ${
           isActive ? 'text-primary' : 'text-text-secondary hover:text-text-main'
         }`}
@@ -75,7 +88,7 @@ export default function SidebarLink({
 
   return (
     <Link
-      href={href}
+      href={linkHref}
       className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
         isActive
           ? 'bg-primary/10 text-primary'
