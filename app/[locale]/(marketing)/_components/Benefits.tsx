@@ -81,7 +81,7 @@ export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
                 return (
                   <div
                     key={card.id}
-                    className="w-full max-w-3xl rounded-3xl border border-border-color shadow-2xl transition-opacity duration-300"
+                    className="w-full max-w-3xl overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-black/40 transition-all duration-500 ease-out"
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -94,31 +94,56 @@ export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
                     }}
                   >
                     {'icon' in card ? (
-                      <div className="p-8 rounded-3xl bg-card h-full">
-                        <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                          <div className="flex-shrink-0 w-16 h-16 bg-secondary border border-border-color rounded-xl flex items-center justify-center">
+                      // Benefit card — banner-style: dark gradient + soft primary
+                      // glow blob in the corner + bigger typography. Same visual
+                      // language as the Casting / Live Cams / Luxury hero banners
+                      // on /explore.
+                      <div className="relative h-full overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-8">
+                        <div
+                          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
+                          aria-hidden
+                        />
+                        <div className="relative flex flex-col items-start space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
+                          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm">
                             {card.icon}
                           </div>
                           <div>
-                            <h3 className="text-2xl font-bold text-text-main mb-2">{card.title}</h3>
-                            <p className="text-text-secondary leading-relaxed">{card.description}</p>
+                            <h3 className="mb-2 text-2xl font-black tracking-tight text-white">{card.title}</h3>
+                            <p className="leading-relaxed text-white/70">{card.description}</p>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center p-8 py-16 rounded-3xl bg-secondary h-full flex flex-col justify-center">
-                        <h3 className="text-3xl font-bold text-text-main mb-4">
-                          {t('benefits.cta.title_part1')}
-                          <span className="text-primary">{t('benefits.cta.title_highlight')}</span>
-                          {t('benefits.cta.title_part2')}
-                        </h3>
-                        <p className="text-lg text-text-secondary mb-8 max-w-lg mx-auto">{t('benefits.cta.subtitle')}</p>
-                        <button
-                          onClick={onApplyClick}
-                          className="bg-primary hover:bg-pink-400 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 self-center"
-                        >
-                          {t('benefits.cta.button')}
-                        </button>
+                      // CTA card — heavier banner treatment: clapperboard-style
+                      // ribbon stripe on top + larger primary glow + the apply
+                      // button. Mirrors the casting banner on /explore?q=casting.
+                      <div className="relative flex h-full flex-col justify-center overflow-hidden rounded-3xl bg-gradient-to-br from-black via-zinc-900 to-black p-8 py-16 text-center">
+                        <div
+                          className="pointer-events-none absolute inset-x-0 top-0 h-3"
+                          style={{
+                            backgroundImage:
+                              'repeating-linear-gradient(-30deg, #ffffff 0 16px, #000000 16px 32px)',
+                          }}
+                          aria-hidden
+                        />
+                        <div
+                          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/30 blur-3xl"
+                          aria-hidden
+                        />
+                        <div className="relative">
+                          <h3 className="mb-4 text-3xl font-black tracking-tight text-white">
+                            {t('benefits.cta.title_part1')}
+                            <span className="text-primary">{t('benefits.cta.title_highlight')}</span>
+                            {t('benefits.cta.title_part2')}
+                          </h3>
+                          <p className="mx-auto mb-8 max-w-lg text-lg text-white/70">{t('benefits.cta.subtitle')}</p>
+                          <button
+                            onClick={onApplyClick}
+                            className="self-center rounded-full bg-primary px-8 py-3 font-black text-white shadow-lg shadow-primary/40 transition-all duration-300 hover:scale-105 hover:bg-pink-400"
+                          >
+                            {t('benefits.cta.button')}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -128,34 +153,56 @@ export default function Benefits({ onApplyClick, sectionRef }: BenefitsProps) {
           </div>
         </div>
 
-        {/* Mobile */}
-        <div className="space-y-8 md:hidden">
+        {/* Mobile — same banner-style cards as the desktop scroll-stack
+            so the visual language stays consistent at narrow widths. */}
+        <div className="space-y-6 md:hidden">
           {benefitCards.map((card) => (
-            <div key={card.id} className="p-6 rounded-3xl bg-card border border-border-color shadow-lg">
-              <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                <div className="flex-shrink-0 w-14 h-14 bg-secondary border border-border-color rounded-xl flex items-center justify-center">
+            <div
+              key={card.id}
+              className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-6 shadow-2xl shadow-black/40"
+            >
+              <div
+                className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl"
+                aria-hidden
+              />
+              <div className="relative flex flex-col items-start space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
+                <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-sm">
                   {card.icon}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-text-main mb-2">{card.title}</h3>
-                  <p className="text-text-secondary leading-relaxed text-sm">{card.description}</p>
+                  <h3 className="mb-2 text-xl font-black tracking-tight text-white">{card.title}</h3>
+                  <p className="text-sm leading-relaxed text-white/70">{card.description}</p>
                 </div>
               </div>
             </div>
           ))}
-          <div className="text-center p-8 py-12 rounded-3xl bg-secondary border border-border-color shadow-lg">
-            <h3 className="text-2xl font-bold text-text-main mb-4">
-              {t('benefits.cta.title_part1')}
-              <span className="text-primary">{t('benefits.cta.title_highlight')}</span>
-              {t('benefits.cta.title_part2')}
-            </h3>
-            <p className="text-md text-text-secondary mb-6 max-w-lg mx-auto">{t('benefits.cta.subtitle')}</p>
-            <button
-              onClick={onApplyClick}
-              className="bg-primary hover:bg-pink-400 text-white font-bold py-3 px-8 rounded-full transition-all duration-300 transform hover:scale-105 self-center"
-            >
-              {t('benefits.cta.button')}
-            </button>
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-black via-zinc-900 to-black p-8 py-12 text-center shadow-2xl shadow-black/40">
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-3"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(-30deg, #ffffff 0 12px, #000000 12px 24px)',
+              }}
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/30 blur-3xl"
+              aria-hidden
+            />
+            <div className="relative">
+              <h3 className="mb-4 text-2xl font-black tracking-tight text-white">
+                {t('benefits.cta.title_part1')}
+                <span className="text-primary">{t('benefits.cta.title_highlight')}</span>
+                {t('benefits.cta.title_part2')}
+              </h3>
+              <p className="text-md mx-auto mb-6 max-w-lg text-white/70">{t('benefits.cta.subtitle')}</p>
+              <button
+                onClick={onApplyClick}
+                className="self-center rounded-full bg-primary px-8 py-3 font-black text-white shadow-lg shadow-primary/40 transition-all duration-300 hover:scale-105 hover:bg-pink-400"
+              >
+                {t('benefits.cta.button')}
+              </button>
+            </div>
           </div>
         </div>
       </div>
