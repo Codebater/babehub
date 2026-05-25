@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, useTransition } from 'react';
 import {
   ChevronUp,
-  User,
   Star,
   LayoutDashboard,
   Plus,
@@ -113,15 +112,11 @@ export default function ProfileMenu({ profile, isCreator, isRecruiter = false }:
             Apply BabeHub
           </button>
 
-          <Link
-            href={`/c/${profile.handle}` as '/c/[handle]'}
-            onClick={close}
-            className={itemClass}
-            role="menuitem"
-          >
-            <User className="h-4 w-4" />
-            My profile
-          </Link>
+          {/* "My profile" entry deliberately removed — the platform has
+              a single canonical profile concept (the Professional
+              profile below). The public /c/{handle} page still exists
+              and is reachable via @-handle links / sharing, but it's
+              not duplicated as a menu item alongside the editor. */}
           <Link
             href="/favorites"
             onClick={close}

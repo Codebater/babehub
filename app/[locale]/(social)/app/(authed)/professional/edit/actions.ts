@@ -65,8 +65,20 @@ export async function saveProfessionalProfile(
 ): Promise<SaveProfessionalProfileResult> {
   const { user, profile, supabase } = await requireOnboarded();
 
-  const rawRate = (formData.get('hourly_rate_cents') as string | null)?.trim() ?? '';
-  const rate = rawRate ? Math.max(0, Math.round(Number(rawRate))) : null;
+  // Editor now sends `hourly_rate` in whole currency units (1 = 1 EUR);
+  // multiply by 100 before persisting in professional_profiles
+  // .hourly_rate_cents. The legacy `hourly_rate_cents` field name is
+  // kept as a fallback so any in-flight draft doesn't lose its value.
+  const rawWhole = (formData.get('hourly_rate') as string | null)?.trim() ?? '';
+  const rawCents = (formData.get('hourly_rate_cents') as string | null)?.trim() ?? '';
+  let rate: number | null = null;
+  if (rawWhole) {
+    const n = Number(rawWhole);
+    if (Number.isFinite(n) && n >= 0) rate = Math.round(n * 100);
+  } else if (rawCents) {
+    const n = Number(rawCents);
+    if (Number.isFinite(n) && n >= 0) rate = Math.round(n);
+  }
 
   const visibility = (formData.get('visibility') as string) || 'public';
   const collaboration_status = (formData.get('collaboration_status') as string) || 'open';
@@ -76,7 +88,7 @@ export async function saveProfessionalProfile(
     headline: ((formData.get('headline') as string) || '').trim().slice(0, 140),
     about: ((formData.get('about') as string) || '').trim().slice(0, 2000),
     hourly_rate_cents: rate,
-    currency: ((formData.get('currency') as string) || 'USD').toUpperCase().slice(0, 3),
+    currency: ((formData.get('currency') as string) || 'EUR').toUpperCase().slice(0, 3),
     region: ((formData.get('region') as string) || '').trim() || null,
     languages: csvToArray((formData.get('languages') as string) || '', { lower: true }),
     skills: csvToArray((formData.get('skills') as string) || '', { lower: true, limit: 20 }),

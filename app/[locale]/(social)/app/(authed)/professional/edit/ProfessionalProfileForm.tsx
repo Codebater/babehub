@@ -159,14 +159,22 @@ export default function ProfessionalProfileForm({
         </h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
-          <Field label="Hourly rate (cents)" hint="Optional. Set to 0 for 'negotiable'.">
+          {/* Rate input in whole currency units (1 = 1 EUR). The
+              server action multiplies by 100 before saving in
+              professional_profiles.hourly_rate_cents — users
+              shouldn't have to think in cents. */}
+          <Field label="Hourly rate" hint="Whole EUR. Optional — leave blank or 0 for 'negotiable'.">
             <input
-              name="hourly_rate_cents"
+              name="hourly_rate"
               type="number"
               min={0}
-              step={100}
-              defaultValue={defaults.hourly_rate_cents ?? ''}
-              placeholder="e.g. 10000 = $100/hr"
+              step={1}
+              defaultValue={
+                defaults.hourly_rate_cents != null
+                  ? Math.round(defaults.hourly_rate_cents / 100)
+                  : ''
+              }
+              placeholder="e.g. 100 = €100/hr"
               className={inputClass}
             />
           </Field>
@@ -175,7 +183,7 @@ export default function ProfessionalProfileForm({
               name="currency"
               type="text"
               maxLength={3}
-              defaultValue={defaults.currency}
+              defaultValue={defaults.currency || 'EUR'}
               className={inputClass}
             />
           </Field>

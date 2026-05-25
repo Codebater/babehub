@@ -44,6 +44,18 @@ function parseCents(raw: string | null): number | null {
 }
 
 /**
+ * Parse a whole-currency-unit input (e.g. "500" for €500) and return
+ * cents (50000). Recruiters enter budgets in whole EUR/USD, the DB
+ * stores cents — this is the conversion shim.
+ */
+function parseWholeUnitsToCents(raw: string | null): number | null {
+  if (!raw) return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n * 100);
+}
+
+/**
  * Create a job in 'draft' state OR create+publish in one shot if the
  * form submitted with publish=1. Returns the new row id so the
  * composer can redirect to the recruiter dashboard.
@@ -71,13 +83,32 @@ export async function createJob(formData: FormData): Promise<JobActionResult> {
       ? visibilityRaw
       : 'public';
 
+  // Composer now sends `budget_min` / `budget_max` in whole currency
+  // units (1 = 1 EUR). Multiply by 100 to land in the cents column.
+  // The legacy `budget_min_cents` / `budget_max_cents` names are kept
+  // as a fallback for any existing draft form still in flight.
+  const budgetMinRaw =
+    (formData.get('budget_min') as string | null) ??
+    (formData.get('budget_min_cents') as string | null);
+  const budgetMaxRaw =
+    (formData.get('budget_max') as string | null) ??
+    (formData.get('budget_max_cents') as string | null);
+  const usesLegacyCents =
+    !formData.get('budget_min') && !!formData.get('budget_min_cents');
+  const budget_min_cents = usesLegacyCents
+    ? parseCents(budgetMinRaw)
+    : parseWholeUnitsToCents(budgetMinRaw);
+  const budget_max_cents = usesLegacyCents
+    ? parseCents(budgetMaxRaw)
+    : parseWholeUnitsToCents(budgetMaxRaw);
+
   const insertRow = {
     poster_id: user.id,
     title,
     description: ((formData.get('description') as string) || '').trim().slice(0, 5000),
-    budget_min_cents: parseCents((formData.get('budget_min_cents') as string) ?? null),
-    budget_max_cents: parseCents((formData.get('budget_max_cents') as string) ?? null),
-    currency: ((formData.get('currency') as string) || 'USD')
+    budget_min_cents,
+    budget_max_cents,
+    currency: ((formData.get('currency') as string) || 'EUR')
       .toUpperCase()
       .slice(0, 3),
     location_kind: locationKind,

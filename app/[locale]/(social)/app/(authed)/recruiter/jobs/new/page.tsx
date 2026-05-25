@@ -107,24 +107,28 @@ export default async function NewJobPage({ searchParams }: Props) {
         </Field>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Field label="Budget min (cents)">
+          {/* Budget entered in whole currency units (1 = 1 EUR). The
+              server action multiplies by 100 before persisting in
+              jobs.budget_min_cents / budget_max_cents — recruiters
+              shouldn't have to think in cents. */}
+          <Field label="Budget min" hint="Whole EUR. e.g. 500 = €500">
             <input
-              name="budget_min_cents"
+              name="budget_min"
               type="number"
               min={0}
-              step={100}
+              step={1}
               className={inputClass}
-              placeholder="50000"
+              placeholder="500"
             />
           </Field>
-          <Field label="Budget max (cents)">
+          <Field label="Budget max" hint="Whole EUR. e.g. 2000 = €2000">
             <input
-              name="budget_max_cents"
+              name="budget_max"
               type="number"
               min={0}
-              step={100}
+              step={1}
               className={inputClass}
-              placeholder="200000"
+              placeholder="2000"
             />
           </Field>
           <Field label="Currency">
@@ -132,7 +136,7 @@ export default async function NewJobPage({ searchParams }: Props) {
               name="currency"
               type="text"
               maxLength={3}
-              defaultValue="USD"
+              defaultValue="EUR"
               className={inputClass}
             />
           </Field>
