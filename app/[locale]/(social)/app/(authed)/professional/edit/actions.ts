@@ -76,7 +76,18 @@ export async function saveProfessionalProfile(
 
   const visibility = (formData.get('visibility') as string) || 'public';
   const collaboration_status = (formData.get('collaboration_status') as string) || 'open';
-  const availability = (formData.get('availability') as string) || 'available';
+  // The slim editor (Sprint 2g) replaced the 3-option `availability`
+  // select with a single "Open for work" checkbox. When the checkbox
+  // is ticked the form sends `availability_open=1`; otherwise the
+  // field is absent. The legacy `availability` name is still
+  // accepted in case any older client posts the long-form value.
+  const availabilityCheckbox = formData.get('availability_open') === '1';
+  const availabilityLegacy = formData.get('availability') as string | null;
+  const availability = availabilityLegacy
+    ? availabilityLegacy
+    : availabilityCheckbox
+      ? 'available'
+      : 'busy';
 
   const input: ProfessionalProfileInput = {
     headline: ((formData.get('headline') as string) || '').trim().slice(0, 140),

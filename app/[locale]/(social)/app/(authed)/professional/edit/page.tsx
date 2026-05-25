@@ -44,18 +44,17 @@ export default async function ProfessionalEditPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <header className="mb-8">
+    <main className="mx-auto max-w-2xl px-6 py-10">
+      <header className="mb-6">
         <p className="text-sm text-text-secondary">
-          Your single <strong className="text-text-main">Profile</strong>{' '}
-          — cover, avatar, handle on top, professional details below.
-          Recruiters and visitors see this on your public profile.
+          Edit how you appear across Babe Hub. Keep it short — this is what
+          recruiters and visitors see.
         </p>
       </header>
 
       {/* ── Identity (former /app/settings content) ──────────────────── */}
-      <section className="space-y-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
+      <section className="space-y-6 rounded-2xl border border-border-color bg-card/40 p-5 sm:p-6">
+        <h2 className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-text-secondary">
           Identity
         </h2>
 
@@ -111,7 +110,7 @@ export default async function ProfessionalEditPage() {
       </section>
 
       {/* ── Professional (existing pro-profile editor) ───────────────── */}
-      <div className="mt-12 border-t border-border-color/40 pt-10">
+      <div className="mt-8">
         <ProfessionalProfileForm
           currentHandle={profile.handle}
           defaults={{

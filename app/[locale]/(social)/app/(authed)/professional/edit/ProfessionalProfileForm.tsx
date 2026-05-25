@@ -1,25 +1,46 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { Loader2, Save, AlertCircle, CheckCircle2, ExternalLink } from 'lucide-react';
+import {
+  Loader2,
+  Save,
+  AlertCircle,
+  CheckCircle2,
+  Briefcase,
+  MapPin,
+  Clock,
+  Eye,
+  Link2,
+} from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { saveProfessionalProfile } from './actions';
 import ChipPicker from '../../../../_components/ChipPicker';
-import { PRESET_CATEGORIES, PRESET_SKILLS, PRESET_LANGUAGES } from './chips-data';
+import { PRESET_CATEGORIES, PRESET_LANGUAGES } from './chips-data';
 
 /**
- * Client form for the professional profile editor. Renders every
- * field in a single column, posts to the `saveProfessionalProfile`
- * server action via a FormData payload.
+ * Slim, opinionated Profile editor. Trimmed in Sprint 2g from 8
+ * sections down to 4 because most of the original fields were dead
+ * weight for a casting / job marketplace:
  *
- * Skills / categories / languages are entered as comma-separated
- * strings for v1 (the server action handles trimming + deduping). A
- * chip-picker is a Phase-2-polish nice-to-have.
+ *   - Identity (cover, avatar, handle, display name, bio) lives in
+ *     the parent page above this form, powered by SettingsForm.
+ *   - "What you do"     — Categories chip picker (drives matching).
+ *   - "Where you are"   — Location + Languages.
+ *   - "Working with me" — Hourly rate + "Open for work" + visibility.
+ *   - "Links"           — Website + Instagram. The other 4 link rows
+ *                         (twitter / youtube / tiktok / linkedin) were
+ *                         pulled — Instagram is the canonical creator
+ *                         platform, a personal site is the canonical
+ *                         "real biography" link, the rest were noise.
  *
- * Portfolio CRUD is intentionally read-only here for the v1 cut — we
- * surface the existing items + a "manage portfolio" link to a future
- * dedicated /app/professional/portfolio screen. That keeps the editor
- * focused; we'll wire portfolio uploads when the dedicated screen ships.
+ * Dropped from the UI but preserved in the DB via hidden inputs so
+ * existing data isn't wiped on save: headline, about, skills,
+ * collaboration_status, and the unused link rows. New profiles get
+ * sensible empty defaults for those columns.
+ *
+ * The hidden ChipPicker for skills is gone too — categories alone are
+ * the platform's match signal; an unbounded skill cloud added cognitive
+ * load with no payoff in recruiter search.
  */
 type Defaults = {
   headline: string;
@@ -54,11 +75,12 @@ type Status =
 export default function ProfessionalProfileForm({
   currentHandle,
   defaults,
-  portfolio,
 }: {
   currentHandle: string;
   defaults: Defaults;
-  portfolio: PortfolioItem[];
+  /** Kept on the prop signature for forward-compat — the portfolio UI
+   *  itself is hidden until Phase 2 polish. */
+  portfolio?: PortfolioItem[];
 }) {
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const [pending, startTransition] = useTransition();
@@ -75,242 +97,150 @@ export default function ProfessionalProfileForm({
     });
   };
 
-  const linkRows: Array<{ key: string; label: string }> = [
-    { key: 'website', label: 'Website' },
-    { key: 'twitter', label: 'X / Twitter' },
-    { key: 'instagram', label: 'Instagram' },
-    { key: 'youtube', label: 'YouTube' },
-    { key: 'tiktok', label: 'TikTok' },
-    { key: 'linkedin', label: 'LinkedIn' },
-  ];
-
   return (
-    <form action={onSubmit} className="space-y-10">
-      {/* ── Identity ──────────────────────────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-          Identity
-        </h2>
+    <form action={onSubmit} className="space-y-8">
+      {/* Legacy fields preserved invisibly so an upsert doesn't wipe
+          existing data from the editor's pre-2g shape. */}
+      <input type="hidden" name="headline" value={defaults.headline} />
+      <input type="hidden" name="about" value={defaults.about} />
+      <input type="hidden" name="skills" value={defaults.skills.join(',')} />
+      <input
+        type="hidden"
+        name="collaboration_status"
+        value={defaults.collaboration_status}
+      />
+      {/* Carry through the link rows we no longer expose so existing
+          twitter / youtube / tiktok / linkedin URLs survive a save. */}
+      {(['twitter', 'youtube', 'tiktok', 'linkedin'] as const).map((k) => (
+        <input
+          key={k}
+          type="hidden"
+          name={`link_${k}`}
+          value={defaults.links[k] ?? ''}
+        />
+      ))}
 
-        <Field label="Headline" hint="One line — 'Lifestyle creator, EU-based, available'.">
-          <input
-            name="headline"
-            type="text"
-            maxLength={140}
-            defaultValue={defaults.headline}
-            placeholder="What you do, in one line"
-            className={inputClass}
-          />
-        </Field>
-
-        <Field label="About" hint="2-3 paragraphs. What you offer, who you work with.">
-          <textarea
-            name="about"
-            rows={5}
-            maxLength={2000}
-            defaultValue={defaults.about}
-            className={`${inputClass} resize-y`}
-          />
-        </Field>
-      </section>
-
-      {/* ── Categories & skills ───────────────────────────────────────── */}
-      <section className="space-y-6">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-          What you do
-        </h2>
-
-        {/* Pickers replaced the old comma-separated inputs — click chips
-            to toggle. Each picker stores its selection as a comma-
-            separated hidden input under the original name, so the
-            saveProfessionalProfile server-action parser is unchanged. */}
+      {/* ── What you do ───────────────────────────────────────────────── */}
+      <Section icon={Briefcase} title="What you do">
         <ChipPicker
           name="categories"
           label="Categories"
-          hint="Click to pick. These drive recruiter search + the category banners on /jobs."
+          hint="Pick up to 3 buckets that describe you best. Drives matching + the platform sidebar filters."
           presets={PRESET_CATEGORIES}
           initial={defaults.categories}
-          limit={8}
+          limit={3}
         />
+      </Section>
 
-        <ChipPicker
-          name="skills"
-          label="Skills"
-          hint="Click to pick. Add a custom skill if yours isn't listed."
-          presets={PRESET_SKILLS}
-          initial={defaults.skills}
-          limit={20}
-        />
-
-        <ChipPicker
-          name="languages"
-          label="Languages"
-          hint="Click to pick. Add a custom language if needed."
-          presets={PRESET_LANGUAGES}
-          initial={defaults.languages}
-          limit={10}
-        />
-      </section>
-
-      {/* ── Rates & availability ──────────────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-          Rates &amp; availability
-        </h2>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
-          {/* Rate input in whole currency units (1 = 1 EUR). The
-              server action multiplies by 100 before saving in
-              professional_profiles.hourly_rate_cents — users
-              shouldn't have to think in cents. */}
-          <Field label="Hourly rate" hint="Whole EUR. Optional — leave blank or 0 for 'negotiable'.">
+      {/* ── Where you are ─────────────────────────────────────────────── */}
+      <Section icon={MapPin} title="Where you are">
+        <div className="space-y-4">
+          <Field label="Location">
             <input
-              name="hourly_rate"
-              type="number"
-              min={0}
-              step={1}
-              defaultValue={
-                defaults.hourly_rate_cents != null
-                  ? Math.round(defaults.hourly_rate_cents / 100)
-                  : ''
-              }
-              placeholder="e.g. 100 = €100/hr"
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Currency">
-            <input
-              name="currency"
+              name="region"
               type="text"
-              maxLength={3}
-              defaultValue={defaults.currency || 'EUR'}
+              defaultValue={defaults.region}
+              placeholder="Berlin · Germany"
               className={inputClass}
             />
           </Field>
-        </div>
-
-        <Field label="Region" hint="City, country, or 'Remote'.">
-          <input
-            name="region"
-            type="text"
-            defaultValue={defaults.region}
-            placeholder="Berlin · Germany"
-            className={inputClass}
+          <ChipPicker
+            name="languages"
+            label="Languages you speak"
+            presets={PRESET_LANGUAGES}
+            initial={defaults.languages}
+            limit={5}
           />
-        </Field>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Collaboration">
-            <select
-              name="collaboration_status"
-              defaultValue={defaults.collaboration_status}
-              className={inputClass}
-            >
-              <option value="open">Open — accepting work</option>
-              <option value="selective">Selective — case by case</option>
-              <option value="closed">Closed — not accepting</option>
-            </select>
-          </Field>
-          <Field label="Availability">
-            <select
-              name="availability"
-              defaultValue={defaults.availability}
-              className={inputClass}
-            >
-              <option value="available">Available now</option>
-              <option value="busy">Busy — limited capacity</option>
-              <option value="unavailable">Unavailable</option>
-            </select>
-          </Field>
         </div>
-      </section>
+      </Section>
 
-      {/* ── Links ─────────────────────────────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-          Links
-        </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {linkRows.map(({ key, label }) => (
-            <Field key={key} label={label}>
+      {/* ── Working with me ───────────────────────────────────────────── */}
+      <Section icon={Clock} title="Working with me">
+        <div className="space-y-4">
+          <div className="grid grid-cols-[1fr_120px] gap-4">
+            <Field label="Hourly rate" hint="Whole EUR — leave blank if you prefer to discuss.">
               <input
-                name={`link_${key}`}
-                type="url"
-                defaultValue={defaults.links[key] ?? ''}
-                placeholder="https://…"
+                name="hourly_rate"
+                type="number"
+                min={0}
+                step={1}
+                defaultValue={
+                  defaults.hourly_rate_cents != null
+                    ? Math.round(defaults.hourly_rate_cents / 100)
+                    : ''
+                }
+                placeholder="100"
                 className={inputClass}
               />
             </Field>
-          ))}
+            <Field label="Currency">
+              <input
+                name="currency"
+                type="text"
+                maxLength={3}
+                defaultValue={defaults.currency || 'EUR'}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border-color bg-card/40 p-3">
+            <input
+              type="checkbox"
+              name="availability_open"
+              value="1"
+              defaultChecked={defaults.availability === 'available'}
+              className="mt-0.5 h-4 w-4 rounded border-border-color text-primary focus:ring-primary"
+            />
+            <span className="flex-1">
+              <span className="block text-sm font-bold text-text-main">
+                Open for work
+              </span>
+              <span className="block text-xs text-text-secondary">
+                Show recruiters you&apos;re actively taking on projects right now.
+              </span>
+            </span>
+          </label>
         </div>
-      </section>
+      </Section>
+
+      {/* ── Links ─────────────────────────────────────────────────────── */}
+      <Section icon={Link2} title="Links">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Field label="Website">
+            <input
+              name="link_website"
+              type="url"
+              defaultValue={defaults.links.website ?? ''}
+              placeholder="https://your-site.com"
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Instagram">
+            <input
+              name="link_instagram"
+              type="url"
+              defaultValue={defaults.links.instagram ?? ''}
+              placeholder="https://instagram.com/you"
+              className={inputClass}
+            />
+          </Field>
+        </div>
+      </Section>
 
       {/* ── Visibility ────────────────────────────────────────────────── */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-          Visibility
-        </h2>
+      <Section icon={Eye} title="Visibility">
         <Field label="Who can see this profile?">
-          <select
-            name="visibility"
-            defaultValue={defaults.visibility}
-            className={inputClass}
-          >
+          <select name="visibility" defaultValue={defaults.visibility} className={inputClass}>
             <option value="public">Public — anyone can see</option>
             <option value="recruiters_only">Recruiters only (signed-in users)</option>
             <option value="private">Private — only you</option>
           </select>
         </Field>
-      </section>
+      </Section>
 
-      {/* ── Portfolio (read-only stub for v1) ─────────────────────────── */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-            Portfolio ({portfolio.length})
-          </h2>
-        </div>
-        {portfolio.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-border-color bg-secondary/40 p-6 text-center text-sm text-text-secondary">
-            No portfolio items yet. The dedicated portfolio editor is shipping next
-            — for now, drop work references in the &quot;About&quot; field above.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {portfolio.map((item) => (
-              <li
-                key={item.id}
-                className="flex items-start gap-3 rounded-xl border border-border-color bg-card p-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-text-main">
-                    {item.title || 'Untitled'}
-                  </p>
-                  {item.description && (
-                    <p className="mt-0.5 line-clamp-2 text-xs text-text-secondary">
-                      {item.description}
-                    </p>
-                  )}
-                  {item.external_url && (
-                    <a
-                      href={item.external_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
-                      <ExternalLink className="h-3 w-3" />
-                      {new URL(item.external_url).hostname}
-                    </a>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {/* ── Status + submit ───────────────────────────────────────────── */}
-      <div className="sticky bottom-0 -mx-6 border-t border-border-color/40 bg-background/80 px-6 py-4 backdrop-blur">
+      {/* ── Sticky save bar ───────────────────────────────────────────── */}
+      <div className="sticky bottom-0 -mx-6 border-t border-border-color/40 bg-background/85 px-6 py-4 backdrop-blur">
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
@@ -322,7 +252,7 @@ export default function ProfessionalProfileForm({
             ) : (
               <Save className="h-4 w-4" />
             )}
-            {pending ? 'Saving…' : 'Save professional profile'}
+            {pending ? 'Saving…' : 'Save profile'}
           </button>
 
           <Link
@@ -350,11 +280,28 @@ export default function ProfessionalProfileForm({
   );
 }
 
-// Readable in light AND dark OS color schemes: explicit dark zinc
-// background + white text + bordered. The native browser controls
-// (select, textarea, number) ignore the platform's theme tokens and
-// fall back to OS colors otherwise — which is how a few inputs ended
-// up white-on-white for users on light-mode systems.
+// ── Tiny presentational helpers ──────────────────────────────────────
+
+function Section({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: typeof Briefcase;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-border-color bg-card/40 p-5 sm:p-6">
+      <h2 className="mb-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-text-secondary">
+        <Icon className="h-4 w-4 text-primary" />
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
 const inputClass =
   'w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-primary focus:outline-none [color-scheme:dark]';
 
