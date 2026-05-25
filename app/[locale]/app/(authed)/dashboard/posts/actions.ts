@@ -105,6 +105,12 @@ export async function createPost(_prev: PostState, formData: FormData): Promise<
       .eq('id', user.id)
       .single();
     if (profile?.handle) revalidatePath(`/c/${profile.handle}`);
+    // A free video post should appear in the Featured creators row on
+    // /explore immediately — bust the cache here instead of waiting for
+    // the natural revalidate TTL.
+    if (kind === 'video' && tier_required_id === null) {
+      revalidatePath('/explore');
+    }
   }
 
   redirect('/app/dashboard/posts');

@@ -1,31 +1,34 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { X, ExternalLink } from 'lucide-react';
-import type { FeedVideo } from './types';
+import { X, ExternalLink, User } from 'lucide-react';
+import Link from 'next/link';
+import type { ModalPayload } from './types';
 
 /**
- * Fullscreen-ish modal for playing an eporner video inline via iframe.
- * Closes on:
- *   - Esc key
- *   - click on the dimmed backdrop
- *   - click the explicit Close button
+ * Unified fullscreen video modal. Renders either:
+ *   - an eporner iframe player (when payload.kind === 'iframe'), or
+ *   - an HTML5 <video> player for creator-uploaded content
+ *     (payload.kind === 'video').
  *
- * Locks body scroll while open so the page underneath doesn't jump on
- * mobile. Iframe is unsandboxed because eporner's player needs same-origin
- * access for autoplay + analytics; we're trusting the embed by design.
+ * Closes on Esc, backdrop click, or the explicit Close button. Locks
+ * background scroll while open so the page underneath doesn't jump on
+ * mobile.
+ *
+ * For creator videos the header includes a "View creator profile →" CTA
+ * that links to /c/{handle} — the primary conversion path back into the
+ * subscription flow.
  */
 export default function VideoModal({
-  video,
+  payload,
   onClose,
 }: {
-  video: FeedVideo;
+  payload: ModalPayload;
   onClose: () => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Prevent background scroll while open.
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
@@ -44,7 +47,7 @@ export default function VideoModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={video.title}
+      aria-label={payload.title}
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}
@@ -53,17 +56,30 @@ export default function VideoModal({
     >
       <div className="relative w-full max-w-5xl">
         <div className="flex items-center justify-between gap-4 pb-3">
-          <h2 className="line-clamp-1 flex-1 text-sm font-medium text-white">{video.title}</h2>
+          <h2 className="line-clamp-1 flex-1 text-sm font-medium text-white">
+            {payload.title}
+          </h2>
           <div className="flex items-center gap-2">
-            <a
-              href={video.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded-full border border-white/20 px-3 py-1 text-xs text-white/80 transition-colors hover:border-white hover:text-white"
-            >
-              <ExternalLink className="h-3 w-3" />
-              Open on source
-            </a>
+            {payload.kind === 'iframe' ? (
+              <a
+                href={payload.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 rounded-full border border-white/20 px-3 py-1 text-xs text-white/80 transition-colors hover:border-white hover:text-white"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Open on source
+              </a>
+            ) : (
+              <Link
+                href={`/c/${payload.creatorHandle}`}
+                onClick={onClose}
+                className="flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-bold text-white transition-colors hover:bg-pink-400"
+              >
+                <User className="h-3 w-3" />
+                View {payload.creatorName} →
+              </Link>
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -76,18 +92,36 @@ export default function VideoModal({
         </div>
 
         <div className="aspect-video w-full overflow-hidden rounded-xl bg-black shadow-2xl">
-          <iframe
-            src={video.embed}
-            title={video.title}
-            allow="autoplay; fullscreen; encrypted-media"
-            allowFullScreen
-            className="h-full w-full border-0"
-          />
+          {payload.kind === 'iframe' ? (
+            <iframe
+              src={payload.embed}
+              title={payload.title}
+              allow="autoplay; fullscreen; encrypted-media"
+              allowFullScreen
+              className="h-full w-full border-0"
+            />
+          ) : (
+            <video
+              src={payload.src}
+              title={payload.title}
+              controls
+              autoPlay
+              playsInline
+              className="h-full w-full"
+            />
+          )}
         </div>
 
-        <p className="mt-3 line-clamp-1 text-xs text-white/50">
-          {video.keywords.split(',').slice(0, 6).map((k) => k.trim()).filter(Boolean).join(' · ')}
-        </p>
+        {payload.kind === 'iframe' && payload.keywords && (
+          <p className="mt-3 line-clamp-1 text-xs text-white/50">
+            {payload.keywords
+              .split(',')
+              .slice(0, 6)
+              .map((k) => k.trim())
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        )}
       </div>
     </div>
   );

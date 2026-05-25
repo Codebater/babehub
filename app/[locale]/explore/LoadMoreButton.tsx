@@ -11,13 +11,19 @@ import VideoCard from './VideoCard';
  * number) + accumulated videos in client state so we can append the
  * next batch without remounting the grid (preserves modal state,
  * scroll position, etc.).
+ *
+ * `query` is the current search term — pagination stays inside the
+ * same search context so "Load more" doesn't drop you back to the
+ * unfiltered latest feed.
  */
 export default function LoadMoreButton({
   initialPage,
   initialHasMore,
+  query,
 }: {
   initialPage: number;
   initialHasMore: boolean;
+  query?: string;
 }) {
   const [nextPage, setNextPage] = useState(initialPage + 1);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -31,7 +37,7 @@ export default function LoadMoreButton({
     setError(null);
     startTransition(async () => {
       try {
-        const next = await loadMoreFeed(nextPage);
+        const next = await loadMoreFeed(nextPage, { query });
         setExtra((prev) => [...prev, ...next.videos]);
         setNextPage(next.page + 1);
         setHasMore(next.hasMore);

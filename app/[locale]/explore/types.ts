@@ -12,3 +12,48 @@ export type FeedPage = {
   /** 1-indexed page number this batch represents (so the caller knows what to ask next). */
   page: number;
 };
+
+/**
+ * A creator-uploaded video post resolved with its signed playback URL.
+ * Surfaced in the "Featured creators" row above the eporner grid.
+ */
+export type CreatorFeedVideo = {
+  postId: string;
+  body: string;
+  publishedAt: string | null;
+  /** Signed Supabase Storage URL — 1h expiry, mint via getSignedMediaUrls. */
+  videoUrl: string;
+  /** Static poster, if we ever generate one. Currently null → first-frame fallback. */
+  posterUrl: string | null;
+  creator: {
+    handle: string;
+    displayName: string;
+    avatarUrl: string | null;
+    isVerified: boolean;
+  };
+};
+
+/**
+ * Discriminated union the unified <VideoModal> accepts.
+ *   - 'iframe' → eporner-style embed (uses <iframe src>)
+ *   - 'video'  → creator-uploaded video with a signed URL (uses <video src>)
+ *                Includes the creator handle so the modal can render a
+ *                "View creator profile →" CTA for subscription conversion.
+ */
+export type ModalPayload =
+  | {
+      kind: 'iframe';
+      embed: string;
+      title: string;
+      /** Public URL on the source platform (eporner.com). */
+      sourceUrl: string;
+      /** Comma-separated keywords for the footer chip line. Optional. */
+      keywords?: string;
+    }
+  | {
+      kind: 'video';
+      src: string;
+      title: string;
+      creatorHandle: string;
+      creatorName: string;
+    };

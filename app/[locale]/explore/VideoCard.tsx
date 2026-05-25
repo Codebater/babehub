@@ -3,28 +3,32 @@
 import { useState } from 'react';
 import { Play, Eye, Clock } from 'lucide-react';
 import VideoModal from './VideoModal';
-import type { FeedVideo } from './types';
+import type { FeedVideo, ModalPayload } from './types';
 
 /**
- * One video card in the /explore grid. Renders the thumbnail + duration
- * + title + view count. Click anywhere on the card opens an inline
- * modal with the eporner iframe player. Closing the modal returns to
- * the feed (no navigation, no scroll reset).
+ * One eporner video card in the /explore grid. Thumbnail + duration +
+ * title + view count. Click opens the unified VideoModal in iframe mode.
  *
- * Client component because it owns the modal-open state. Could be split
- * into a server-rendered shell + a client overlay-trigger if perf ever
- * becomes a concern, but the bundle cost is tiny.
+ * Client component because it owns the modal-open state. Pairs with
+ * CreatorVideoCard.tsx (same UX, different payload kind).
  */
 export default function VideoCard({ video }: { video: FeedVideo }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Pick the largest thumbnail available (defaulting to default_thumb).
   const thumb = video.default_thumb?.src ?? video.thumbs?.[0]?.src ?? '';
 
   const formatViews = (n: number): string => {
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
     return String(n);
+  };
+
+  const modalPayload: ModalPayload = {
+    kind: 'iframe',
+    embed: video.embed,
+    title: video.title,
+    sourceUrl: video.url,
+    keywords: video.keywords,
   };
 
   return (
@@ -45,20 +49,17 @@ export default function VideoCard({ video }: { video: FeedVideo }) {
             />
           )}
 
-          {/* Play-icon overlay on hover. */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
             <span className="rounded-full bg-primary/90 p-4 opacity-0 transition-opacity group-hover:opacity-100">
               <Play className="h-6 w-6 fill-white text-white" />
             </span>
           </div>
 
-          {/* Duration pill, bottom-right. */}
           <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white">
             <Clock className="h-3 w-3" />
             {video.length_min}
           </span>
 
-          {/* Views pill, bottom-left. */}
           <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white">
             <Eye className="h-3 w-3" />
             {formatViews(video.views)}
@@ -72,7 +73,7 @@ export default function VideoCard({ video }: { video: FeedVideo }) {
         </div>
       </button>
 
-      {isOpen && <VideoModal video={video} onClose={() => setIsOpen(false)} />}
+      {isOpen && <VideoModal payload={modalPayload} onClose={() => setIsOpen(false)} />}
     </>
   );
 }
