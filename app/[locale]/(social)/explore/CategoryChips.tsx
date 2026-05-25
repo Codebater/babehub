@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { Clapperboard, Sparkles, Radio, Gem } from 'lucide-react';
+import { Clapperboard, Radio, Gem } from 'lucide-react';
 
 /**
  * Horizontal row of one-tap category filters shown above the search bar
@@ -14,7 +14,6 @@ import { Clapperboard, Sparkles, Radio, Gem } from 'lucide-react';
  */
 
 const CATEGORIES = [
-  { label: 'All', q: '', icon: Sparkles },
   { label: 'Casting', q: 'casting', icon: Clapperboard },
   { label: 'Live Cams', q: 'live cams', icon: Radio },
   { label: 'Luxury Shoots', q: 'luxury', icon: Gem },

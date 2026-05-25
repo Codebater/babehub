@@ -31,8 +31,7 @@ export default async function OnboardingPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
       <header className="mb-8 text-center">
-        <p className="text-sm uppercase tracking-widest text-text-secondary">Welcome</p>
-        <h1 className="mt-2 text-4xl font-black tracking-tight text-text-main">
+        <h1 className="text-4xl font-black tracking-tight text-text-main">
           Set up your account
         </h1>
         <p className="mt-3 text-text-secondary">

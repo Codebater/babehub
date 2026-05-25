@@ -10,8 +10,7 @@ export default async function SettingsPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
       <header className="mb-8">
-        <p className="text-sm uppercase tracking-widest text-text-secondary">Account</p>
-        <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+        <h1 className="text-3xl font-black tracking-tight text-text-main md:text-4xl">
           Settings
         </h1>
         <p className="mt-1 text-sm text-text-secondary">

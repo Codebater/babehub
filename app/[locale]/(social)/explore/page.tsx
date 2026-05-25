@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { loadFeedPage } from './data';
 import { loadFeaturedCreatorVideos } from './creators';
 import VideoCard from './VideoCard';
@@ -50,6 +51,13 @@ type Props = {
 
 export default async function ExplorePage({ searchParams }: Props) {
   const { q } = await searchParams;
+  // The platform's default discovery surface is the Casting category.
+  // Visiting /explore without a query → redirect to /explore?q=casting
+  // so users always land on a populated section instead of generic
+  // "latest" search results.
+  if (q === undefined) {
+    redirect('/explore?q=casting');
+  }
   const query = q?.trim() ?? '';
 
   // Load both sources in parallel — independent of each other.

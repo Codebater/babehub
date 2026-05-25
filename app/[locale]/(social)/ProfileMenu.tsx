@@ -9,6 +9,7 @@ import {
   Plus,
   Settings,
   LogOut,
+  Megaphone,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { signOut } from '../app/(public)/login/actions';
@@ -71,6 +72,19 @@ export default function ProfileMenu({ profile, isCreator }: Props) {
           role="menu"
           className="animate-fade-in-up absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-2xl border border-border-color bg-card p-2 shadow-2xl shadow-black/40"
         >
+          {/* Featured: Apply BabeHub — pink primary CTA at the top of
+              the menu so creators always have one click to the Apply
+              form regardless of which page they're on. */}
+          <Link
+            href={'/#apply' as '/'}
+            onClick={close}
+            className="mb-1 flex w-full items-center gap-3 rounded-xl bg-primary px-3 py-2 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:bg-pink-400 hover:scale-[1.02]"
+            role="menuitem"
+          >
+            <Megaphone className="h-4 w-4" />
+            Apply BabeHub
+          </Link>
+
           <Link
             href={`/c/${profile.handle}` as '/c/[handle]'}
             onClick={close}

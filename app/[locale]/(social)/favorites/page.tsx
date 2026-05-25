@@ -39,8 +39,7 @@ export default async function FavoritesPage() {
     <main className="mx-auto max-w-7xl px-6 py-10">
       <header className="mb-8 flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-widest text-text-secondary">Saved</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+          <h1 className="text-3xl font-black tracking-tight text-text-main md:text-4xl">
             Favorites
           </h1>
           <p className="mt-1 text-sm text-text-secondary">
