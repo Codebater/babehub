@@ -7,6 +7,9 @@ import { Link } from '@/i18n/navigation';
  *   - Supabase Postgres (profile, posts, tiers, subscriptions, invoices)
  *   - Supabase Storage (avatars, covers, post media)
  *   - NOWPayments (crypto payment processing, no card data ever touches us)
+ *   - CCBill (future — card / SEPA payment processing)
+ *   - Airtable (application form submissions; deletable via the
+ *     /legal/delete-my-application self-service link)
  *   - eporner (third-party catalog playback; we don't get viewing logs back)
  *   - Vercel Analytics (anonymous page-view counts; no PII)
  *
@@ -61,9 +64,27 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Payment metadata:</strong> the amount, currency, and
-              status of crypto invoices you initiated. We never see your
-              card details — there are no card payments. Crypto wallet
-              addresses live on the blockchain, not in our database.
+              status of crypto invoices you initiated through our payment
+              processor. We never see your card details. Crypto wallet
+              addresses live on the blockchain, not in our database. (When
+              we enable CCBill for card / SEPA payments, billing details
+              are handled by CCBill directly — we only receive the
+              processor&apos;s transaction reference and status.)
+            </li>
+            <li>
+              <strong>Application data:</strong> if you fill out the
+              marketing Apply form, your answers (name, email, social
+              handles, country, content type, etc.) are stored in our
+              applicant tracking system (Airtable) and used to review your
+              application. You can wipe every record matching your email
+              at any time via the{' '}
+              <Link
+                href="/legal/delete-my-application"
+                className="text-primary hover:underline"
+              >
+                Delete my application
+              </Link>{' '}
+              page.
             </li>
             <li>
               <strong>Anonymous usage data:</strong> page-view counts via
@@ -88,6 +109,26 @@ export default function PrivacyPage() {
               <strong>NOWPayments</strong> — processes crypto subscription
               invoices. They receive the invoice amount, currency, and your
               email when you initiate a payment.
+            </li>
+            <li>
+              <strong>CCBill</strong> <em>(future)</em> — when card / SEPA
+              payments are enabled, CCBill will process card transactions
+              directly. They will see the billing details you enter on
+              their hosted form; we will only receive a transaction
+              reference + status. Until enabled, no data is sent to CCBill.
+            </li>
+            <li>
+              <strong>Airtable</strong> — stores application form
+              submissions (the marketing Apply survey). Each row contains
+              the answers you entered on the form. Self-service deletion
+              is available via the{' '}
+              <Link
+                href="/legal/delete-my-application"
+                className="text-primary hover:underline"
+              >
+                Delete my application
+              </Link>{' '}
+              link.
             </li>
             <li>
               <strong>Vercel</strong> — hosts and serves the application;
@@ -138,11 +179,34 @@ export default function PrivacyPage() {
           <p className="text-text-main/90">
             Depending on where you live, you have the right to access,
             correct, delete, or export your personal data, and to object
-            to certain processing. You can edit most of your data directly
-            in <Link href="/app/settings" className="text-primary hover:underline">Settings</Link>;
-            for anything else, use the contact form on the marketing site
-            and we&apos;ll respond.
+            to certain processing.
           </p>
+          <ul className="mt-3 list-disc space-y-1 pl-6 text-text-main/90">
+            <li>
+              Edit most of your account data directly in{' '}
+              <Link
+                href="/app/settings"
+                className="text-primary hover:underline"
+              >
+                Settings
+              </Link>
+              .
+            </li>
+            <li>
+              Delete every application-form record matching your email at{' '}
+              <Link
+                href="/legal/delete-my-application"
+                className="text-primary hover:underline"
+              >
+                Delete my application
+              </Link>{' '}
+              — instant, no questions asked.
+            </li>
+            <li>
+              For anything else (full account deletion, data export, etc.),
+              contact us through the marketing site and we&apos;ll respond.
+            </li>
+          </ul>
         </section>
 
         <section>

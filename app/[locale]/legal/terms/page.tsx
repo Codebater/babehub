@@ -67,16 +67,18 @@ export default function TermsPage() {
         <section>
           <h2 className="mb-2 text-xl font-bold">3. Payments</h2>
           <p className="text-text-main/90">
-            All subscriptions, tips, and other paid transactions on Babe Hub
-            are settled in <strong>cryptocurrency</strong> via our payment
-            processor (NOWPayments). By initiating a payment you accept that:
+            Subscriptions, tips, and other paid transactions on Babe Hub are
+            processed today through <strong>NOWPayments</strong> (cryptocurrency).
+            A second processor, <strong>CCBill</strong> (card and SEPA), is
+            planned for a future release and will be offered alongside crypto
+            once enabled. By initiating any payment you accept that:
           </p>
           <ul className="mt-3 list-disc space-y-1 pl-6 text-text-main/90">
             <li>
               Crypto transactions are <strong>irreversible</strong> on the
-              blockchain. <strong>No refunds</strong> are issued, except where
-              a refund is required by applicable law and we determine in our
-              sole discretion that it is warranted.
+              blockchain. <strong>No refunds</strong> are issued on crypto
+              payments, except where a refund is required by applicable law
+              and we determine in our sole discretion that it is warranted.
             </li>
             <li>
               You are responsible for picking the correct chain / asset and
@@ -86,6 +88,11 @@ export default function TermsPage() {
             <li>
               Exchange-rate volatility between invoice and confirmation is
               not Babe Hub&apos;s responsibility.
+            </li>
+            <li>
+              Card / SEPA payments (when CCBill is enabled) follow the
+              processor&apos;s own chargeback and dispute rules; Babe Hub
+              itself still does not issue voluntary refunds.
             </li>
           </ul>
         </section>
@@ -101,7 +108,30 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-xl font-bold">5. No warranty, no liability</h2>
+          <h2 className="mb-2 text-xl font-bold">5. Application data</h2>
+          <p className="text-text-main/90">
+            If you submit the marketing Apply form (creator onboarding
+            survey), we store the answers you provide — name, email, social
+            handles, country, and the other fields on the form — in our
+            applicant tracking system. We use that data exclusively to
+            review your application and to contact you about it.
+          </p>
+          <p className="mt-3 text-text-main/90">
+            You can request deletion of every application record matching
+            your email address at any time, with no questions asked, via the
+            self-service{' '}
+            <Link
+              href="/legal/delete-my-application"
+              className="text-primary hover:underline"
+            >
+              Delete my application
+            </Link>{' '}
+            link, or by contacting us through the marketing site.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-2 text-xl font-bold">6. No warranty, no liability</h2>
           <p className="text-text-main/90">
             The service is provided <strong>&quot;as is&quot;</strong>, without
             warranties of any kind. We do not guarantee uninterrupted access,
@@ -119,7 +149,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-xl font-bold">6. Acceptable use</h2>
+          <h2 className="mb-2 text-xl font-bold">7. Acceptable use</h2>
           <p className="text-text-main/90">
             You will not upload, share, or solicit content that involves
             minors, non-consenting persons, or anything that violates
@@ -130,7 +160,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-xl font-bold">7. Termination</h2>
+          <h2 className="mb-2 text-xl font-bold">8. Termination</h2>
           <p className="text-text-main/90">
             We may suspend or terminate any account, with or without notice,
             for any reason — including without limitation a violation of
@@ -141,7 +171,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-xl font-bold">8. Changes</h2>
+          <h2 className="mb-2 text-xl font-bold">9. Changes</h2>
           <p className="text-text-main/90">
             We may update these Terms from time to time. Continued use of the
             platform after a change is effective constitutes acceptance of the
@@ -151,7 +181,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-xl font-bold">9. Contact</h2>
+          <h2 className="mb-2 text-xl font-bold">10. Contact</h2>
           <p className="text-text-main/90">
             Questions about these Terms can be sent via the contact form on
             the{' '}
