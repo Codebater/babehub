@@ -85,12 +85,33 @@ export async function searchVideos(
   const url = `${SEARCH_URL}?${params.toString()}`;
 
   const res = await fetch(url, {
+    // A realistic User-Agent so eporner's edge layer doesn't reject the
+    // request as bot-traffic. Some adult APIs return empty / 403 to
+    // generic User-Agents like Node's default `node/x.y` UA.
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (compatible; BabeHub/1.0; +https://babehub.net)',
+      Accept: 'application/json',
+    },
     next: { revalidate: options.revalidateSeconds ?? 300 }, // 5 min default
   });
 
   if (!res.ok) {
-    throw new Error(`eporner search failed (${res.status}): ${await res.text()}`);
+    const errBody = await res.text();
+    console.error('[eporner] search failed', res.status, errBody.slice(0, 300));
+    throw new Error(`eporner search failed (${res.status}): ${errBody.slice(0, 200)}`);
   }
 
-  return (await res.json()) as EpornerSearchResponse;
+  const data = (await res.json()) as EpornerSearchResponse;
+  console.log(
+    '[eporner] search ok — page',
+    data.page,
+    'of',
+    data.total_pages,
+    '· videos in batch:',
+    data.videos.length,
+    '· total catalog:',
+    data.total_count,
+  );
+  return data;
 }
