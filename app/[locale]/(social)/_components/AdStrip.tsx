@@ -1,50 +1,126 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useSurveyModal } from '../SurveyModalProvider';
 
 /**
  * `<AdStrip>` — a thin, deliberately old-school "Advertisement" rail
- * that sits between content sections on public pages.
+ * that sits between content sections on public pages and **rotates
+ * through creatives every few seconds** like a 2000s banner ad.
  *
- * Design intent: it should read as a *real ad* slot — newspaper-style
- * dashed top/bottom rule, monospace "ADVERTISEMENT" eyebrow, bold
- * uppercase headline, single CTA pill — so visitors instantly clock
- * "this is the ad zone, not editorial content". When no real
- * advertiser is plugged in (current state), clicking the strip opens
- * the B2B BannerInquiryModal — i.e. the strip *itself* is the pitch.
+ * Why the rotation:
+ *   - Real banner inventory has multiple creatives in a single slot;
+ *     rotating in place gives this placeholder the same "we have ad
+ *     supply" feel even though every creative currently points back
+ *     to the BannerInquiryModal.
+ *   - Different headlines pitch different angles (reach, anonymity,
+ *     placement options, response time) — whichever lands with the
+ *     visitor at the moment they look at it.
  *
- * Why thin instead of another billboard: SponsoredSlot already
- * occupies the big-format slot on /explore. The AdStrip lives in
- * between-section gutters where a full billboard would be too noisy.
- * One line tall on mobile, two on desktop with a hint sub-line.
+ * Design intent stays "newspaper-rule strip":
+ *   - dashed top/bottom border (newspaper-rule feel)
+ *   - monospace ADVERTISEMENT eyebrow chip
+ *   - bold uppercase headline + sub line
+ *   - whole strip is one big <button> — click anywhere → opens the
+ *     B2B BannerInquiryModal until a real advertiser is plugged in.
  *
  * Variants:
- *   - 'thin'    (default) — full-bleed-feeling strip with eyebrow +
- *                            headline + sub + CTA. Use between major
- *                            sections (top of /explore, top of /jobs).
- *   - 'compact'             — single-line condensed pill, used inside
- *                            denser layouts (sidebars, sparse pages).
+ *   - 'thin'    (default) — rotating, full-bleed feel.
+ *   - 'compact'             — single-line condensed pill, static
+ *                            (rotation would be noisy in dense layouts).
  *
  * Tracking: `placement` is dropped on a data-attr so any analytics
  * layer wired in later can attribute clicks without code changes.
  */
 type Props = {
   variant?: 'thin' | 'compact';
-  headline?: string;
-  sub?: string;
+  /** Override the rotation interval (ms). Default 6000. */
+  intervalMs?: number;
   /** Identifier for the slot's location, e.g. "explore-top". */
   placement?: string;
 };
 
+type Creative = {
+  /** Tracking key for the individual creative. */
+  key: string;
+  /** Tiny eyebrow chip text. Defaults to "Advertisement". */
+  eyebrow?: string;
+  headline: string;
+  sub: string;
+  /** Optional accent shade applied to the eyebrow chip + hover halo. */
+  accent?: 'pink' | 'amber' | 'sky' | 'mono';
+};
+
+/**
+ * The default carousel — five creatives that each pitch the slot
+ * from a different angle. Stable order so SSR ↔ client first paint
+ * stays identical; rotation only starts after hydration.
+ */
+const DEFAULT_CREATIVES: Creative[] = [
+  {
+    key: 'reach',
+    headline: 'Your ad could be here',
+    sub: 'Reach every visitor on this page — pitch a slot in 60 seconds.',
+    accent: 'mono',
+  },
+  {
+    key: 'placements',
+    eyebrow: 'Inventory',
+    headline: 'Banner · Featured job · Collab',
+    sub: 'Pick one, two, or all three. Brands often combine.',
+    accent: 'pink',
+  },
+  {
+    key: 'anonymous',
+    eyebrow: 'Anonymous OK',
+    headline: 'Brand inquiries — no obligation',
+    sub: 'Email only. Reply within 48 hours.',
+    accent: 'sky',
+  },
+  {
+    key: 'placement',
+    eyebrow: 'Premium slot',
+    headline: 'Top of /explore · Top of /jobs',
+    sub: 'High-traffic placements above every grid.',
+    accent: 'amber',
+  },
+  {
+    key: 'cta',
+    eyebrow: 'Limited slots',
+    headline: 'Sponsor a placement now',
+    sub: 'A handful of slots open per month — claim yours.',
+    accent: 'pink',
+  },
+];
+
+const ACCENT_CLASS: Record<NonNullable<Creative['accent']>, { chip: string; halo: string }> = {
+  pink: {
+    chip: 'border-primary/40 bg-primary/10 text-primary',
+    halo: 'group-hover:bg-primary/[0.06]',
+  },
+  amber: {
+    chip: 'border-amber-300/40 bg-amber-300/10 text-amber-200',
+    halo: 'group-hover:bg-amber-300/[0.05]',
+  },
+  sky: {
+    chip: 'border-sky-300/40 bg-sky-300/10 text-sky-200',
+    halo: 'group-hover:bg-sky-300/[0.05]',
+  },
+  mono: {
+    chip: 'border-border-color bg-card/40 text-text-secondary',
+    halo: 'group-hover:bg-primary/[0.04]',
+  },
+};
+
 export default function AdStrip({
   variant = 'thin',
-  headline = 'Your ad could be here',
-  sub = 'Reach every visitor on this page — pitch a slot in 60 seconds.',
+  intervalMs = 6000,
   placement = 'unknown',
 }: Props) {
   const { openBanner } = useSurveyModal();
 
+  // ── Compact: static, single-line. Rotation would be noisy. ─────
   if (variant === 'compact') {
     return (
       <button
@@ -58,7 +134,7 @@ export default function AdStrip({
             Ad
           </span>
           <span className="truncate text-xs font-medium text-text-secondary group-hover:text-text-main">
-            {headline}
+            {DEFAULT_CREATIVES[0].headline}
           </span>
         </div>
         <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-secondary transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -66,33 +142,80 @@ export default function AdStrip({
     );
   }
 
-  // 'thin' — the oldschool strip. Newspaper-rule dashed dividers top
-  // and bottom, monospace eyebrow, bold uppercase headline.
+  // ── Thin: rotating banner. ─────────────────────────────────────
+  return <RotatingStrip placement={placement} intervalMs={intervalMs} onClick={openBanner} />;
+}
+
+/**
+ * Inner component handling the rotation state. Split out so we don't
+ * need useState/useEffect at all when the parent is 'compact'.
+ *
+ * The strip starts at index 0 on every render (SSR-safe — no client-
+ * only random seed leaks into the markup); the rotation timer kicks
+ * in after hydration via useEffect.
+ */
+function RotatingStrip({
+  placement,
+  intervalMs,
+  onClick,
+}: {
+  placement: string;
+  intervalMs: number;
+  onClick: () => void;
+}) {
+  const [index, setIndex] = useState(0);
+  // `fading` toggles a one-tick opacity-0 right before the swap so the
+  // creative cross-fades instead of jump-cutting. 250ms fade out → set
+  // new index → 250ms fade back in. Total 500ms transition per swap.
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    if (DEFAULT_CREATIVES.length <= 1) return;
+    const id = window.setInterval(() => {
+      setFading(true);
+      window.setTimeout(() => {
+        setIndex((i) => (i + 1) % DEFAULT_CREATIVES.length);
+        setFading(false);
+      }, 250);
+    }, intervalMs);
+    return () => window.clearInterval(id);
+  }, [intervalMs]);
+
+  const c = DEFAULT_CREATIVES[index];
+  const accent = ACCENT_CLASS[c.accent ?? 'mono'];
+
   return (
     <button
       type="button"
-      onClick={openBanner}
+      onClick={onClick}
       data-ad-placement={placement}
-      aria-label={`Sponsored slot: ${headline}`}
-      className="group relative block w-full overflow-hidden border-y border-dashed border-border-color/70 bg-card/30 py-3 text-left transition-colors hover:border-primary/50 hover:bg-primary/[0.04] sm:py-4"
+      data-ad-creative={c.key}
+      aria-label={`Sponsored slot: ${c.headline}`}
+      className={`group relative block w-full overflow-hidden border-y border-dashed border-border-color/70 bg-card/30 py-3 text-left transition-colors hover:border-primary/50 sm:py-4 ${accent.halo}`}
     >
-      <div className="flex items-center gap-3 px-4 sm:gap-5 sm:px-6">
-        <span className="hidden shrink-0 rounded-sm border border-border-color px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-text-secondary sm:inline-flex">
-          Advertisement
+      <div
+        className={`flex items-center gap-3 px-4 transition-opacity duration-300 sm:gap-5 sm:px-6 ${
+          fading ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <span
+          className={`hidden shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.25em] sm:inline-flex ${accent.chip}`}
+        >
+          {c.eyebrow ?? 'Advertisement'}
         </span>
-        <span className="inline-flex shrink-0 rounded-sm border border-border-color px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-text-secondary sm:hidden">
+        <span
+          className={`inline-flex shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] sm:hidden ${accent.chip}`}
+        >
           Ad
         </span>
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-black uppercase tracking-wide text-text-main sm:text-base">
-            {headline}
+            {c.headline}
           </p>
-          {sub && (
-            <p className="mt-0.5 hidden truncate text-xs text-text-secondary sm:block">
-              {sub}
-            </p>
-          )}
+          <p className="mt-0.5 hidden truncate text-xs text-text-secondary sm:block">
+            {c.sub}
+          </p>
         </div>
 
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-text-main/15 bg-text-main/[0.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-main transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
@@ -100,6 +223,21 @@ export default function AdStrip({
           <span className="sm:hidden">Pitch</span>
           <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
+      </div>
+
+      {/* Old-school carousel dots — bottom-right, decorative. Active
+          dot in primary pink, others muted. Visible on desktop only;
+          mobile keeps the strip clean. */}
+      <div className="pointer-events-none absolute bottom-1 right-3 hidden gap-1 sm:flex">
+        {DEFAULT_CREATIVES.map((cr, i) => (
+          <span
+            key={cr.key}
+            aria-hidden
+            className={`h-1 w-1 rounded-full transition-colors ${
+              i === index ? 'bg-primary' : 'bg-text-secondary/30'
+            }`}
+          />
+        ))}
       </div>
     </button>
   );

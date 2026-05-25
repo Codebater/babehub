@@ -113,11 +113,7 @@ export default async function JobsPage({ searchParams }: Props) {
           chips. Same shape as the /explore-top placement so brand-side
           surfaces feel like one family. */}
       <div className="mb-6">
-        <AdStrip
-          placement="jobs-top"
-          headline="Hire faster — feature your job here"
-          sub="Premium placement at the top of the board. Pitch a slot in 60 seconds."
-        />
+        <AdStrip placement="jobs-top" />
       </div>
 
       {/* Filter chips */}
