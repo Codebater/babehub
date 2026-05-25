@@ -76,17 +76,15 @@ export default async function ExplorePage({ searchParams }: Props) {
     : new Map<string, number>();
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10">
-      <header className="mb-6">
-        <p className="text-sm uppercase tracking-widest text-text-secondary">Discover</p>
-        <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
-          Explore videos
-        </h1>
-      </header>
-
-      <div className="mb-10">
+    <main className="mx-auto max-w-7xl px-6 py-6">
+      <div className="mb-6">
         <CategoryChips />
       </div>
+
+      {/* ── Category hero banners (each section "starts with the banner") ─ */}
+      {showCastingNumbers && <CastingBanner />}
+      {showLiveCamsBanner && <LiveCamsBanner />}
+      {showLuxuryBanner && <LuxuryBanner />}
 
       {/* ── Featured creators row ─────────────────────────────────────────── */}
       {featured.length > 0 && (
@@ -105,17 +103,8 @@ export default async function ExplorePage({ searchParams }: Props) {
         </section>
       )}
 
-      {/* ── Category hero banners ───────────────────────────────────────── */}
-      {showCastingNumbers && <CastingBanner />}
-      {showLiveCamsBanner && <LiveCamsBanner />}
-      {showLuxuryBanner && <LuxuryBanner />}
-
-      {/* ── Trending eporner grid ─────────────────────────────────────────── */}
+      {/* ── Eporner grid ──────────────────────────────────────────────────── */}
       <section>
-        <h2 className="mb-4 text-lg font-bold text-text-main">
-          {query ? `Results for "${query}"` : 'Trending videos'}
-        </h2>
-
         {eporneFailed ? (
           <div className="rounded-2xl border border-red-500/40 bg-red-500/5 p-8 text-center">
             <p className="text-text-main">Can&apos;t load videos right now.</p>

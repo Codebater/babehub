@@ -121,6 +121,25 @@ export default async function SocialLayout({ children }: { children: React.React
             </Link>
           </div>
         )}
+
+        {/* ── Legal footer ───────────────────────────────────────────── */}
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 px-2 text-[10px] text-text-secondary/70">
+          <Link
+            href="/legal/terms"
+            className="transition-colors hover:text-primary"
+          >
+            Terms
+          </Link>
+          <span aria-hidden>·</span>
+          <Link
+            href="/legal/privacy"
+            className="transition-colors hover:text-primary"
+          >
+            Privacy
+          </Link>
+          <span aria-hidden>·</span>
+          <span>18+ only</span>
+        </div>
       </aside>
 
       {/* ── Main content ───────────────────────────────────────────────── */}
