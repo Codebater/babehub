@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react';
 import { Loader2, Save, AlertCircle, CheckCircle2, ExternalLink } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { saveProfessionalProfile } from './actions';
+import ChipPicker from './ChipPicker';
+import { PRESET_CATEGORIES, PRESET_SKILLS, PRESET_LANGUAGES } from './chips-data';
 
 /**
  * Client form for the professional profile editor. Renders every
@@ -113,46 +115,41 @@ export default function ProfessionalProfileForm({
       </section>
 
       {/* ── Categories & skills ───────────────────────────────────────── */}
-      <section className="space-y-4">
+      <section className="space-y-6">
         <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
           What you do
         </h2>
 
-        <Field
+        {/* Pickers replaced the old comma-separated inputs — click chips
+            to toggle. Each picker stores its selection as a comma-
+            separated hidden input under the original name, so the
+            saveProfessionalProfile server-action parser is unchanged. */}
+        <ChipPicker
+          name="categories"
           label="Categories"
-          hint="Up to 8, comma-separated. e.g. casting, livecam, ugc"
-        >
-          <input
-            name="categories"
-            type="text"
-            defaultValue={defaults.categories.join(', ')}
-            placeholder="casting, livecam, luxury, ugc"
-            className={inputClass}
-          />
-        </Field>
+          hint="Click to pick. These drive recruiter search + the category banners on /jobs."
+          presets={PRESET_CATEGORIES}
+          initial={defaults.categories}
+          limit={8}
+        />
 
-        <Field
+        <ChipPicker
+          name="skills"
           label="Skills"
-          hint="Up to 20, comma-separated. Picked up by recruiter search."
-        >
-          <input
-            name="skills"
-            type="text"
-            defaultValue={defaults.skills.join(', ')}
-            placeholder="dancing, modeling, scripting"
-            className={inputClass}
-          />
-        </Field>
+          hint="Click to pick. Add a custom skill if yours isn't listed."
+          presets={PRESET_SKILLS}
+          initial={defaults.skills}
+          limit={20}
+        />
 
-        <Field label="Languages" hint="Comma-separated.">
-          <input
-            name="languages"
-            type="text"
-            defaultValue={defaults.languages.join(', ')}
-            placeholder="english, german, spanish"
-            className={inputClass}
-          />
-        </Field>
+        <ChipPicker
+          name="languages"
+          label="Languages"
+          hint="Click to pick. Add a custom language if needed."
+          presets={PRESET_LANGUAGES}
+          initial={defaults.languages}
+          limit={10}
+        />
       </section>
 
       {/* ── Rates & availability ──────────────────────────────────────── */}
