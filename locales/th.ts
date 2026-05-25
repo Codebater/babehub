@@ -12,8 +12,8 @@ export default {
   hero: {
     title: {
       more: 'เพิ่ม',
-      withBest: 'กับเอเจนซี่โมเดลที่ดีที่สุด',
-      modelAgency: 'เอเจนซี่โมเดล',
+      withBest: 'กับเอเจนซี่ผู้ใหญ่ที่ดีที่สุด',
+      modelAgency: 'เอเจนซี่ผู้ใหญ่',
     },
     word: {
       fans: 'แฟนคลับ',

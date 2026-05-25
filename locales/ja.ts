@@ -12,8 +12,8 @@ export default {
   hero: {
     title: {
       more: 'より多くの',
-      withBest: '最高のモデル事務所で',
-      modelAgency: 'モデル事務所',
+      withBest: '最高のアダルト事務所で',
+      modelAgency: 'アダルト事務所',
     },
     word: {
       fans: 'ファンを',

@@ -12,8 +12,8 @@ export default {
   hero: {
     title: {
       more: 'More',
-      withBest: 'with the best Model Agency',
-      modelAgency: 'Model Agency',
+      withBest: 'with the best Adult Agency',
+      modelAgency: 'Adult Agency',
     },
     word: {
       fans: 'Fans',
