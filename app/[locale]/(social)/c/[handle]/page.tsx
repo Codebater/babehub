@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { Lock, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
+import { loadFullInteractionsBatch } from '@/lib/interactions/load';
 import MediaTile, { type MediaItem } from '@/components/MediaTile';
+import PostInteractions from '@/components/PostInteractions';
 
 /**
  * `/c/{handle}` — public creator profile.
@@ -62,12 +64,19 @@ async function loadProfile(handle: string) {
   const mediaIds = (posts ?? []).flatMap((p) => p.media_ids ?? []);
   const mediaUrlMap = await getSignedMediaUrls(mediaIds);
 
+  // Batched: like counts + viewer's likes/favorites + top-20 comments
+  // per post + comment authors. 4 round-trips total regardless of post
+  // count, so a 20-post profile is no more expensive than a 1-post one.
+  const postIds = (posts ?? []).map((p) => p.id);
+  const interactionsMap = await loadFullInteractionsBatch('creator_post', postIds);
+
   return {
     profile,
     tiers: tiers ?? [],
     posts: posts ?? [],
     viewer: user,
     mediaUrlMap,
+    interactionsMap,
   };
 }
 
@@ -113,7 +122,7 @@ export default async function CreatorProfilePage({ params }: Props) {
   const result = await loadProfile(handle);
   if (!result) notFound();
 
-  const { profile, tiers, posts, viewer, mediaUrlMap } = result;
+  const { profile, tiers, posts, viewer, mediaUrlMap, interactionsMap } = result;
   const isOwnProfile = viewer?.id === profile.id;
   const isCreator = profile.role === 'creator';
 
@@ -260,6 +269,8 @@ export default async function CreatorProfilePage({ params }: Props) {
                   const mediaItems: MediaItem[] = (post.media_ids ?? [])
                     .map((id) => mediaUrlMap.get(id))
                     .filter((m): m is MediaItem => Boolean(m));
+                  const ix = interactionsMap.get(post.id);
+                  const firstMediaUrl = mediaItems[0]?.url ?? null;
                   return (
                     <li
                       key={post.id}
@@ -281,6 +292,22 @@ export default async function CreatorProfilePage({ params }: Props) {
                           </span>
                         )}
                       </div>
+
+                      <PostInteractions
+                        provider="creator_post"
+                        contentId={post.id}
+                        initialLikeCount={ix?.likeCount ?? 0}
+                        initialIsLiked={ix?.isLiked ?? false}
+                        initialIsFavorited={ix?.isFavorited ?? false}
+                        initialComments={ix?.comments ?? []}
+                        commentCount={ix?.commentCount ?? 0}
+                        viewerId={viewer?.id ?? null}
+                        isSignedIn={Boolean(viewer)}
+                        meta={{
+                          title: post.body?.slice(0, 80) || `Post by @${profile.handle}`,
+                          thumbUrl: firstMediaUrl,
+                        }}
+                      />
                     </li>
                   );
                 })}

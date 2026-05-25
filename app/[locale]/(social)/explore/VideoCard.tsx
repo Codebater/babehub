@@ -28,6 +28,8 @@ export default function VideoCard({ video }: { video: FeedVideo }) {
     embed: video.embed,
     title: video.title,
     sourceUrl: video.url,
+    contentId: video.id,
+    thumbUrl: thumb,
     keywords: video.keywords,
   };
 

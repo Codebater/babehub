@@ -3,11 +3,7 @@
 //
 //   - Through the MCP: invoke `generate_typescript_types` with the project id
 //     and overwrite this file with the output.
-//   - Or with the CLI:
-//       npx supabase gen types typescript --project-id gpewtvzaatcqyquogxlh > types/supabase.ts
-//
-// Do not hand-edit. Keep this file in version control so type-checks in CI
-// match the live database schema.
+//   - Manually: `supabase gen types typescript --project-id gpewtvzaatcqyquogxlh`
 
 export type Json =
   | string
@@ -18,8 +14,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -433,6 +427,90 @@ export type Database = {
           },
         ]
       }
+      video_comments: {
+        Row: {
+          body: string
+          content_id: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          provider: Database["public"]["Enums"]["content_provider"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          content_id: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          provider: Database["public"]["Enums"]["content_provider"]
+          user_id: string
+        }
+        Update: {
+          body?: string
+          content_id?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          provider?: Database["public"]["Enums"]["content_provider"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      video_favorites: {
+        Row: {
+          content_id: string
+          created_at: string
+          embed_url: string | null
+          provider: Database["public"]["Enums"]["content_provider"]
+          source_url: string | null
+          thumb_url: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          embed_url?: string | null
+          provider: Database["public"]["Enums"]["content_provider"]
+          source_url?: string | null
+          thumb_url?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          embed_url?: string | null
+          provider?: Database["public"]["Enums"]["content_provider"]
+          source_url?: string | null
+          thumb_url?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      video_likes: {
+        Row: {
+          content_id: string
+          created_at: string
+          provider: Database["public"]["Enums"]["content_provider"]
+          user_id: string
+        }
+        Insert: {
+          content_id: string
+          created_at?: string
+          provider: Database["public"]["Enums"]["content_provider"]
+          user_id: string
+        }
+        Update: {
+          content_id?: string
+          created_at?: string
+          provider?: Database["public"]["Enums"]["content_provider"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -448,6 +526,7 @@ export type Database = {
       }
     }
     Enums: {
+      content_provider: "creator_post" | "eporner"
       media_kind: "image" | "video"
       payment_provider: "stripe" | "nowpayments"
       post_kind: "text" | "image" | "video" | "gallery"
@@ -585,6 +664,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      content_provider: ["creator_post", "eporner"],
       media_kind: ["image", "video"],
       payment_provider: ["stripe", "nowpayments"],
       post_kind: ["text", "image", "video", "gallery"],

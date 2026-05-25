@@ -8,6 +8,7 @@ import {
   LogOut,
   Home,
   Clapperboard,
+  Star,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -72,6 +73,9 @@ export default async function SocialLayout({ children }: { children: React.React
             <>
               <SidebarLink href={`/c/${profile.handle}`} label="My profile">
                 <User className="h-5 w-5" />
+              </SidebarLink>
+              <SidebarLink href="/favorites" label="Favorites">
+                <Star className="h-5 w-5" />
               </SidebarLink>
               <SidebarLink href="/app/dashboard" label="Dashboard">
                 <LayoutDashboard className="h-5 w-5" />

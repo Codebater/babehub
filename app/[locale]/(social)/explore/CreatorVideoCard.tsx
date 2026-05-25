@@ -21,8 +21,10 @@ export default function CreatorVideoCard({ video }: { video: CreatorFeedVideo })
     kind: 'video',
     src: video.videoUrl,
     title: video.body || `Post by ${video.creator.displayName || video.creator.handle}`,
+    contentId: video.postId,
     creatorHandle: video.creator.handle,
     creatorName: video.creator.displayName || video.creator.handle,
+    thumbUrl: video.posterUrl ?? undefined,
   };
 
   return (

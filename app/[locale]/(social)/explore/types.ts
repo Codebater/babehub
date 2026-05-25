@@ -47,6 +47,10 @@ export type ModalPayload =
       title: string;
       /** Public URL on the source platform (eporner.com). */
       sourceUrl: string;
+      /** Eporner video id — used as content_id for the interactions table. */
+      contentId: string;
+      /** Thumbnail cached on the favorite row for the /favorites list. */
+      thumbUrl?: string;
       /** Comma-separated keywords for the footer chip line. Optional. */
       keywords?: string;
     }
@@ -54,6 +58,9 @@ export type ModalPayload =
       kind: 'video';
       src: string;
       title: string;
+      /** posts.id — used as content_id for the interactions table. */
+      contentId: string;
       creatorHandle: string;
       creatorName: string;
+      thumbUrl?: string;
     };
