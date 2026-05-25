@@ -29,10 +29,7 @@ export default async function TiersPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-text-main md:text-4xl">
-          Subscription tiers
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="text-sm text-text-secondary">
           Set the prices fans pay to subscribe to your content. You can have up to
           5 active tiers at a time. Existing subscribers stay subscribed at the
           price they signed up at.

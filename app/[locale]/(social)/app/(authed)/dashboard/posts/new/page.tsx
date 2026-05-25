@@ -23,10 +23,7 @@ export default async function NewPostPage() {
         >
           ← All posts
         </Link>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main md:text-4xl">
-          New post
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-2 text-sm text-text-secondary">
           Write something, attach images or a video, then publish public or
           tier-locked.
         </p>

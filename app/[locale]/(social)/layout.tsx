@@ -90,7 +90,7 @@ export default async function SocialLayout({ children }: { children: React.React
           >
             <Gem className="h-5 w-5" />
           </SidebarLink>
-          <SidebarLink href="/" label="Marketing site">
+          <SidebarLink href="/marketing" label="Marketing site">
             <Home className="h-5 w-5" />
           </SidebarLink>
         </nav>

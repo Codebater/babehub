@@ -54,11 +54,9 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
       <header className="mb-10">
-        <h1 className="text-3xl font-black tracking-tight text-text-main md:text-4xl">
-          Welcome, {profile.display_name || profile.handle}
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          @{profile.handle} · role:{' '}
+        <p className="text-sm text-text-secondary">
+          Signed in as <strong className="text-text-main">{profile.display_name || profile.handle}</strong>{' '}
+          · @{profile.handle} · role:{' '}
           <span className="font-medium capitalize text-primary">{profile.role}</span>
         </p>
       </header>

@@ -29,10 +29,7 @@ export default async function PostsPage() {
     <main className="mx-auto max-w-5xl px-6 py-10">
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-main md:text-4xl">
-            Your posts
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
+          <p className="text-sm text-text-secondary">
             Anything you publish without a tier is public on your profile and
             shows up on /explore. Tier-gated posts unlock for active subscribers only.
           </p>

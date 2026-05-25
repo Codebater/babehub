@@ -37,15 +37,10 @@ export default async function FavoritesPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
-      <header className="mb-8 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-text-main md:text-4xl">
-            Favorites
-          </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Everything you’ve starred — eporner videos and creator posts in one place.
-          </p>
-        </div>
+      <header className="mb-8">
+        <p className="text-sm text-text-secondary">
+          Everything you’ve starred — eporner videos and creator posts in one place.
+        </p>
       </header>
 
       {(!favorites || favorites.length === 0) ? (

@@ -31,10 +31,7 @@ export default async function EditTierPage({ params }: Props) {
         >
           ← All tiers
         </Link>
-        <h1 className="mt-2 text-3xl font-black tracking-tight text-text-main md:text-4xl">
-          Edit tier
-        </h1>
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-2 text-sm text-text-secondary">
           Changes apply to new subscriptions only. Existing subscribers stay on the
           price they originally signed up at.
         </p>
