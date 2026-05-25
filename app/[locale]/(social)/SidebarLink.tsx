@@ -72,15 +72,24 @@ export default function SidebarLink({
 
   const isActive = pathMatches && queryMatches;
 
+  // Icon wrapper: hovering the link animates the icon (scale + tilt +
+  // color shift to primary) so categories feel alive on hover. The
+  // `group` class on the outer Link enables the group-hover selectors
+  // here. Active links already glow primary; the hover effect makes
+  // every link feel interactive too.
+  const iconWrapClass =
+    'inline-flex shrink-0 transition-transform duration-200 ease-out group-hover:scale-110 group-hover:-rotate-6' +
+    (isActive ? ' text-primary' : ' group-hover:text-primary');
+
   if (compact) {
     return (
       <Link
         href={linkHref}
-        className={`flex flex-col items-center gap-0.5 rounded-md px-3 py-1.5 text-[10px] font-medium transition-colors ${
+        className={`group flex flex-col items-center gap-0.5 rounded-md px-3 py-1.5 text-[10px] font-medium transition-colors ${
           isActive ? 'text-primary' : 'text-text-secondary hover:text-text-main'
         }`}
       >
-        {children}
+        <span className={iconWrapClass}>{children}</span>
         {label}
       </Link>
     );
@@ -89,13 +98,13 @@ export default function SidebarLink({
   return (
     <Link
       href={linkHref}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+      className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
         isActive
           ? 'bg-primary/10 text-primary'
           : 'text-text-secondary hover:bg-secondary hover:text-text-main'
       }`}
     >
-      {children}
+      <span className={iconWrapClass}>{children}</span>
       {label}
     </Link>
   );

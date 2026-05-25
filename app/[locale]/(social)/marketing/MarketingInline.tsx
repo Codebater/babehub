@@ -59,8 +59,20 @@ export default function MarketingInline() {
   const open = () => setIsSurveyModalOpen(true);
   const close = () => setIsSurveyModalOpen(false);
 
+  // overflow-x-hidden + max-w-full + a `marketing-inline` namespace
+  // class on the outer wrapper.
+  //
+  // - The standalone /marketing-home was designed for a full-viewport
+  //   width. Inside the (social) shell the main column is narrower
+  //   (full viewport minus the 240px sidebar), so a couple of sections
+  //   (marquee row, gallery grids) can overflow horizontally.
+  //   `overflow-x-hidden` contains the marquee animation; `max-w-full`
+  //   tells children "you have this much room, no more."
+  // - The CSS rules below scale down a couple of sections that used
+  //   to assume a desktop-width viewport so they read comfortably in
+  //   the narrower social-shell column.
   return (
-    <div className="bg-background font-sans transition-colors duration-700">
+    <div className="marketing-inline relative w-full max-w-full overflow-x-hidden bg-background font-sans transition-colors duration-700">
       <Hero onApplyClick={open} />
       <Benefits onApplyClick={open} sectionRef={benefitsRef} />
       <MarketingDashboard onApplyClick={open} />
@@ -70,6 +82,18 @@ export default function MarketingInline() {
       <Apply onApplyClick={open} />
 
       <SurveyModal isOpen={isSurveyModalOpen} onClose={close} />
+
+      {/* Light per-section overrides that only apply inside this
+          embedded marketing view. Keeps the standalone marketing home
+          at `/` untouched. */}
+      <style>{`
+        .marketing-inline section { width: 100%; min-width: 0; }
+        .marketing-inline .container { max-width: 100%; }
+        /* The Hero's min-h-screen subtracts the bottom-tab-bar height
+           inside the embedded view so the next section is visible
+           without a forced full-screen scroll. */
+        .marketing-inline section:first-of-type { min-height: auto; padding-top: 3rem; padding-bottom: 4rem; }
+      `}</style>
     </div>
   );
 }
