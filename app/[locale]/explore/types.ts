@@ -1,25 +1,14 @@
-import type { MediaItem } from '@/components/MediaTile';
+import type { EpornerVideo } from '@/lib/eporner/client';
 
-export const PAGE_SIZE = 20;
+export const PAGE_SIZE = 24;
 
-export type FeedPost = {
-  id: string;
-  body: string;
-  kind: 'text' | 'image' | 'video' | 'gallery';
-  media_ids: string[];
-  tier_required_id: string | null;
-  published_at: string | null;
-  creator: {
-    handle: string;
-    display_name: string;
-    avatar_url: string | null;
-    is_verified: boolean;
-  };
-  mediaItems: MediaItem[];
-};
+/** Re-export so the explore subtree doesn't have to know about lib/eporner. */
+export type FeedVideo = EpornerVideo;
 
 export type FeedPage = {
-  posts: FeedPost[];
-  /** True when there might be more posts past this batch. */
+  videos: FeedVideo[];
+  /** True when there are more pages past the current one. */
   hasMore: boolean;
+  /** 1-indexed page number this batch represents (so the caller knows what to ask next). */
+  page: number;
 };

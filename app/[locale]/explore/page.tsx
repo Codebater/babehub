@@ -1,47 +1,65 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { loadFeedPage } from './data';
-import PostCard from './PostCard';
+import VideoCard from './VideoCard';
 import LoadMoreButton from './LoadMoreButton';
 
 /**
- * `/explore` — public global feed of every free post on Babe Hub.
+ * `/explore` — public video discovery feed.
  *
- * Dynamic on purpose (no SSG): new posts land here constantly, and we
- * want first-paint to reflect the latest state without revalidation
- * tricks. The query is RLS-aware via the cookie-aware Supabase client,
- * but for `/explore` the policy already filters to `tier_required_id is
- * null` so anon viewers and signed-in viewers see the same content —
- * tier-locked content stays on the creator profile only.
+ * Source: eporner v2 search API (no auth required), cached for 5 min via
+ * Next.js `fetch` revalidation. Each card opens an inline iframe modal
+ * for playback — eporner doesn't expose raw MP4 URLs, so embedding is
+ * the only path.
+ *
+ * Phase 2 idea: mix creator-posted videos from /c/{handle} into this
+ * grid (with a "Featured creators" section at the top) so subscribers
+ * can convert in the same browsing session.
  */
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Explore — Babe Hub',
   description:
-    'Discover creators on Babe Hub. Browse the latest free video and photo posts from our community of creators.',
+    'Discover videos on Babe Hub. Browse the latest and trending content from our global catalog.',
   openGraph: {
     title: 'Explore — Babe Hub',
-    description: 'Discover creators on Babe Hub.',
+    description: 'Discover videos on Babe Hub.',
     type: 'website',
   },
   alternates: { canonical: '/explore' },
 };
 
 export default async function ExplorePage() {
-  const firstPage = await loadFeedPage(0);
+  let firstPage;
+  try {
+    firstPage = await loadFeedPage(1);
+  } catch (err) {
+    return (
+      <main className="mx-auto max-w-5xl px-6 py-16">
+        <h1 className="text-2xl font-black text-text-main">Can&apos;t load videos right now</h1>
+        <p className="mt-3 text-text-secondary">
+          The video catalog API is temporarily unreachable. Please try again in a moment.
+        </p>
+        <p className="mt-2 text-xs text-text-secondary/70">
+          {err instanceof Error ? err.message : String(err)}
+        </p>
+      </main>
+    );
+  }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="mx-auto max-w-7xl px-6 py-10">
       <header className="mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-widest text-text-secondary">Discover</p>
           <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
-            Latest from our creators
+            Trending videos
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Free posts from every creator on Babe Hub. Subscribe to a creator&apos;s tier on their
-            profile to unlock their private content.
+            Browse the latest from our global video catalog. For exclusive content
+            from individual creators, visit their profile at{' '}
+            <span className="font-mono text-primary">babehub.net/c/&lt;handle&gt;</span>.
           </p>
         </div>
         <Link
@@ -52,33 +70,31 @@ export default async function ExplorePage() {
         </Link>
       </header>
 
-      {firstPage.posts.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border-color bg-secondary/40 p-12 text-center">
-          <p className="text-text-secondary">
-            No public posts yet. Be the first to publish — sign in and head to your dashboard.
-          </p>
-          <Link
-            href="/app/login"
-            className="mt-6 inline-block rounded-full bg-primary px-6 py-3 font-bold text-white transition-all hover:bg-pink-400 hover:scale-[1.02]"
-          >
-            Get started
-          </Link>
+      {firstPage.videos.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border-color bg-secondary/40 p-12 text-center text-text-secondary">
+          No videos to show right now. Try refreshing.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Video posts span 2 columns on md+ so they're the visual centerpiece. */}
-          {firstPage.posts.map((post) => (
-            <div
-              key={post.id}
-              className={post.kind === 'video' ? 'md:col-span-2' : ''}
-            >
-              <PostCard post={post} creator={post.creator} mediaItems={post.mediaItems} />
-            </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {firstPage.videos.map((video) => (
+            <VideoCard key={video.id} video={video} />
           ))}
 
-          <LoadMoreButton initialOffset={firstPage.posts.length} initialHasMore={firstPage.hasMore} />
+          <LoadMoreButton
+            initialPage={firstPage.page}
+            initialHasMore={firstPage.hasMore}
+          />
         </div>
       )}
+
+      {/* Compliance / context footer */}
+      <footer className="mt-12 border-t border-border-color/40 pt-6 text-xs text-text-secondary">
+        <p>
+          Videos sourced from the public eporner.com catalog via their official API.
+          By browsing, you confirm you are 18+ and that adult content is legal in
+          your jurisdiction.
+        </p>
+      </footer>
     </main>
   );
 }

@@ -3,28 +3,25 @@
 import { useState, useTransition } from 'react';
 import { Loader2 } from 'lucide-react';
 import { loadMoreFeed } from './actions';
-import type { FeedPost } from './types';
-import PostCard from './PostCard';
+import type { FeedVideo } from './types';
+import VideoCard from './VideoCard';
 
 /**
- * "Load more" pagination for /explore. Keeps the cursor + accumulated
- * posts in client state so we can append without remounting the entire
- * feed (preserves video playback positions, scroll position, etc.).
- *
- * We split the feed visually: video-only posts go in a full-width row,
- * everything else in a 2-col grid. The split is applied per page so new
- * batches mix in naturally.
+ * "Load more" pagination for /explore. Holds the cursor (next page
+ * number) + accumulated videos in client state so we can append the
+ * next batch without remounting the grid (preserves modal state,
+ * scroll position, etc.).
  */
 export default function LoadMoreButton({
-  initialOffset,
+  initialPage,
   initialHasMore,
 }: {
-  initialOffset: number;
+  initialPage: number;
   initialHasMore: boolean;
 }) {
-  const [offset, setOffset] = useState(initialOffset);
+  const [nextPage, setNextPage] = useState(initialPage + 1);
   const [hasMore, setHasMore] = useState(initialHasMore);
-  const [extra, setExtra] = useState<FeedPost[]>([]);
+  const [extra, setExtra] = useState<FeedVideo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -34,25 +31,20 @@ export default function LoadMoreButton({
     setError(null);
     startTransition(async () => {
       try {
-        const next = await loadMoreFeed(offset);
-        setExtra((prev) => [...prev, ...next.posts]);
-        setOffset(offset + next.posts.length);
+        const next = await loadMoreFeed(nextPage);
+        setExtra((prev) => [...prev, ...next.videos]);
+        setNextPage(next.page + 1);
         setHasMore(next.hasMore);
       } catch {
-        setError('Could not load more posts. Try again?');
+        setError('Could not load more videos. Try again?');
       }
     });
   };
 
   return (
     <>
-      {extra.map((post) => (
-        <div
-          key={post.id}
-          className={post.kind === 'video' ? 'md:col-span-2' : ''}
-        >
-          <PostCard post={post} creator={post.creator} mediaItems={post.mediaItems} />
-        </div>
+      {extra.map((video) => (
+        <VideoCard key={video.id} video={video} />
       ))}
 
       {hasMore && (
@@ -64,7 +56,7 @@ export default function LoadMoreButton({
             className="flex items-center gap-2 rounded-full border border-border-color px-6 py-3 text-sm font-medium text-text-main transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
           >
             {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-            {pending ? 'Loading…' : 'Load more'}
+            {pending ? 'Loading…' : 'Load more videos'}
           </button>
         </div>
       )}
