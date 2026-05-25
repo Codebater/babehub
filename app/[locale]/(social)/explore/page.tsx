@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { loadFeedPage } from './data';
 import { loadFeaturedCreatorVideos } from './creators';
 import VideoCard from './VideoCard';
 import CreatorVideoCard from './CreatorVideoCard';
 import LoadMoreButton from './LoadMoreButton';
-import SearchBar from './SearchBar';
 import CategoryChips from './CategoryChips';
 import CastingBanner from './CastingBanner';
+import LiveCamsBanner from './LiveCamsBanner';
+import LuxuryBanner from './LuxuryBanner';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
 
 /**
@@ -62,11 +62,14 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   const eporneFailed = 'error' in firstPage;
 
-  // Only show casting-slate numbers when the user is on the casting view.
-  // We compute the first batch's numbers server-side here; the
-  // LoadMoreButton continues numbering on the client with the same
-  // helper, threading the used-set so no two cards share a number.
-  const showCastingNumbers = query.toLowerCase() === 'casting';
+  // Each category gets its own treatment. Switching on the lowercased
+  // query keeps it case-insensitive and accident-proof against trailing
+  // whitespace (already trimmed above).
+  const queryKey = query.toLowerCase();
+  const showCastingNumbers = queryKey === 'casting';
+  const showLiveCamsBanner = queryKey === 'live cams';
+  const showLuxuryBanner = queryKey === 'luxury';
+
   const castingTaken = new Set<number>();
   const castingNumberMap = showCastingNumbers && !eporneFailed
     ? assignCastingNumbers(firstPage.videos, castingTaken)
@@ -74,27 +77,15 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-widest text-text-secondary">Discover</p>
-          <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
-            {query ? `Search: ${query}` : 'Explore videos'}
-          </h1>
-        </div>
-        <Link
-          href="/app/login"
-          className="hidden shrink-0 rounded-full border border-primary px-4 py-2 text-sm font-bold text-primary transition-colors hover:bg-primary hover:text-white sm:inline-flex"
-        >
-          Sign in
-        </Link>
+      <header className="mb-6">
+        <p className="text-sm uppercase tracking-widest text-text-secondary">Discover</p>
+        <h1 className="mt-1 text-3xl font-black tracking-tight text-text-main md:text-4xl">
+          Explore videos
+        </h1>
       </header>
 
-      <div className="mb-4">
-        <CategoryChips />
-      </div>
-
       <div className="mb-10">
-        <SearchBar initialQuery={query} />
+        <CategoryChips />
       </div>
 
       {/* ── Featured creators row ─────────────────────────────────────────── */}
@@ -114,8 +105,10 @@ export default async function ExplorePage({ searchParams }: Props) {
         </section>
       )}
 
-      {/* ── Casting hero banner (only on /explore?q=casting) ────────────── */}
+      {/* ── Category hero banners ───────────────────────────────────────── */}
       {showCastingNumbers && <CastingBanner />}
+      {showLiveCamsBanner && <LiveCamsBanner />}
+      {showLuxuryBanner && <LuxuryBanner />}
 
       {/* ── Trending eporner grid ─────────────────────────────────────────── */}
       <section>
