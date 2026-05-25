@@ -9,6 +9,8 @@ import {
   Home,
   Clapperboard,
   Star,
+  Radio,
+  Gem,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -95,6 +97,20 @@ export default async function SocialLayout({ children }: { children: React.React
             </p>
             <SidebarLink href="/explore?q=casting" label="Casting" matchQuery="casting">
               <Clapperboard className="h-5 w-5" />
+            </SidebarLink>
+            <SidebarLink
+              href="/explore?q=live%20cams"
+              label="Live Cams"
+              matchQuery="live cams"
+            >
+              <Radio className="h-5 w-5" />
+            </SidebarLink>
+            <SidebarLink
+              href="/explore?q=luxury"
+              label="Luxury Shoots"
+              matchQuery="luxury"
+            >
+              <Gem className="h-5 w-5" />
             </SidebarLink>
             <SidebarLink href="/" label="Marketing site">
               <Home className="h-5 w-5" />
