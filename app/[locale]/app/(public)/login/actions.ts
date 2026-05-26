@@ -25,6 +25,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export async function sendMagicLink(_prev: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  // Optional `next` lets a dedicated login surface (e.g. /app/admin/login)
+  // route the post-auth visitor to a specific destination. Falls back to
+  // the callback's default (/explore) when absent. Server-side
+  // open-redirect defense lives in /auth/callback, so we don't sanitize
+  // here; we just forward what we got.
+  const next = String(formData.get('next') ?? '').trim();
 
   if (!email || !EMAIL_RE.test(email)) {
     return { error: 'Please enter a valid email address.', email };
@@ -32,11 +38,14 @@ export async function sendMagicLink(_prev: LoginState, formData: FormData): Prom
 
   const supabase = await createClient();
   const origin = await getRequestOrigin();
+  const redirectUrl = next
+    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${origin}/auth/callback`;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      emailRedirectTo: redirectUrl,
       // shouldCreateUser=true is the default: first-time email creates an
       // account and triggers `handle_new_user` (auto-profile creation).
       shouldCreateUser: true,
@@ -67,14 +76,18 @@ export async function sendMagicLink(_prev: LoginState, formData: FormData): Prom
  * Requires: Google OAuth client configured in Supabase Auth → Providers.
  * Without that, this call returns an error and we bounce back to /app/login.
  */
-export async function signInWithGoogle(): Promise<void> {
+export async function signInWithGoogle(formData?: FormData): Promise<void> {
   const supabase = await createClient();
   const origin = await getRequestOrigin();
+  const next = formData ? String(formData.get('next') ?? '').trim() : '';
+  const redirectTo = next
+    ? `${origin}/auth/callback?next=${encodeURIComponent(next)}`
+    : `${origin}/auth/callback`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo,
     },
   });
 

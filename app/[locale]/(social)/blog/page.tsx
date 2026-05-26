@@ -1,7 +1,16 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { Calendar, Clock, ArrowRight, BookOpen } from 'lucide-react';
-import { getAllPostsByDate } from '@/lib/blog/posts';
+import { Calendar, Clock, ArrowRight, BookOpen, Briefcase, Sparkles } from 'lucide-react';
+import { loadAllBlogPosts } from '@/lib/blog/db';
+import { createClient } from '@/lib/supabase/server';
+import { loadFeaturedJobs } from '@/lib/jobs/featured';
+
+// Switched from `force-dynamic` to ISR (5-minute revalidate) — blog
+// posts change at most a few times a day. Cached HTML serves every
+// subsequent visitor within the window; admin-published posts surface
+// in the next render after the window expires. Big perf win without
+// losing the "publish now → live within minutes" guarantee.
+export const revalidate = 300;
 
 /**
  * `/blog` — public blog index. Server-rendered, static-friendly
@@ -32,9 +41,40 @@ function formatDate(iso: string): string {
   });
 }
 
-export default function BlogIndexPage() {
-  const posts = getAllPostsByDate();
+// Real featured jobs only — each card links to /jobs/{id} so the
+// reader lands on the detail page and can apply. Showcase demos were
+// dropped because they're not real DB rows and couldn't deep-link to
+// a specific job. Once the catalog is small the row just renders
+// fewer cards; once it grows past 6 the highest-budget jobs auto-fill
+// the slots that admin manual picks don't claim.
+type FeaturedJobItem = {
+  id: string;
+  date: string;
+  title: string;
+  href: string;
+};
+
+async function loadFeaturedJobsForBlog(): Promise<FeaturedJobItem[]> {
+  const supabase = await createClient();
+  const real = await loadFeaturedJobs(supabase, 6);
+  return real
+    .filter((j) => j.published_at)
+    .map((j) => ({
+      id: j.id,
+      date: j.published_at!.slice(0, 10),
+      title: j.title,
+      href: `/jobs/${j.id}`,
+    }))
+    .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+export default async function BlogIndexPage() {
+  // Merged DB + static registry. Admin-published rows show up alongside
+  // hand-crafted launch posts; DB rows with a matching slug override
+  // their static counterparts (the admin's edits win).
+  const posts = await loadAllBlogPosts();
   const [featured, ...rest] = posts;
+  const featuredJobs = await loadFeaturedJobsForBlog();
 
   // JSON-LD Blog schema — tells Google + Bing this is a publication
   // hub with N articles. Each article gets its own BlogPosting on its
@@ -118,6 +158,51 @@ export default function BlogIndexPage() {
               </span>
             </div>
           </Link>
+
+          {/* ── Featured jobs row ──────────────────────────────────
+              Brands paying for `featured_until` slots get a card on
+              the blog index too — the same entries the sidebar
+              calendar surfaces in amber. Doubles the visibility for
+              the same fee, and gives blog readers a parallel surface
+              into the marketplace without leaving the page. */}
+          {featuredJobs.length > 0 && (
+            <section className="mt-10">
+              <div className="mb-4 flex items-baseline justify-between">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-text-secondary">
+                  Featured jobs this month
+                </h2>
+                <Link
+                  href="/jobs"
+                  className="text-xs font-bold uppercase tracking-widest text-amber-300 hover:underline"
+                >
+                  See all →
+                </Link>
+              </div>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {featuredJobs.slice(0, 6).map((job) => (
+                  <li key={job.id}>
+                    <Link
+                      href={job.href as never}
+                      className="group flex h-full flex-col rounded-2xl border border-amber-400/20 bg-gradient-to-br from-card to-amber-950/10 p-5 transition-all hover:border-amber-400/50 hover:scale-[1.01]"
+                    >
+                      <p className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+                        <Briefcase className="h-3 w-3" />
+                        Featured job · {formatDate(job.date)}
+                      </p>
+                      <h3 className="mt-2 text-base font-bold leading-snug text-text-main transition-colors group-hover:text-amber-200">
+                        {job.title}
+                      </h3>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs text-text-secondary opacity-0 transition-opacity group-hover:opacity-100">
+                        <Sparkles className="h-3 w-3 text-amber-300" />
+                        View on the jobs board
+                        <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* ── Rest of the catalog ────────────────────────────── */}
           {rest.length > 0 && (

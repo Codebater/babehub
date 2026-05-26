@@ -1,31 +1,24 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * B2B "Sponsored banner / featured job / collab" inquiry endpoint.
  *
- * Twin of `/api/survey`, but writes to a different Airtable table so
- * brand leads don't pollute the creator-applicant table. Uses the same
- * Airtable base + API key (single source of truth for inquiries) but a
- * different table:
+ * Primary path: writes to `public.banner_inquiries` (Supabase). Admin
+ * /app/admin/inquiries reads from this table.
  *
- *   - AIRTABLE_BANNER_TABLE (preferred)
- *   - AIRTABLE_BANNER_TABLE_ID (alternate name)
- *   - falls back to "B2B Inquiries"
+ * Fallback path: optional Airtable mirror when AIRTABLE_API_KEY +
+ * AIRTABLE_BANNER_TABLE are both set. Lets the team migrate gradually.
  *
- * Anonymous-friendly: only `email` is required (we need a way to
- * reply). Company, name, website, budget, message, telegram are all
- * optional and persisted as empty strings when omitted.
+ * Anonymous-friendly: only `email` is required. Company / name /
+ * website / budget / timeline / message all optional. Signed-in
+ * submitters get linked via user_id.
  */
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 type BannerInquiryBody = {
-  /**
-   * Multi-select array — brands can pick one, two, or all three of
-   * banner / featured_job / collab in a single inquiry. The pre-multi
-   * shape used a single `kind` string; we still accept that as a
-   * fallback so old client builds don't break mid-deploy.
-   */
+  /** Multi-select. Pre-multi shape had a single `kind` — kept for back-compat. */
   kinds?: string[];
   kind?: string;
   company?: string;
@@ -44,17 +37,41 @@ const KIND_LABELS: Record<string, string> = {
   collab: 'Creator collab',
 };
 
-function buildRecord(body: BannerInquiryBody): Record<string, string> {
-  // Normalize: array > single-string fallback > empty. Joined into a
-  // comma-separated label so Airtable single-line text columns can
-  // hold the value without schema changes.
-  const kinds = Array.isArray(body.kinds) && body.kinds.length
-    ? body.kinds
-    : body.kind
-      ? [body.kind]
-      : [];
-  const kindLabel = kinds.map((k) => KIND_LABELS[k] ?? k).join(', ');
+function toErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (err && typeof err === 'object') {
+    if ('message' in err && typeof (err as { message?: unknown }).message === 'string') {
+      return (err as { message: string }).message;
+    }
+    if ('error' in err) {
+      try {
+        return JSON.stringify((err as { error: unknown }).error);
+      } catch {
+        return 'Unknown error';
+      }
+    }
+  }
+  return String(err);
+}
 
+function normalizeKinds(body: BannerInquiryBody): string[] {
+  if (Array.isArray(body.kinds) && body.kinds.length) return body.kinds;
+  if (body.kind) return [body.kind];
+  return [];
+}
+
+/** Optional Airtable mirror — only runs when env vars are set. */
+async function mirrorToAirtable(body: BannerInquiryBody, kinds: string[]) {
+  const apiKey = process.env.AIRTABLE_API_KEY;
+  const baseId = process.env.AIRTABLE_BASE_ID;
+  if (!apiKey || !baseId) return;
+
+  const tableName =
+    process.env.AIRTABLE_BANNER_TABLE ||
+    process.env.AIRTABLE_BANNER_TABLE_ID ||
+    'B2B Inquiries';
+
+  const kindLabel = kinds.map((k) => KIND_LABELS[k] ?? k).join(', ');
   const record: Record<string, string> = {
     Kind: kindLabel,
     Email: body.email ?? '',
@@ -66,28 +83,16 @@ function buildRecord(body: BannerInquiryBody): Record<string, string> {
     Message: body.message ?? '',
     Telegram: body.telegram ?? '',
   };
-
   if (process.env.AIRTABLE_OMIT_SUBMISSION_DATE !== '1') {
     record['Submission Date'] = new Date().toISOString();
   }
-  return record;
-}
 
-function toErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (err && typeof err === 'object') {
-    if ('message' in err && typeof (err as { message?: unknown }).message === 'string') {
-      return (err as { message: string }).message;
-    }
-    if ('error' in err) {
-      try {
-        return JSON.stringify((err as { error: unknown }).error);
-      } catch {
-        return 'Unknown Airtable error';
-      }
-    }
-  }
-  return String(err);
+  const mod = await import('airtable');
+  const Airtable = mod.default;
+  if (!Airtable) return;
+  Airtable.configure({ apiKey });
+  const base = Airtable.base(baseId);
+  await base(tableName).create([{ fields: record }]);
 }
 
 export async function POST(request: Request) {
@@ -100,44 +105,47 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiKey = process.env.AIRTABLE_API_KEY;
-    const baseId = process.env.AIRTABLE_BASE_ID;
-    const tableName =
-      process.env.AIRTABLE_BANNER_TABLE ||
-      process.env.AIRTABLE_BANNER_TABLE_ID ||
-      'B2B Inquiries';
+    const kinds = normalizeKinds(body);
 
-    if (!apiKey || !baseId) {
-      // Soft-fail in dev when Airtable isn't configured: log the
-      // payload so testers can verify the form roundtrip without
-      // needing real credentials. In prod the env vars are present so
-      // this path doesn't fire.
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(
-          '[banner-inquiry] Airtable not configured — payload was:',
-          JSON.stringify(buildRecord(body), null, 2),
-        );
-        return NextResponse.json({ success: true, dryRun: true });
-      }
-      throw new Error('Airtable configuration missing (AIRTABLE_API_KEY or AIRTABLE_BASE_ID)');
+    // Primary write to Supabase.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    const { error: insertError } = await supabase.from('banner_inquiries').insert({
+      user_id: user?.id ?? null,
+      kinds,
+      company: body.company?.trim() || null,
+      website: body.website?.trim() || null,
+      budget: body.budget?.trim() || null,
+      timeline: body.timeline?.trim() || null,
+      message: body.message?.trim() || null,
+      name: body.name?.trim() || null,
+      email: body.email.trim().toLowerCase(),
+      telegram: body.telegram?.trim() || null,
+    });
+
+    if (insertError) {
+      console.error('Banner inquiry insert error:', insertError);
+      return NextResponse.json(
+        { error: 'Failed to save inquiry', details: insertError.message },
+        { status: 500 },
+      );
     }
 
-    const mod = await import('airtable');
-    const Airtable = mod.default;
-    if (!Airtable) {
-      throw new Error('Failed to load Airtable SDK');
+    try {
+      await mirrorToAirtable(body, kinds);
+    } catch (err) {
+      console.warn('Airtable mirror failed (non-fatal):', toErrorMessage(err));
     }
-
-    Airtable.configure({ apiKey });
-    const base = Airtable.base(baseId);
-    await base(tableName).create([{ fields: buildRecord(body) }]);
 
     return NextResponse.json({ success: true });
   } catch (err) {
     const details = toErrorMessage(err);
     console.error('Banner inquiry route error:', details);
     return NextResponse.json(
-      { error: 'Failed to submit to Airtable', details },
+      { error: 'Failed to submit inquiry', details },
       { status: 500 },
     );
   }

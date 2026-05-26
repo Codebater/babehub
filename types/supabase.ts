@@ -1,10 +1,3 @@
-// Generated from Supabase project `gpewtvzaatcqyquogxlh` via the Supabase MCP
-// `generate_typescript_types` tool. Re-run after any schema migration:
-//
-//   - Through the MCP: invoke `generate_typescript_types` with the project id
-//     and overwrite this file with the output.
-//   - Manually: `supabase gen types typescript --project-id gpewtvzaatcqyquogxlh`
-
 export type Json =
   | string
   | number
@@ -14,11 +7,134 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
+      banner_inquiries: {
+        Row: {
+          budget: string | null
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          kinds: string[]
+          message: string | null
+          name: string | null
+          notes: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          telegram: string | null
+          timeline: string | null
+          user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          budget?: string | null
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          kinds?: string[]
+          message?: string | null
+          name?: string | null
+          notes?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          telegram?: string | null
+          timeline?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          budget?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          kinds?: string[]
+          message?: string | null
+          name?: string | null
+          notes?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          telegram?: string | null
+          timeline?: string | null
+          user_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "banner_inquiries_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          author: string
+          author_id: string | null
+          body: string
+          cover_url: string | null
+          created_at: string
+          description: string
+          id: string
+          published_at: string | null
+          reading_minutes: number
+          slug: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          author_id?: string | null
+          body?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          published_at?: string | null
+          reading_minutes?: number
+          slug: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          author_id?: string | null
+          body?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          published_at?: string | null
+          reading_minutes?: number
+          slug?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       creator_settings: {
         Row: {
           agency_id: string | null
@@ -314,7 +430,36 @@ export type Database = {
           tier_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "payment_invoices_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoices_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_invoices_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       portfolio_items: {
         Row: {
@@ -347,7 +492,22 @@ export type Database = {
           title?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_items_media_id_fkey"
+            columns: ["media_id"]
+            isOneToOne: false
+            referencedRelation: "media"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posts: {
         Row: {
@@ -395,7 +555,22 @@ export type Database = {
           tier_required_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "posts_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_tier_required_id_fkey"
+            columns: ["tier_required_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professional_profiles: {
         Row: {
@@ -455,50 +630,79 @@ export type Database = {
           user_id?: string
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "professional_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
+          applied_babehub: boolean
           avatar_url: string | null
           bio: string
+          country: string | null
           cover_url: string | null
           created_at: string
           display_name: string
           handle: string
           id: string
+          is_banned: boolean
+          is_frozen: boolean
+          is_premium: boolean
           is_verified: boolean
           onboarded_at: string | null
+          premium_until: string | null
           role: Database["public"]["Enums"]["user_role"]
           roles: Database["public"]["Enums"]["user_role"][]
           updated_at: string
+          verified_at: string | null
         }
         Insert: {
+          applied_babehub?: boolean
           avatar_url?: string | null
           bio?: string
+          country?: string | null
           cover_url?: string | null
           created_at?: string
           display_name?: string
           handle: string
           id: string
+          is_banned?: boolean
+          is_frozen?: boolean
+          is_premium?: boolean
           is_verified?: boolean
           onboarded_at?: string | null
+          premium_until?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           roles?: Database["public"]["Enums"]["user_role"][]
           updated_at?: string
+          verified_at?: string | null
         }
         Update: {
+          applied_babehub?: boolean
           avatar_url?: string | null
           bio?: string
+          country?: string | null
           cover_url?: string | null
           created_at?: string
           display_name?: string
           handle?: string
           id?: string
+          is_banned?: boolean
+          is_frozen?: boolean
+          is_premium?: boolean
           is_verified?: boolean
           onboarded_at?: string | null
+          premium_until?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           roles?: Database["public"]["Enums"]["user_role"][]
           updated_at?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -542,7 +746,15 @@ export type Database = {
           sort_order?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscription_tiers_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -590,7 +802,109 @@ export type Database = {
           tier_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_submissions: {
+        Row: {
+          agrees_to_profit_share: boolean
+          content_type: string | null
+          country: string | null
+          created_at: string
+          email: string
+          goals: string | null
+          id: string
+          interested_in_campaigns: boolean
+          is_active_creator: boolean | null
+          is_generating_revenue: boolean | null
+          is_over_18: boolean | null
+          monthly_earnings: string | null
+          name: string
+          notes: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          social_handle: string | null
+          social_platform: string | null
+          status: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          agrees_to_profit_share?: boolean
+          content_type?: string | null
+          country?: string | null
+          created_at?: string
+          email: string
+          goals?: string | null
+          id?: string
+          interested_in_campaigns?: boolean
+          is_active_creator?: boolean | null
+          is_generating_revenue?: boolean | null
+          is_over_18?: boolean | null
+          monthly_earnings?: string | null
+          name?: string
+          notes?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_handle?: string | null
+          social_platform?: string | null
+          status?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          agrees_to_profit_share?: boolean
+          content_type?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string
+          goals?: string | null
+          id?: string
+          interested_in_campaigns?: boolean
+          is_active_creator?: boolean | null
+          is_generating_revenue?: boolean | null
+          is_over_18?: boolean | null
+          monthly_earnings?: string | null
+          name?: string
+          notes?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          social_handle?: string | null
+          social_platform?: string | null
+          status?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       video_comments: {
         Row: {
@@ -677,10 +991,16 @@ export type Database = {
         Relationships: []
       }
     }
-    Views: { [_ in never]: never }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
       has_active_subscription: {
-        Args: { fan_id: string; required_tier_id?: string; target_creator_id: string }
+        Args: {
+          fan_id: string
+          required_tier_id?: string
+          target_creator_id: string
+        }
         Returns: boolean
       }
     }
@@ -715,145 +1035,9 @@ export type Database = {
         | "brand"
         | "service_provider"
     }
-    CompositeTypes: { [_ in never]: never }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends { Insert: infer I }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends { Update: infer U }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      application_status: [
-        "pending",
-        "viewed",
-        "shortlisted",
-        "accepted",
-        "rejected",
-        "withdrawn",
-      ],
-      content_provider: ["creator_post", "eporner"],
-      job_location_kind: ["remote", "onsite", "hybrid"],
-      job_status: ["draft", "published", "paused", "expired", "closed"],
-      media_kind: ["image", "video"],
-      moderation_status: ["pending", "approved", "rejected", "flagged"],
-      payment_provider: ["stripe", "nowpayments"],
-      post_kind: ["text", "image", "video", "gallery"],
-      subscription_status: [
-        "active",
-        "past_due",
-        "canceled",
-        "incomplete",
-        "trialing",
-      ],
-      user_role: [
-        "fan",
-        "creator",
-        "chatter",
-        "admin",
-        "recruiter",
-        "agency",
-        "brand",
-        "service_provider",
-      ],
-    },
-  },
-} as const
+</content>

@@ -66,7 +66,31 @@ export type EpornerSearchOptions = {
   gay?: '0' | '1';
   /** Seconds to cache the response in Next.js fetch cache. */
   revalidateSeconds?: number;
+  /**
+   * Filter out AI-generated / deepfake videos client-side after the
+   * API responds. Eporner doesn't expose an upstream "no AI" flag,
+   * so we scan `title + keywords` for a small allow-list of AI
+   * markers and drop matches. Defaults to true — every caller gets
+   * AI-free results unless they opt out.
+   */
+  excludeAi?: boolean;
 };
+
+/**
+ * Word-boundary regex matching common AI / deepfake markers. Run
+ * against the lowercased `title + ' ' + keywords` string. Anchored
+ * on \b so e.g. "Stuart" doesn't match "art" inside "AI art".
+ *
+ * Conservative on purpose — adding "virtual" or "cgi" would catch
+ * legitimate non-AI content. Adjust here as new AI marker terms
+ * become common on the upstream catalog.
+ */
+const AI_MARKER_RE =
+  /\b(ai|ai-generated|aigenerated|ai_generated|deepfake|deep-fake|deepfaked|midjourney|stable[\s-]?diffusion|dall[\s-]?e|sora|aigen|synthetic\s+person|ai\s+girl|ai\s+model|ai\s+porn|ai\s+actress)\b/i;
+
+export function isAiGenerated(v: { title: string; keywords: string }): boolean {
+  return AI_MARKER_RE.test(`${v.title} ${v.keywords}`);
+}
 
 export async function searchVideos(
   options: EpornerSearchOptions = {},
@@ -103,15 +127,31 @@ export async function searchVideos(
   }
 
   const data = (await res.json()) as EpornerSearchResponse;
+
+  // Default-on AI filter. We log the drop count so it's visible in
+  // dev whether the filter is doing anything noticeable.
+  const excludeAi = options.excludeAi !== false;
+  let filtered = data.videos;
+  let droppedAi = 0;
+  if (excludeAi) {
+    filtered = data.videos.filter((v) => {
+      const isAi = isAiGenerated(v);
+      if (isAi) droppedAi += 1;
+      return !isAi;
+    });
+  }
+
   console.log(
     '[eporner] search ok — page',
     data.page,
     'of',
     data.total_pages,
     '· videos in batch:',
-    data.videos.length,
+    filtered.length,
+    excludeAi && droppedAi > 0 ? `(− ${droppedAi} AI)` : '',
     '· total catalog:',
     data.total_count,
   );
-  return data;
+
+  return { ...data, videos: filtered };
 }

@@ -33,6 +33,7 @@ export default function LoadMoreButton({
   showCastingNumbers = false,
   initialUsedNumbers = [],
   primaryCreator = null,
+  locked = false,
 }: {
   initialPage: number;
   initialHasMore: boolean;
@@ -41,6 +42,14 @@ export default function LoadMoreButton({
   initialUsedNumbers?: number[];
   /** Primary platform creator — used to attribute every catalog card. */
   primaryCreator?: PrimaryCreator | null;
+  /**
+   * When true, each appended VideoCard renders inside its own
+   * blurred + click-blocked grid cell — same visual posture as the
+   * initial PremiumGate-wrapped grid above. Keeps the premium pitch
+   * consistent across pagination instead of revealing unblurred
+   * content after one click.
+   */
+  locked?: boolean;
 }) {
   const [nextPage, setNextPage] = useState(initialPage + 1);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -82,19 +91,38 @@ export default function LoadMoreButton({
     });
   };
 
+  // When `locked=true`, every appended cell wraps with the same
+  // blur+pointer-block as the initial PremiumGate grid above so the
+  // premium pitch stays consistent across pagination. The button
+  // itself stays OUTSIDE this wrap, so it remains usable.
+  //
+  // Sponsored slots span the whole grid (col-span-full); we preserve
+  // that on the wrapper itself so it still occupies the full row even
+  // when wrapped.
+  const lockClass = locked ? 'pointer-events-none select-none blur-[3px]' : '';
+
   return (
     <>
       {batches.flatMap((batch, batchIdx) => [
-        // Sponsored billboard above every loaded batch — "Your banner
-        // here". Spans the whole grid width via col-span-full.
-        <SponsoredSlot key={`sponsor-${batchIdx}`} />,
+        <div
+          key={`sponsor-${batchIdx}`}
+          className={`col-span-full ${lockClass}`}
+          aria-hidden={locked || undefined}
+        >
+          <SponsoredSlot />
+        </div>,
         ...batch.map((video) => (
-          <VideoCard
+          <div
             key={video.id}
-            video={video}
-            castingNumber={showCastingNumbers ? castingMap.get(video.id) : undefined}
-            primaryCreator={primaryCreator}
-          />
+            className={lockClass}
+            aria-hidden={locked || undefined}
+          >
+            <VideoCard
+              video={video}
+              castingNumber={showCastingNumbers ? castingMap.get(video.id) : undefined}
+              primaryCreator={primaryCreator}
+            />
+          </div>
         )),
       ])}
 

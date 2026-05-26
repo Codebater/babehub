@@ -2,6 +2,7 @@ import { Link } from '@/i18n/navigation';
 import { requireRecruiter } from '@/lib/auth/guards';
 import { createJobAndRedirect } from '@/lib/jobs/actions';
 import ChipPicker from '../../../../../_components/ChipPicker';
+import JobDeadlinePicker from './JobDeadlinePicker';
 
 // Job-side preset vocabulary. Categories overlap with the
 // professional-profile presets on purpose so a creator's profile
@@ -199,6 +200,20 @@ export default async function NewJobPage({ searchParams }: Props) {
             </span>
           </label>
         </div>
+
+        {/* Application deadline. Required, with a 1-week minimum and
+            6-month maximum so the board doesn't fill with stale
+            indefinite postings. Quick-pick chips (1 week / 1 month /
+            3 months / 6 months) cover the common cases; the date
+            input itself respects the same min/max bounds via the
+            client-side picker. The action enforces the same window
+            server-side. */}
+        <Field
+          label="Application deadline"
+          hint="Pick when applications close. Minimum 1 week, maximum 6 months out. After the deadline the job auto-hides from the public board."
+        >
+          <JobDeadlinePicker />
+        </Field>
 
         <div className="flex flex-wrap items-center gap-3 border-t border-border-color/40 pt-6">
           <button

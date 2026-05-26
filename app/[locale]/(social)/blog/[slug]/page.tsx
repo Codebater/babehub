@@ -2,8 +2,18 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { Calendar, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
-import { ALL_POSTS, getPostBySlug, getAllPostsByDate } from '@/lib/blog/posts';
+import { ALL_POSTS } from '@/lib/blog/posts';
+import { loadAllBlogPosts, loadBlogPostBySlug } from '@/lib/blog/db';
 import AdStrip from '../../_components/AdStrip';
+
+// ISR with a 5-minute window. Static-registry posts get SSG'd at
+// build via generateStaticParams; DB posts render on first visit and
+// then serve from cache. After 5 minutes a re-render picks up any
+// admin edits. Trade-off: edits land within 5 min rather than
+// instantly, but every cached request after the first is essentially
+// free. revalidatePath('/blog/{slug}') in the admin action busts the
+// cache immediately when the admin publishes/edits.
+export const revalidate = 300;
 
 type Props = {
   params: Promise<{ slug: string; locale: string }>;
@@ -19,7 +29,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await loadBlogPostBySlug(slug);
   if (!post) return { title: 'Post not found — Babe Hub' };
 
   const canonical = `/blog/${post.slug}`;
@@ -58,11 +68,12 @@ function formatDate(iso: string): string {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await loadBlogPostBySlug(slug);
   if (!post) notFound();
 
   // Up to 2 related posts: same-tag-overlap > date-recency fallback.
-  const others = getAllPostsByDate().filter((p) => p.slug !== post.slug);
+  const allOthers = await loadAllBlogPosts();
+  const others = allOthers.filter((p) => p.slug !== post.slug);
   const related = others
     .map((p) => ({
       post: p,

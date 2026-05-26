@@ -47,11 +47,125 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const result = await loadJob(id);
   if (!result) return { title: 'Job not found' };
+  const desc =
+    result.job.description.slice(0, 160) ||
+    `Apply on Babe Hub — ${result.job.location_kind} · paid creator work.`;
   return {
     title: `${result.job.title} — Babe Hub jobs`,
-    description: result.job.description.slice(0, 160) || undefined,
+    description: desc,
+    keywords: [
+      'adult creator job',
+      'creator hiring',
+      'casting',
+      ...(result.job.categories ?? []),
+      ...(result.job.tags ?? []),
+    ],
     alternates: { canonical: `/jobs/${id}` },
+    openGraph: {
+      type: 'article',
+      title: result.job.title,
+      description: desc,
+      url: `https://babehub.net/jobs/${id}`,
+    },
   };
+}
+
+/**
+ * Build a schema.org JobPosting object for this row. Google's "Jobs
+ * search experience" (Google For Jobs) crawls pages carrying this
+ * schema and surfaces them in the dedicated jobs vertical of SERPs —
+ * the highest-value SEO move a job listing page can make.
+ *
+ * Spec: https://developers.google.com/search/docs/appearance/structured-data/job-posting
+ *
+ * Required fields covered: title, description, datePosted,
+ * hiringOrganization, jobLocation/jobLocationType, employmentType.
+ * baseSalary is included when at least one budget bound is set.
+ * validThrough comes from `expires_at` (set by the recruiter's
+ * deadline picker, 1 week to 6 months out).
+ */
+function buildJobPostingLd(job: {
+  id: string;
+  title: string;
+  description: string;
+  budget_min_cents: number | null;
+  budget_max_cents: number | null;
+  currency: string;
+  location_kind: string;
+  location_text: string | null;
+  categories: string[];
+  published_at: string | null;
+  expires_at: string | null;
+}) {
+  const description =
+    job.description.trim() ||
+    `Open job on Babe Hub. Apply directly from the platform.`;
+  const ld: Record<string, unknown> = {
+    '@context': 'https://schema.org/',
+    '@type': 'JobPosting',
+    title: job.title,
+    description,
+    identifier: {
+      '@type': 'PropertyValue',
+      name: 'Babe Hub',
+      value: job.id,
+    },
+    datePosted: job.published_at ?? new Date().toISOString(),
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: 'Babe Hub',
+      sameAs: 'https://babehub.net',
+    },
+    employmentType: 'CONTRACTOR',
+    url: `https://babehub.net/jobs/${job.id}`,
+    directApply: true,
+    industry: 'Adult content creation',
+  };
+
+  if (job.expires_at) ld.validThrough = job.expires_at;
+
+  // Google For Jobs requires `jobLocationType: 'TELECOMMUTE'` for
+  // remote-only roles; on-site / hybrid need a real jobLocation block.
+  if (job.location_kind === 'remote') {
+    ld.jobLocationType = 'TELECOMMUTE';
+    ld.applicantLocationRequirements = {
+      '@type': 'Country',
+      name: 'Anywhere',
+    };
+  } else {
+    ld.jobLocation = {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: job.location_text ?? job.location_kind,
+      },
+    };
+    if (job.location_kind === 'hybrid') {
+      ld.jobLocationType = 'TELECOMMUTE';
+    }
+  }
+
+  // baseSalary block — only emit when at least one bound is set.
+  // Google accepts both a single value and MonetaryAmount with
+  // min/max via QuantitativeValue.
+  if (job.budget_min_cents || job.budget_max_cents) {
+    const min = (job.budget_min_cents ?? job.budget_max_cents)! / 100;
+    const max = (job.budget_max_cents ?? job.budget_min_cents)! / 100;
+    ld.baseSalary = {
+      '@type': 'MonetaryAmount',
+      currency: (job.currency || 'EUR').toUpperCase(),
+      value: {
+        '@type': 'QuantitativeValue',
+        minValue: min,
+        maxValue: max,
+        unitText: 'PROJECT',
+      },
+    };
+  }
+
+  if (job.categories?.length) ld.occupationalCategory = job.categories.join(', ');
+
+  return ld;
 }
 
 function formatBudget(min: number | null, max: number | null, currency: string) {
@@ -75,8 +189,29 @@ export default async function JobDetailPage({ params }: Props) {
   const isOwnJob = viewer?.id === job.poster_id;
   const budget = formatBudget(job.budget_min_cents, job.budget_max_cents, job.currency);
 
+  const jobPostingLd = buildJobPostingLd({
+    id: job.id,
+    title: job.title,
+    description: job.description,
+    budget_min_cents: job.budget_min_cents,
+    budget_max_cents: job.budget_max_cents,
+    currency: job.currency,
+    location_kind: job.location_kind,
+    location_text: job.location_text,
+    categories: job.categories,
+    published_at: job.published_at,
+    expires_at: job.expires_at,
+  });
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
+      {/* Google For Jobs / generic JobPosting structured data. Inline
+          so the crawler doesn't need to follow another request. */}
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingLd) }}
+      />
       <Link
         href="/jobs"
         className="text-sm text-text-secondary transition-colors hover:text-primary"
@@ -116,6 +251,14 @@ export default async function JobDetailPage({ params }: Props) {
               <span className="inline-flex items-center gap-1 text-text-secondary">
                 <Clock className="h-4 w-4" />
                 Posted {new Date(job.published_at).toLocaleDateString()}
+              </span>
+            )}
+            {job.expires_at && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-bold text-amber-300"
+                title={`Deadline · ${new Date(job.expires_at).toLocaleString()}`}
+              >
+                Closes {new Date(job.expires_at).toLocaleDateString()}
               </span>
             )}
           </div>

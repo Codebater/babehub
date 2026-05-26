@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireOnboarded } from '@/lib/auth/guards';
+import { getLimits } from '@/lib/limits';
 import type { Database } from '@/types/supabase';
 
 /**
@@ -54,10 +55,26 @@ function parseWholeUnitsToCents(raw: string | null): number | null {
  * composer can redirect to the recruiter dashboard.
  */
 export async function createJob(formData: FormData): Promise<JobActionResult> {
-  const { user, supabase } = await requireOnboarded();
+  const { user, profile, supabase } = await requireOnboarded();
 
   const title = ((formData.get('title') as string) || '').trim().slice(0, 200);
   if (!title) return { ok: false, error: 'Title is required.' };
+
+  // ── Quota enforcement ─────────────────────────────────────────
+  // 5 jobs free, 25 jobs elevated (verified / premium / admin).
+  // Count current jobs HEAD-only to keep this cheap on every post
+  // attempt.
+  const limits = getLimits(profile);
+  const { count } = await supabase
+    .from('jobs')
+    .select('id', { count: 'exact', head: true })
+    .eq('poster_id', user.id);
+  if ((count ?? 0) >= limits.jobs) {
+    return {
+      ok: false,
+      error: `Job-posting cap reached (${limits.jobs}). Apply BabeHub or upgrade to Premium for more.`,
+    };
+  }
 
   const wantsPublish = formData.get('publish') === '1';
   const locationKindRaw = (formData.get('location_kind') as string) || 'remote';
@@ -85,6 +102,39 @@ export async function createJob(formData: FormData): Promise<JobActionResult> {
     (formData.get('budget_max') as string | null) ?? null,
   );
 
+  // Deadline → `expires_at`. Required, with a hard window of 7-180
+  // days from now. The composer's JobDeadlinePicker enforces the
+  // same bounds client-side; this check is defense-in-depth against
+  // a manually-crafted POST.
+  //
+  // YYYY-MM-DD parsed as end-of-day UTC so the job stays visible the
+  // entire day the recruiter picked.
+  const deadlineRaw = ((formData.get('expires_at') as string) || '').trim();
+  let expires_at: string | null = null;
+  if (deadlineRaw) {
+    const d = new Date(`${deadlineRaw}T23:59:59Z`);
+    if (Number.isNaN(d.getTime())) {
+      return { ok: false, error: 'Invalid deadline format.' };
+    }
+    const minMs = Date.now() + 7 * 24 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000; // 6d to allow same-day +7 picks
+    const maxMs = Date.now() + 180 * 24 * 60 * 60 * 1000 + 24 * 60 * 60 * 1000;
+    if (d.getTime() < minMs) {
+      return {
+        ok: false,
+        error: 'Deadline must be at least 1 week from today.',
+      };
+    }
+    if (d.getTime() > maxMs) {
+      return {
+        ok: false,
+        error: 'Deadline cannot be more than 6 months from today.',
+      };
+    }
+    expires_at = d.toISOString();
+  } else {
+    return { ok: false, error: 'A deadline is required (1 week to 6 months).' };
+  }
+
   const insertRow = {
     poster_id: user.id,
     title,
@@ -103,6 +153,7 @@ export async function createJob(formData: FormData): Promise<JobActionResult> {
     token_cost: Math.max(0, Math.round(Number(formData.get('token_cost') ?? 0)) || 0),
     status: (wantsPublish ? 'published' : 'draft') as JobStatus,
     published_at: wantsPublish ? new Date().toISOString() : null,
+    expires_at,
   };
 
   const { data, error } = await supabase

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Sparkles, Users } from 'lucide-react';
-import CategoryChips from '../explore/CategoryChips';
 import ApplyButton from '../_components/ApplyButton';
 
 /**
@@ -24,10 +23,6 @@ export const metadata: Metadata = {
 export default function CreatorsPage() {
   return (
     <main className="mx-auto max-w-7xl px-6 py-6 md:py-8">
-      <div className="mb-6">
-        <CategoryChips />
-      </div>
-
       {/* Coming-soon hero — same banner language as Casting/Live Cams/Luxury,
           but in an iridescent purple/primary blend with a "Coming Soon"
           chip instead of a category badge. */}

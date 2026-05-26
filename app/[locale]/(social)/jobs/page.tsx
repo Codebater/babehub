@@ -1,23 +1,60 @@
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { Briefcase, MapPin, Sparkles, Clock, ShieldCheck } from 'lucide-react';
+import {
+  Briefcase,
+  MapPin,
+  Sparkles,
+  Clock,
+  ShieldCheck,
+  ArrowRight,
+  Activity,
+  Flame,
+} from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import AdStrip from '../_components/AdStrip';
+import { loadJobsIndustryStats } from '@/lib/jobs/stats';
+import { loadFeaturedJobs } from '@/lib/jobs/featured';
+import { formatCompact } from '@/lib/format/compact';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Jobs — Babe Hub',
+  // Title + description tuned for the search intents the platform
+  // serves: recruiters looking to "find adult applicants" / "find
+  // adult creators", and creators looking for "adult creator jobs"
+  // / "casting calls". Keywords are duplicated for legacy crawlers
+  // that still weight the meta keywords field.
+  title: 'Adult creator jobs · Find applicants & casting calls — Babe Hub',
   description:
-    'Open jobs from creators, agencies and brands on Babe Hub. Apply directly from the platform.',
+    'Open adult-industry jobs: casting, live cams, brand collabs, photography. Find adult creators and applicants — apply or post a job in one click. Crypto-paid where possible, deadlines visible up front.',
+  keywords: [
+    'adult creator jobs',
+    'find adult applicants',
+    'find adult creators',
+    'adult casting',
+    'casting calls',
+    'live cams jobs',
+    'brand collab',
+    'adult content creator hiring',
+  ],
   alternates: { canonical: '/jobs' },
+  openGraph: {
+    type: 'website',
+    title: 'Adult creator jobs · Find applicants & casting calls',
+    description:
+      'Open adult-industry jobs on Babe Hub — casting, live cams, brand collabs.',
+    url: 'https://babehub.net/jobs',
+  },
 };
+
+type SortKey = 'newest' | 'paid' | 'oldest';
 
 type Props = {
   searchParams: Promise<{
     q?: string;
     category?: string;
     location?: string;
+    sort?: string;
   }>;
 };
 
@@ -42,21 +79,67 @@ function timeAgo(iso: string): string {
   return `${Math.floor(day / 30)}mo ago`;
 }
 
+/**
+ * "Closes in 3d" / "Closes today" / "Closes in 5h". Reads back to the
+ * applicant how much time they have left to send their intro before
+ * the deadline hides the job from the board.
+ */
+function timeUntil(iso: string): string {
+  const ms = new Date(iso).getTime() - Date.now();
+  if (ms <= 0) return 'expired';
+  const hour = Math.floor(ms / 3_600_000);
+  if (hour < 24) return hour <= 1 ? 'in 1h' : `in ${hour}h`;
+  const day = Math.floor(hour / 24);
+  if (day === 1) return 'tomorrow';
+  if (day < 30) return `in ${day}d`;
+  return `in ${Math.floor(day / 30)}mo`;
+}
+
+/** Parse the `?sort=` param against the allow-list; default to newest. */
+function parseSort(raw: string | undefined): SortKey {
+  if (raw === 'paid' || raw === 'oldest') return raw;
+  return 'newest';
+}
+
 export default async function JobsPage({ searchParams }: Props) {
-  const { q, category, location } = await searchParams;
+  const { q, category, location, sort } = await searchParams;
+  const sortKey = parseSort(sort);
   const supabase = await createClient();
 
-  // RLS already filters to published + approved + not-expired jobs the
-  // viewer can see (public OR verified_only with verified viewer OR own).
-  // We layer optional filters on top.
+  // RLS filters to published + approved + not-expired jobs the viewer
+  // can see (public OR verified_only with verified viewer OR own).
+  // We layer optional filters + sort on top.
+  // Drop expired rows server-side so a recruiter's old deadline can't
+  // leak into the public board. RLS already has its own deadline check
+  // for non-owners; this query-level filter shaves a roundtrip for
+  // authed users who own the row.
+  const nowIso = new Date().toISOString();
   let query = supabase
     .from('jobs')
     .select(
-      'id, title, description, budget_min_cents, budget_max_cents, currency, location_kind, location_text, tags, categories, requires_verification, published_at, poster_id, featured_until, promoted_score',
+      'id, title, description, budget_min_cents, budget_max_cents, currency, location_kind, location_text, tags, categories, requires_verification, published_at, poster_id, featured_until, promoted_score, expires_at',
     )
-    .order('promoted_score', { ascending: false })
-    .order('published_at', { ascending: false })
-    .limit(40);
+    .not('published_at', 'is', null)
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+    .limit(50);
+
+  // Sort by the selected key. "Newest" puts featured promoted_score
+  // first so paying admins still win visibility; "paid" and "oldest"
+  // sort purely on the column the user asked about (no featured
+  // override, so the rule the visitor sees on the screen is honest).
+  if (sortKey === 'newest') {
+    query = query
+      .order('promoted_score', { ascending: false })
+      .order('published_at', { ascending: false });
+  } else if (sortKey === 'paid') {
+    query = query
+      .order('budget_max_cents', { ascending: false, nullsFirst: false })
+      .order('budget_min_cents', { ascending: false, nullsFirst: false })
+      .order('published_at', { ascending: false });
+  } else {
+    // 'oldest' — chronological, oldest first
+    query = query.order('published_at', { ascending: true });
+  }
 
   if (category?.trim()) {
     query = query.contains('categories', [category.trim().toLowerCase()]);
@@ -65,11 +148,17 @@ export default async function JobsPage({ searchParams }: Props) {
     query = query.eq('location_kind', location);
   }
   if (q?.trim()) {
-    // Postgres full-text query on the tsvector column maintained by trigger.
     query = query.textSearch('search_doc', q.trim(), { type: 'websearch' });
   }
 
-  const { data: jobs } = await query;
+  const [{ data: jobs }, industry, featuredJobs] = await Promise.all([
+    query,
+    loadJobsIndustryStats(supabase),
+    // Real featured rows (admin manual picks + auto-by-budget). Shown
+    // only on the unfiltered default-sort view (see below) — each
+    // card deep-links to the specific /jobs/{id} detail page.
+    loadFeaturedJobs(supabase, 3),
+  ]);
 
   // Resolve poster handles in a single follow-up query.
   const posterIds = Array.from(new Set((jobs ?? []).map((j) => j.poster_id)));
@@ -91,15 +180,41 @@ export default async function JobsPage({ searchParams }: Props) {
     ]),
   );
 
+  const isFiltered = Boolean(q || category || location);
+
+  // ItemList JSON-LD describing the open jobs visible on this board.
+  // Helps Google understand this as a job-board landing page (sibling
+  // signal to the per-job JobPosting JSON-LD on each detail page).
+  const itemListLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Open adult-creator jobs · Babe Hub',
+    numberOfItems: (jobs ?? []).length,
+    itemListElement: (jobs ?? []).slice(0, 30).map((j, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `https://babehub.net/jobs/${j.id}`,
+      name: j.title,
+    })),
+  };
+
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10">
+    <main className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-10">
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }}
+      />
+      {/* ── Page header ─────────────────────────────────────────────
+          Slimmed down: just the page intro + the "Post a job" CTA.
+          The industry budget flow metric moved down to sit inline
+          with the sort filter (denser visual rhythm, less wasted
+          vertical real estate). */}
       <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm text-text-secondary">
-            Open jobs from creators, agencies and brands. Apply with one click — the
-            recruiter sees your professional profile attached.
-          </p>
-        </div>
+        <p className="max-w-2xl text-sm text-text-secondary">
+          Open jobs from creators, agencies and brands. Apply with one click —
+          the recruiter sees your professional profile attached.
+        </p>
         <Link
           href="/app/recruiter/jobs/new"
           className="inline-flex items-center gap-2 self-start rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] hover:bg-pink-400 sm:self-auto"
@@ -110,30 +225,92 @@ export default async function JobsPage({ searchParams }: Props) {
       </header>
 
       {/* Old-school ad strip — between the page header and the filter
-          chips. Same shape as the /explore-top placement so brand-side
-          surfaces feel like one family. */}
+          chips. Same shape as the /explore-top placement. */}
       <div className="mb-6">
         <AdStrip placement="jobs-top" />
       </div>
 
-      {/* Filter chips */}
+      {/* ── Real featured row ─────────────────────────────────────
+          Top-3 from `loadFeaturedJobs` (admin manual picks first,
+          then auto-fill by budget). Each card deep-links to the
+          specific /jobs/{id} page so a click goes straight to the
+          apply surface. Only shown on the unfiltered default-sort
+          view so search + sort changes aren't pre-empted by
+          sponsorship. */}
+      {!isFiltered && sortKey === 'newest' && featuredJobs.length > 0 && (
+        <section className="mb-6">
+          <p className="mb-3 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300">
+            <Sparkles className="h-3 w-3" />
+            Featured this month
+          </p>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredJobs.slice(0, 3).map((job) => {
+              const featuredBudget = formatBudget(
+                job.budget_min_cents,
+                job.budget_max_cents,
+                job.currency,
+              );
+              return (
+                <li key={job.id}>
+                  <Link
+                    href={`/jobs/${job.id}` as '/jobs/[id]'}
+                    className="group block h-full overflow-hidden rounded-2xl border border-amber-400/30 bg-gradient-to-br from-card to-amber-950/15 p-4 transition-all hover:border-amber-400/60 hover:scale-[1.01]"
+                  >
+                    <p className="inline-flex items-center gap-1 rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+                      <Sparkles className="h-3 w-3" />
+                      Featured
+                      {job.published_at &&
+                        ` · ${new Date(job.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
+                    </p>
+                    <h3 className="mt-2 line-clamp-2 text-sm font-black tracking-tight text-text-main transition-colors group-hover:text-amber-200">
+                      {job.title}
+                    </h3>
+                    {featuredBudget && (
+                      <p className="mt-1 text-xs font-bold text-text-main">
+                        {featuredBudget}
+                      </p>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {/* Filter chips — sort + category + location, all roll up to
+          URL search params so links stay shareable. Industry budget
+          flow rides along the right edge of the sort row so the
+          headline metric stays in view without claiming a whole hero
+          band. */}
       <FilterChips
+        activeSort={sortKey}
         activeCategory={category ?? ''}
         activeLocation={location ?? ''}
         activeQuery={q ?? ''}
+        industryFlow={industry.totalEur}
+        industryJobCount={industry.jobCount}
       />
 
+      {/* ── Jobs table list ────────────────────────────────────────
+          Replaces the card grid. Dense rows scale better to 100+
+          jobs and read closer to a real "job board" UI. Each row is
+          a single Link so the whole row is the click target.
+
+          Featured rows (`featured_until > now`) get an amber accent
+          border on the left to call them out without breaking the
+          row rhythm. */}
       {!jobs || jobs.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-dashed border-border-color bg-secondary/40 p-12 text-center">
           <Briefcase className="mx-auto h-10 w-10 text-text-secondary/60" />
           <p className="mt-3 text-text-secondary">
-            {q || category || location
+            {isFiltered
               ? 'No jobs match those filters.'
               : 'No jobs posted yet. Be the first — click "Post a job" above.'}
           </p>
         </div>
       ) : (
-        <ul className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-6 divide-y divide-border-color/40 overflow-hidden rounded-2xl border border-border-color bg-card">
           {jobs.map((job) => {
             const poster = posterMap.get(job.poster_id);
             const budget = formatBudget(
@@ -144,98 +321,113 @@ export default async function JobsPage({ searchParams }: Props) {
             const featured =
               job.featured_until && new Date(job.featured_until) > new Date();
             return (
-              <li key={job.id}>
+              <li key={job.id} className="group">
                 <Link
                   href={`/jobs/${job.id}` as '/jobs/[id]'}
-                  className={`group block overflow-hidden rounded-2xl border bg-card p-5 transition-colors hover:border-primary ${
-                    featured ? 'border-amber-300/40' : 'border-border-color'
+                  className={`flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-secondary/50 md:flex-row md:items-center md:gap-6 md:px-5 md:py-4 ${
+                    featured ? 'border-l-4 border-l-amber-400/70' : ''
                   }`}
                 >
-                  {featured && (
-                    <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
-                      <Sparkles className="h-3 w-3" />
-                      Featured
-                    </p>
-                  )}
-                  <h3 className="line-clamp-2 text-base font-black tracking-tight text-text-main group-hover:text-primary">
-                    {job.title}
-                  </h3>
-                  {job.description && (
-                    <p className="mt-2 line-clamp-3 text-sm text-text-secondary">
-                      {job.description}
-                    </p>
-                  )}
-
-                  <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
-                    {budget && (
-                      <span className="font-bold text-text-main">{budget}</span>
+                  {/* ── Title + description column ─────────────── */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {featured && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+                          <Flame className="h-3 w-3" />
+                          Featured
+                        </span>
+                      )}
+                      <h3 className="text-sm font-bold text-text-main transition-colors group-hover:text-primary md:text-base">
+                        {job.title}
+                      </h3>
+                    </div>
+                    {job.description && (
+                      <p className="mt-1 line-clamp-1 text-xs text-text-secondary md:text-sm">
+                        {job.description}
+                      </p>
                     )}
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {job.location_kind === 'remote'
-                        ? 'Remote'
-                        : job.location_text || job.location_kind}
-                    </span>
-                    {job.requires_verification && (
-                      <span className="inline-flex items-center gap-1 text-primary">
-                        <ShieldCheck className="h-3 w-3" />
-                        Verified only
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-secondary">
+                      <span className="inline-flex items-center gap-1 capitalize">
+                        <MapPin className="h-3 w-3" />
+                        {job.location_kind}
+                        {job.location_text ? ` · ${job.location_text}` : ''}
                       </span>
-                    )}
-                  </div>
-
-                  {(job.categories.length > 0 || job.tags.length > 0) && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {job.categories.slice(0, 3).map((c) => (
+                      {job.requires_verification && (
+                        <span className="inline-flex items-center gap-1 text-primary">
+                          <ShieldCheck className="h-3 w-3" />
+                          Verified only
+                        </span>
+                      )}
+                      {job.categories.slice(0, 2).map((c) => (
                         <span
                           key={`cat-${c}`}
-                          className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary"
+                          className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary"
                         >
                           {c}
                         </span>
                       ))}
-                      {job.tags.slice(0, 3).map((t) => (
-                        <span
-                          key={`tag-${t}`}
-                          className="rounded-full border border-border-color px-2 py-0.5 text-[10px] text-text-secondary"
-                        >
-                          {t}
-                        </span>
-                      ))}
+                    </div>
+                  </div>
+
+                  {/* ── Poster column ──────────────────────────── */}
+                  {poster && (
+                    <div className="hidden min-w-0 shrink-0 items-center gap-2 text-xs text-text-secondary md:flex md:w-32">
+                      <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-secondary">
+                        {poster.avatarUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={poster.avatarUrl}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[10px] font-black text-white">
+                            {poster.displayName.slice(0, 1).toUpperCase()}
+                          </span>
+                        )}
+                      </span>
+                      <span className="min-w-0 truncate">
+                        @{poster.handle}
+                        {poster.isVerified && (
+                          <ShieldCheck className="ml-1 inline h-3 w-3 text-primary" />
+                        )}
+                      </span>
                     </div>
                   )}
 
-                  <div className="mt-4 flex items-center justify-between border-t border-border-color/40 pt-3">
-                    {poster ? (
-                      <span className="flex items-center gap-2 text-xs text-text-secondary">
-                        <span className="h-5 w-5 overflow-hidden rounded-full bg-secondary">
-                          {poster.avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={poster.avatarUrl}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[9px] font-black text-white">
-                              {poster.displayName.slice(0, 1).toUpperCase()}
-                            </span>
-                          )}
-                        </span>
-                        @{poster.handle}
-                        {poster.isVerified && (
-                          <ShieldCheck className="h-3 w-3 text-primary" />
-                        )}
-                      </span>
+                  {/* ── Budget column ──────────────────────────── */}
+                  <div className="shrink-0 text-left md:w-40 md:text-right">
+                    {budget ? (
+                      <p className="text-sm font-black text-text-main md:text-base">
+                        {budget}
+                      </p>
                     ) : (
-                      <span />
+                      <p className="text-xs text-text-secondary/60">
+                        No budget listed
+                      </p>
                     )}
                     {job.published_at && (
-                      <span className="inline-flex items-center gap-1 text-[11px] text-text-secondary">
+                      <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-text-secondary">
                         <Clock className="h-3 w-3" />
                         {timeAgo(job.published_at)}
-                      </span>
+                      </p>
                     )}
+                    {job.expires_at && (
+                      <p
+                        className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300"
+                        title={`Applications close ${new Date(job.expires_at).toLocaleString()}`}
+                      >
+                        Closes {timeUntil(job.expires_at)}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ── CTA column ─────────────────────────────── */}
+                  <div className="shrink-0">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-border-color px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-secondary transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
+                      View
+                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                    </span>
                   </div>
                 </Link>
               </li>
@@ -243,20 +435,36 @@ export default async function JobsPage({ searchParams }: Props) {
           })}
         </ul>
       )}
+
+      <p className="mt-4 text-[11px] text-text-secondary">
+        Expired and unpublished jobs are hidden automatically. Showing up to 50
+        rows — pagination lands when the catalog crosses that threshold.
+      </p>
     </main>
   );
 }
 
-// Inline server component — filter chips that update URL search params
+// Inline server component — filter chips that update URL search params.
 function FilterChips({
+  activeSort,
   activeCategory,
   activeLocation,
   activeQuery,
+  industryFlow,
+  industryJobCount,
 }: {
+  activeSort: SortKey;
   activeCategory: string;
   activeLocation: string;
   activeQuery: string;
+  industryFlow: number;
+  industryJobCount: number;
 }) {
+  const sorts: { v: SortKey; label: string }[] = [
+    { v: 'newest', label: 'Newest' },
+    { v: 'paid', label: 'Highest paid' },
+    { v: 'oldest', label: 'Chronological' },
+  ];
   const cats = ['casting', 'live cams', 'luxury', 'ugc', 'modeling', 'photography'];
   const locs = [
     { v: '', label: 'Anywhere' },
@@ -271,53 +479,113 @@ function FilterChips({
       q: activeQuery,
       category: activeCategory,
       location: activeLocation,
+      sort: activeSort,
       ...overrides,
     };
-    for (const [k, v] of Object.entries(merged)) if (v) sp.set(k, v);
-    return sp.toString();
+    Object.entries(merged).forEach(([k, v]) => {
+      if (v && (k !== 'sort' || v !== 'newest')) sp.set(k, v);
+    });
+    const s = sp.toString();
+    return s ? `?${s}` : '';
   };
 
   return (
-    <div className="space-y-3">
-      <div className="-mx-1 flex gap-2 overflow-x-auto pb-1">
-        {locs.map((l) => {
-          const active = activeLocation === l.v;
-          const qs = baseQuery({ location: l.v });
-          return (
-            <Link
-              key={l.label}
-              href={(qs ? `/jobs?${qs}` : '/jobs') as '/jobs'}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-colors ${
-                active
-                  ? 'bg-primary text-white'
-                  : 'border border-border-color bg-card/40 text-text-secondary hover:border-primary hover:text-primary'
-              }`}
-            >
-              {l.label}
-            </Link>
-          );
-        })}
+    <nav className="space-y-3">
+      {/* Sort row + industry budget flow metric on the right.
+          Mobile: metric stacks above the sort pills. Desktop: metric
+          sits on the right edge as a compact "stat chip", so the
+          headline number stays in view alongside the sort controls
+          without claiming a hero band. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary/70">
+            Sort
+          </span>
+          {sorts.map((s) => {
+            const active = s.v === activeSort;
+            return (
+              <Link
+                key={s.v}
+                href={`/jobs${baseQuery({ sort: s.v })}` as '/jobs'}
+                className={`rounded-full px-3 py-1 font-bold transition-colors ${
+                  active
+                    ? 'bg-primary text-white'
+                    : 'bg-secondary text-text-secondary hover:text-text-main'
+                }`}
+              >
+                {s.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Inline industry flow chip — same data the old hero band
+            displayed, compacted into a single line so it pairs with
+            the sort controls instead of competing with them. */}
+        <div
+          className="inline-flex shrink-0 items-center gap-3 rounded-full border border-primary/30 bg-primary/[0.06] px-3 py-1.5"
+          title={`${industryJobCount.toLocaleString()} active jobs · industry budget flow`}
+        >
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+            <Activity className="h-3 w-3" />
+            Flow
+          </span>
+          <span className="text-base font-black tabular-nums text-text-main">
+            {formatCompact(industryFlow, '€')}
+          </span>
+          <span className="hidden text-[10px] uppercase tracking-widest text-text-secondary sm:inline">
+            · {industryJobCount.toLocaleString()} open
+          </span>
+        </div>
       </div>
-      <div className="-mx-1 flex gap-2 overflow-x-auto pb-1">
-        {[''].concat(cats).map((c) => {
-          const active = activeCategory === c;
-          const qs = baseQuery({ category: c });
-          const label = c || 'All categories';
-          return (
-            <Link
-              key={label}
-              href={(qs ? `/jobs?${qs}` : '/jobs') as '/jobs'}
-              className={`shrink-0 rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
-                active
-                  ? 'bg-primary/15 text-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
-            >
-              {label}
-            </Link>
-          );
-        })}
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary/70">
+          Category
+        </span>
+        <Link
+          href={`/jobs${baseQuery({ category: '' })}` as '/jobs'}
+          className={`rounded-full px-3 py-1 transition-colors ${
+            !activeCategory
+              ? 'bg-primary text-white'
+              : 'bg-secondary text-text-secondary hover:text-text-main'
+          }`}
+        >
+          All
+        </Link>
+        {cats.map((c) => (
+          <Link
+            key={c}
+            href={`/jobs${baseQuery({ category: c })}` as '/jobs'}
+            className={`rounded-full px-3 py-1 capitalize transition-colors ${
+              activeCategory === c
+                ? 'bg-primary text-white'
+                : 'bg-secondary text-text-secondary hover:text-text-main'
+            }`}
+          >
+            {c}
+          </Link>
+        ))}
       </div>
-    </div>
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-text-secondary/70">
+          Location
+        </span>
+        {locs.map((l) => (
+          <Link
+            key={l.v}
+            href={`/jobs${baseQuery({ location: l.v })}` as '/jobs'}
+            className={`rounded-full px-3 py-1 transition-colors ${
+              activeLocation === l.v
+                ? 'bg-primary text-white'
+                : 'bg-secondary text-text-secondary hover:text-text-main'
+            }`}
+          >
+            {l.label}
+          </Link>
+        ))}
+      </div>
+    </nav>
   );
 }

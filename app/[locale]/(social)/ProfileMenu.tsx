@@ -11,6 +11,7 @@ import {
   Briefcase,
   Loader2,
   FileText,
+  ShieldAlert,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { signOut } from '../app/(public)/login/actions';
@@ -40,6 +41,13 @@ type Props = {
   };
   isCreator: boolean;
   /**
+   * True when the viewer's profile.role is 'admin'. Drives the admin
+   * shortcut at the top of the popover (Users table for now; more
+   * surfaces — verification queue, content moderation — land here as
+   * they're built).
+   */
+  isAdmin?: boolean;
+  /**
    * True when the viewer's profile.roles[] already contains at least
    * one buy-side role (recruiter / agency / brand / service_provider).
    * Drives the "Recruiter mode" toggle in the menu.
@@ -55,6 +63,7 @@ type Props = {
 export default function ProfileMenu({
   profile,
   isCreator,
+  isAdmin = false,
   isRecruiter = false,
   hasProfessionalProfile = false,
 }: Props) {
@@ -97,7 +106,7 @@ export default function ProfileMenu({
   const close = () => setOpen(false);
 
   return (
-    <div ref={ref} className="relative border-t border-border-color/40 pt-4">
+    <div ref={ref} className="relative pt-4">
       {/* ── Popover ───────────────────────────────────────────────────── */}
       {open && (
         <div
@@ -120,6 +129,23 @@ export default function ProfileMenu({
             <Megaphone className="h-4 w-4" />
             Apply BabeHub
           </button>
+
+          {/* Admin shortcut — only rendered when role === 'admin'.
+              Single entry into the admin hub. Sub-sections (Users /
+              Jobs / Applications / Inquiries) are reachable from the
+              tabbed nav inside the admin shell, so cluttering the
+              popover with four duplicate entries was busywork. */}
+          {isAdmin && (
+            <Link
+              href={'/app/admin' as never}
+              onClick={close}
+              className={itemClass}
+              role="menuitem"
+            >
+              <ShieldAlert className="h-4 w-4 text-primary" />
+              Admin hub
+            </Link>
+          )}
 
           {/* "My profile" entry deliberately removed — the platform has
               a single canonical profile concept (the Professional

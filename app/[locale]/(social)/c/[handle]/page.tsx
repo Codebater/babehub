@@ -43,7 +43,16 @@ async function loadProfile(handle: string) {
 
   if (!profile) return null;
 
-  const [{ data: tiers }, { data: posts }, { data: { user } }] = await Promise.all([
+  // Four parallel queries on render entry. Previously the all-creator-
+  // posts query ran sequentially after the interactions batch — moving
+  // it into the Promise.all here shaves one round-trip off the render
+  // path, the biggest single-render perf win on this page.
+  const [
+    { data: tiers },
+    { data: posts },
+    { data: { user } },
+    { data: allCreatorPosts },
+  ] = await Promise.all([
     supabase
       .from('subscription_tiers')
       .select('id, name, description, price_cents, currency, perks, sort_order')
@@ -58,6 +67,11 @@ async function loadProfile(handle: string) {
       .order('published_at', { ascending: false })
       .limit(20),
     supabase.auth.getUser(),
+    supabase
+      .from('posts')
+      .select('id')
+      .eq('creator_id', profile.id)
+      .not('published_at', 'is', null),
   ]);
 
   // Collect every media id referenced by the posts the viewer can actually
@@ -73,13 +87,9 @@ async function loadProfile(handle: string) {
   const interactionsMap = await loadFullInteractionsBatch('creator_post', postIds);
 
   // Combined likes across every published post by this creator — not
-  // just the 20 most-recent we render. Two cheap queries: list all
-  // ids, then count `video_likes` rows that target them.
-  const { data: allCreatorPosts } = await supabase
-    .from('posts')
-    .select('id')
-    .eq('creator_id', profile.id)
-    .not('published_at', 'is', null);
+  // just the 20 most-recent we render. The all-posts list is already
+  // resolved above (parallel with the visible-20 query), so this is
+  // now a single follow-up count query.
   const allCreatorPostIds = (allCreatorPosts ?? []).map((p) => p.id);
   let totalLikes = 0;
   if (allCreatorPostIds.length > 0) {
@@ -231,17 +241,15 @@ export default async function CreatorProfilePage({ params }: Props) {
           <div className="flex flex-wrap items-center gap-2 self-end pb-2">
             {isOwnProfile ? (
               <>
-                {/* Owner sees two actions:
-                       1. Apply BabeHub — opens the survey modal in place
-                       2. Dashboard      — creator-only, links to the
-                                            posting/tier surfaces (also
-                                            the only entry point to the
-                                            profile editor since the
-                                            sidebar's Profile item already
-                                            covers that destination).
-                    The previous "Edit profile" pill was dropped — it
-                    duplicated the sidebar's Profile menu entry. */}
-                <ApplyButton label="Apply BabeHub" />
+                {/* Owner actions:
+                       1. Apply BabeHub — opens the survey modal in
+                          place. Hidden once `is_verified=true` because
+                          a BabeHub-verified profile has already cleared
+                          the application; surfacing the CTA would be
+                          misleading.
+                       2. Dashboard — creator-only, links to the
+                          posting/tier surfaces. */}
+                {!profile.is_verified && <ApplyButton label="Apply BabeHub" />}
                 {isCreator && (
                   <Link
                     href="/app/dashboard"

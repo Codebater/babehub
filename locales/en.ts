@@ -214,9 +214,9 @@ export default {
     ]
   },
   marketing: {
-    title_part1: 'We scale your ',
-    title_highlight: 'Presence',
-    subtitle: 'We drive 1,000+ page clicks every day and partner with Instagram channels totalling 20,000+ followers to scale your presence and maximize your creator earnings.',
+    title_part1: 'Watch your ',
+    title_highlight: 'Growth',
+    subtitle: 'Live follower counts, engagement spikes, top-earning posts, AI targeting — every metric a creator needs in one dashboard. Built for adult creators, by people who have actually done it.',
     applyNow: 'Apply Now',
     joinedBy: 'joined by ',
     creatorsPlus: '100 creators +',

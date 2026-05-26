@@ -18,6 +18,10 @@ import { createClient } from '@/lib/supabase/server';
 import SidebarLink from './SidebarLink';
 import ProfileMenu from './ProfileMenu';
 import SurveyModalProvider from './SurveyModalProvider';
+import SidebarCalendar, { type CalendarEvent } from './SidebarCalendar';
+import SidebarPitchButton from './SidebarPitchButton';
+import { ALL_POSTS } from '@/lib/blog/posts';
+import { loadFeaturedJobs } from '@/lib/jobs/featured';
 
 /**
  * Shared layout for the social-media surfaces: /explore and /c/{handle}.
@@ -74,16 +78,51 @@ export default async function SocialLayout({ children }: { children: React.React
   }
 
   const isCreator = profile?.role === 'creator';
+  const isAdmin = profile?.role === 'admin';
   const isRecruiter =
     profile?.roles?.some((r) =>
       ['recruiter', 'agency', 'brand', 'service_provider'].includes(r),
     ) ?? false;
 
+  // ── SidebarCalendar events ─────────────────────────────────────────
+  // Two sources merged into a single timeline:
+  //   • Blog posts from the build-time registry
+  //   • Featured jobs from `public.jobs` (any with `featured_until` set)
+  // RLS already restricts the jobs query to ones the viewer can see
+  // (published + approved + not-expired + appropriate visibility).
+  const calendarEvents: CalendarEvent[] = [
+    ...ALL_POSTS.map(
+      (p): CalendarEvent => ({
+        date: p.date,
+        kind: 'blog',
+        href: `/blog/${p.slug}`,
+        title: p.title,
+      }),
+    ),
+  ];
+
+  // Top 6 featured jobs — admin manual picks (`featured_until > now`)
+  // first, then auto-filled by highest budget. Real rows only —
+  // clicking an amber dot lands the visitor on the specific
+  // /jobs/{id} detail page where they can apply. Showcase demo
+  // entries were dropped from this surface (and /blog + /jobs) so
+  // every featured dot is a live, applicable job.
+  const featuredJobs = await loadFeaturedJobs(supabase, 6);
+  for (const j of featuredJobs) {
+    if (!j.published_at) continue;
+    calendarEvents.push({
+      date: j.published_at.slice(0, 10),
+      kind: 'job',
+      href: `/jobs/${j.id}`,
+      title: j.title,
+    });
+  }
+
   return (
     <SurveyModalProvider>
     <div className="min-h-screen bg-background md:flex">
       {/* ── Desktop sidebar ────────────────────────────────────────────── */}
-      <aside className="hidden md:fixed md:left-0 md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:border-r md:border-border-color md:bg-card/40 md:p-4">
+      <aside className="hidden md:fixed md:left-0 md:top-0 md:flex md:h-screen md:w-60 md:flex-col md:overflow-y-auto md:border-r md:border-border-color md:bg-card/40 md:p-4">
         <Link
           href="/explore"
           className="mb-8 px-2 text-2xl font-black tracking-tight text-text-main hover:text-primary"
@@ -130,6 +169,17 @@ export default async function SocialLayout({ children }: { children: React.React
           </SidebarLink>
         </nav>
 
+        {/* Persistent color-coded archive calendar — visible on every
+            (social) page. Blog posts in primary pink, featured jobs in
+            amber. Click a highlighted day to jump to that content.
+            The "Pitch a slot" button right below routes brands into
+            the BannerInquiryModal so every page carries a B2B entry
+            point alongside the inventory it sells. */}
+        <div className="mt-4">
+          <SidebarCalendar events={calendarEvents} />
+          <SidebarPitchButton />
+        </div>
+
         {profile ? (
           <ProfileMenu
             profile={{
@@ -138,6 +188,7 @@ export default async function SocialLayout({ children }: { children: React.React
               avatar_url: profile.avatar_url,
             }}
             isCreator={isCreator}
+            isAdmin={isAdmin}
             isRecruiter={isRecruiter}
             hasProfessionalProfile={hasProfessionalProfile}
           />

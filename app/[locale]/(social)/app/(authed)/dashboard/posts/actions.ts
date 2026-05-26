@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireCreator } from '@/lib/auth/guards';
+import { getLimits, loadUsage } from '@/lib/limits';
 
 export type PostState = {
   ok?: boolean;
@@ -32,7 +33,35 @@ export async function createPost(_prev: PostState, formData: FormData): Promise<
     return { error: 'You can attach at most 10 images per post.', values };
   }
 
-  const { user, supabase } = await requireCreator();
+  const { user, profile, supabase } = await requireCreator();
+
+  // ── Quota enforcement ──────────────────────────────────────────
+  // Caps are: 2/5/5/2 free, 10/25/25/10 elevated (verified / premium /
+  // admin). We count current usage server-side rather than trusting
+  // the client. Pictures + videos count the user's existing `media`
+  // rows; the about-to-be-published post just adds 1 to either
+  // publicPosts or privatePosts depending on `tier_required_id`.
+  //
+  // Adding a media-bearing post pulls media that's already in the
+  // `media` table — the upload already happened before this action
+  // ran. So we don't need to pre-count attached media against caps
+  // again; whoever uploaded them was rate-limited at upload time. We
+  // only enforce the post-level caps here.
+  const limits = getLimits(profile);
+  const usage = await loadUsage(supabase, user.id);
+  if (tierRaw && tierRaw !== 'public') {
+    if (usage.privatePosts >= limits.privatePosts) {
+      return {
+        error: `Private-post cap reached (${limits.privatePosts}). Apply BabeHub or upgrade to Premium for more.`,
+        values,
+      };
+    }
+  } else if (usage.publicPosts >= limits.publicPosts) {
+    return {
+      error: `Public-post cap reached (${limits.publicPosts}). Apply BabeHub or upgrade to Premium for more.`,
+      values,
+    };
+  }
 
   // Tier ownership check.
   let tier_required_id: string | null = null;

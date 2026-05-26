@@ -5,7 +5,6 @@ import { loadFeaturedCreatorVideos } from './creators';
 import VideoCard from './VideoCard';
 import CreatorVideoCard from './CreatorVideoCard';
 import LoadMoreButton from './LoadMoreButton';
-import CategoryChips from './CategoryChips';
 import CastingBanner from './CastingBanner';
 import LiveCamsBanner from './LiveCamsBanner';
 import LuxuryBanner from './LuxuryBanner';
@@ -13,6 +12,9 @@ import FeaturedSlot from './FeaturedSlot';
 import { loadPrimaryCreator } from './primary-creator';
 import { assignCastingNumbers } from '@/lib/casting/numbers';
 import AdStrip from '../_components/AdStrip';
+import { createClient } from '@/lib/supabase/server';
+import { isElevated } from '@/lib/limits';
+import PremiumGate from './PremiumGate';
 
 /**
  * `/explore` — public video discovery feed.
@@ -72,6 +74,26 @@ export default async function ExplorePage({ searchParams }: Props) {
     loadPrimaryCreator().catch(() => null),
   ]);
 
+  // ── Viewer premium gate ─────────────────────────────────────────
+  // Casting videos blur for non-elevated viewers. "Elevated" = admin,
+  // verified, or active premium. Single Supabase round-trip to pull
+  // the four flags; anonymous viewers go straight to "not elevated".
+  let viewerElevated = false;
+  {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: viewerRow } = await supabase
+        .from('profiles')
+        .select('role, is_verified, is_premium, premium_until')
+        .eq('id', user.id)
+        .maybeSingle();
+      viewerElevated = isElevated(viewerRow);
+    }
+  }
+
   const eporneFailed = 'error' in firstPage;
 
   // Each category gets its own treatment. Switching on the lowercased
@@ -118,14 +140,12 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-6">
-      <div className="mb-6">
-        <CategoryChips />
-      </div>
-
-      {/* Old-school ad strip — sits between the category nav and the
-          category hero so it reads as a clearly demarcated ad zone.
-          Click → opens the B2B BannerInquiryModal until a real
-          advertiser is plugged in. */}
+      {/* Old-school ad strip — sits at the top of the page, just
+          above the category hero so it reads as a clearly demarcated
+          ad zone. Click → opens the B2B BannerInquiryModal until a
+          real advertiser is plugged in. (The Categories nav was
+          removed from the top; sidebar Categories cover the same
+          destinations.) */}
       <div className="mb-6">
         <AdStrip placement="explore-top" />
       </div>
@@ -153,6 +173,11 @@ export default async function ExplorePage({ searchParams }: Props) {
       )}
 
       {/* ── Eporner grid ──────────────────────────────────────────────────── */}
+      {/* The gate wraps ONLY the initial grid of cards. LoadMoreButton
+          sits as a sibling underneath, so it stays clickable + readable
+          even when the section is blurred. Its appended cells inherit
+          the same per-cell blur via the `locked` prop so the premium
+          pitch stays consistent across pagination. */}
       <section>
         {eporneFailed ? (
           <div className="rounded-2xl border border-red-500/40 bg-red-500/5 p-8 text-center">
@@ -171,45 +196,59 @@ export default async function ExplorePage({ searchParams }: Props) {
               : 'No videos to show right now. Try refreshing.'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {/* Live Cams: 4 leading "Apply for a live slot" placeholders */}
-            {Array.from({ length: liveCamsLeadingSlots }).map((_, i) => (
-              <FeaturedSlot key={`lc-slot-${i}`} theme="livecams" />
-            ))}
+          <>
+            <PremiumGate
+              locked={showCastingNumbers && !viewerElevated}
+              category="Casting"
+            >
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {/* Live Cams: 4 leading "Apply for a live slot" placeholders */}
+                {Array.from({ length: liveCamsLeadingSlots }).map((_, i) => (
+                  <FeaturedSlot key={`lc-slot-${i}`} theme="livecams" />
+                ))}
 
-            {firstPage.videos.flatMap((video, i) => {
-              const items = [];
-              // Random "Apply to be featured" slot mixed into the
-              // Casting / Luxury / default grids (one per first batch).
-              if (i === randomFeaturedIndex) {
-                items.push(
-                  <FeaturedSlot key={`feat-${i}`} theme={featuredTheme} />,
-                );
-              }
-              items.push(
-                <VideoCard
-                  key={video.id}
-                  video={video}
-                  castingNumber={
-                    showCastingNumbers ? castingNumberMap.get(video.id) : undefined
+                {firstPage.videos.flatMap((video, i) => {
+                  const items = [];
+                  // Random "Apply to be featured" slot mixed into the
+                  // Casting / Luxury / default grids (one per first batch).
+                  if (i === randomFeaturedIndex) {
+                    items.push(
+                      <FeaturedSlot key={`feat-${i}`} theme={featuredTheme} />,
+                    );
                   }
-                  primaryCreator={primaryCreator}
-                />,
-              );
-              return items;
-            })}
+                  items.push(
+                    <VideoCard
+                      key={video.id}
+                      video={video}
+                      castingNumber={
+                        showCastingNumbers ? castingNumberMap.get(video.id) : undefined
+                      }
+                      primaryCreator={primaryCreator}
+                    />,
+                  );
+                  return items;
+                })}
+              </div>
+            </PremiumGate>
 
-            <LoadMoreButton
-              initialPage={firstPage.page}
-              initialHasMore={firstPage.hasMore}
-              query={query || undefined}
-              showCastingNumbers={showCastingNumbers}
-              initialUsedNumbers={
-                showCastingNumbers ? Array.from(castingTaken) : []
-              }
-              primaryCreator={primaryCreator}
-            />
-          </div>
+            {/* Load more — lives OUTSIDE the gate so it's always
+                clickable/readable. The button passes `locked` through
+                so freshly-loaded batches stay blurred for non-premium
+                viewers, matching the initial grid above. */}
+            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <LoadMoreButton
+                initialPage={firstPage.page}
+                initialHasMore={firstPage.hasMore}
+                query={query || undefined}
+                showCastingNumbers={showCastingNumbers}
+                initialUsedNumbers={
+                  showCastingNumbers ? Array.from(castingTaken) : []
+                }
+                primaryCreator={primaryCreator}
+                locked={showCastingNumbers && !viewerElevated}
+              />
+            </div>
+          </>
         )}
       </section>
 
