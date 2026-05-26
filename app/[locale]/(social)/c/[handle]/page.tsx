@@ -440,24 +440,36 @@ export default async function CreatorProfilePage({ params }: Props) {
                         ))}
                       </ul>
                     )}
-                    {/* Subscribe button — posts to the Cryptomus create-invoice
-                        route, which 303-redirects the browser to the hosted
-                        crypto checkout. Unauthenticated viewers get bounced to
-                        /app/login first via the route's own session check. */}
-                    <form
-                      action="/api/cryptomus/create-invoice"
-                      method="POST"
-                      className="mt-auto"
-                    >
-                      <input type="hidden" name="tier_id" value={tier.id} />
-                      <button
-                        type="submit"
-                        disabled={isOwnProfile}
-                        className="w-full rounded-full bg-primary py-2 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-pink-400 hover:scale-[1.02] disabled:cursor-not-allowed disabled:bg-pink-400/40 disabled:hover:scale-100"
-                      >
-                        {isOwnProfile ? "That's your tier" : 'Subscribe with crypto'}
-                      </button>
-                    </form>
+                    {/* Two payment provider buttons stacked. Both routes share
+                        the same shape (form POST → 303 to hosted checkout),
+                        differ only in the action URL + the row's `provider`
+                        column on payment_invoices. Cryptomus is the long-term
+                        rail; NOWPayments stays live as a fallback while the
+                        Cryptomus merchant is being verified. Both end up at
+                        /app/subscriptions/[id] for the polling-refresh wait. */}
+                    <div className="mt-auto flex flex-col gap-2">
+                      <form action="/api/cryptomus/create-invoice" method="POST">
+                        <input type="hidden" name="tier_id" value={tier.id} />
+                        <button
+                          type="submit"
+                          disabled={isOwnProfile}
+                          className="w-full rounded-full bg-primary py-2 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-pink-400 hover:scale-[1.02] disabled:cursor-not-allowed disabled:bg-pink-400/40 disabled:hover:scale-100"
+                        >
+                          {isOwnProfile ? "That's your tier" : 'Pay with Cryptomus'}
+                        </button>
+                      </form>
+                      {!isOwnProfile && (
+                        <form action="/api/nowpayments/create-invoice" method="POST">
+                          <input type="hidden" name="tier_id" value={tier.id} />
+                          <button
+                            type="submit"
+                            className="w-full rounded-full border border-primary/40 bg-primary/10 py-2 text-sm font-bold text-primary transition-all hover:border-primary hover:bg-primary/20"
+                          >
+                            Pay with NOWPayments
+                          </button>
+                        </form>
+                      )}
+                    </div>
                   </div>
                 );
               })}
