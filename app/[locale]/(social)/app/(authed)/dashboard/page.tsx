@@ -267,7 +267,7 @@ export default async function DashboardPage() {
             </h2>
             <p className="relative mt-2 max-w-xl text-sm text-text-secondary">
               Set up subscription tiers, publish locked content, accept tips,
-              and get paid in crypto today (NOWPayments) or card (CCBill, soon).
+              and get paid in crypto today (Cryptomus) or card (CCBill, soon).
               Your fan history stays — you just unlock creator features.
             </p>
             <Link

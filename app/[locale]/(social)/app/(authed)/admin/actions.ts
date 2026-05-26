@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth/guards';
+import type { TablesUpdate } from '@/types/supabase';
 
 /**
  * Server actions for the admin user-management table. All four flip a
@@ -26,7 +27,7 @@ async function flipFlag(
   const { supabase } = await requireAdmin();
   // Touch verified_at alongside is_verified so the admin view can show
   // when verification was granted (and the queue can sort by it).
-  const patch: Record<string, unknown> = { [column]: value };
+  const patch: TablesUpdate<'profiles'> = { [column]: value };
   if (column === 'is_verified') {
     patch.verified_at = value ? new Date().toISOString() : null;
   }
@@ -93,11 +94,15 @@ export async function upsertBlogPost(formData: FormData) {
   );
   const publish = formData.get('publish') === '1';
 
+  // Validation failures throw — the admin sees Next's error overlay
+  // with the real reason. (Form-action handlers must return void, so
+  // we can't pass a `{ ok, error }` shape back. If we ever want inline
+  // error UI here, switch to useActionState + a wrapping client form.)
   if (!/^[a-z0-9-]{3,80}$/.test(slug)) {
-    return { ok: false, error: 'Slug must be 3-80 chars, lowercase, digits and dashes only.' };
+    throw new Error('Slug must be 3-80 chars, lowercase, digits and dashes only.');
   }
   if (!title || !body) {
-    return { ok: false, error: 'Title and body are required.' };
+    throw new Error('Title and body are required.');
   }
 
   // Upsert by slug. `publish=1` flips published_at to now; "Save
@@ -119,7 +124,7 @@ export async function upsertBlogPost(formData: FormData) {
       { onConflict: 'slug' },
     );
 
-  if (error) return { ok: false, error: error.message };
+  if (error) throw new Error(`Blog upsert failed: ${error.message}`);
 
   revalidatePath('/blog');
   revalidatePath(`/blog/${slug}`);

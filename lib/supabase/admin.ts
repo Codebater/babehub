@@ -4,7 +4,7 @@ import type { Database } from '@/types/supabase';
 /**
  * Service-role Supabase client. **Server-only.** This client bypasses RLS
  * and has full read/write access to the database. Use it for:
- *   - Stripe / NOWPayments webhook handlers that write `subscriptions` rows
+ *   - Cryptomus webhook handler that writes `subscriptions` rows
  *     on behalf of users (no user session available at that moment)
  *   - Background jobs / cron handlers that need cross-user access
  *   - Internal admin tooling

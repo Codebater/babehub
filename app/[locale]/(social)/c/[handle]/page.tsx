@@ -440,12 +440,12 @@ export default async function CreatorProfilePage({ params }: Props) {
                         ))}
                       </ul>
                     )}
-                    {/* Subscribe button — posts to the NOWPayments create-invoice
+                    {/* Subscribe button — posts to the Cryptomus create-invoice
                         route, which 303-redirects the browser to the hosted
                         crypto checkout. Unauthenticated viewers get bounced to
                         /app/login first via the route's own session check. */}
                     <form
-                      action="/api/nowpayments/create-invoice"
+                      action="/api/cryptomus/create-invoice"
                       method="POST"
                       className="mt-auto"
                     >

@@ -2,10 +2,10 @@ import { randomUUID } from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { createInvoice } from '@/lib/nowpayments/client';
+import { createInvoice } from '@/lib/cryptomus/client';
 
 /**
- * POST /api/nowpayments/create-invoice
+ * POST /api/cryptomus/create-invoice
  *
  * Wired to the "Subscribe" form on every creator profile (`/c/{handle}`).
  * Body is `application/x-www-form-urlencoded` with a single field:
@@ -15,15 +15,14 @@ import { createInvoice } from '@/lib/nowpayments/client';
  * Flow:
  *   1. Require a signed-in user — redirect to /app/login with a `next=`
  *      param pointing back to the creator profile if not.
- *   2. Look up the tier (must be active, must belong to a creator that's
- *      not the same as the subscriber).
- *   3. Generate our own row id, hand it to NOWPayments as `order_id` so
- *      the IPN webhook can resolve the payment back to this invoice.
- *   4. Create the NOWPayments invoice (sandbox or prod based on env).
+ *   2. Look up the tier (must be active, must not be the user's own).
+ *   3. Generate our own row id, hand it to Cryptomus as `order_id` so
+ *      the webhook can resolve the payment back to this invoice.
+ *   4. Create the Cryptomus invoice.
  *   5. Insert the `payment_invoices` row via the SERVICE-ROLE client
  *      (RLS denies anon/authenticated writes — only the webhook + this
  *      route may write).
- *   6. 303-redirect the user's browser to NOWPayments' hosted checkout.
+ *   6. 303-redirect the user's browser to Cryptomus' hosted checkout.
  */
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -47,7 +46,6 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    // Send to login, then bounce back to whichever creator profile they came from.
     const referer = request.headers.get('referer');
     const fallback = '/app/dashboard';
     const next =
@@ -60,7 +58,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Pull the tier + the creator's handle in one round trip via RLS-aware client.
   const { data: tier } = await supabase
     .from('subscription_tiers')
     .select(
@@ -69,8 +66,6 @@ export async function POST(request: NextRequest) {
     .eq('id', tierId)
     .maybeSingle();
 
-  // The `creator` join can return an array or single depending on FK shape;
-  // normalise to a single object.
   const creator = Array.isArray(tier?.creator) ? tier?.creator[0] : tier?.creator;
 
   if (!tier || !tier.active || !creator) {
@@ -86,34 +81,33 @@ export async function POST(request: NextRequest) {
   const invoiceRowId = randomUUID();
   const base = origin(request);
 
-  let nowInvoice;
+  let cryptInvoice;
   try {
-    nowInvoice = await createInvoice({
-      price_amount: tier.price_cents / 100,
-      price_currency: tier.currency.toLowerCase(),
+    cryptInvoice = await createInvoice({
+      amount: (tier.price_cents / 100).toFixed(2),
+      currency: tier.currency.toUpperCase(),
       order_id: invoiceRowId,
-      order_description: `${tier.name} subscription for @${creator.handle}`,
-      ipn_callback_url: `${base}/api/nowpayments/ipn`,
-      success_url: `${base}/app/subscriptions/${invoiceRowId}`,
-      cancel_url: `${base}/c/${creator.handle}?cancelled=1`,
+      url_callback: `${base}/api/cryptomus/webhook`,
+      url_success: `${base}/app/subscriptions/${invoiceRowId}`,
+      url_return: `${base}/c/${creator.handle}?cancelled=1`,
+      lifetime: 3600, // 1h to complete payment
     });
   } catch (err) {
-    console.error('NOWPayments createInvoice error:', err);
+    console.error('Cryptomus createInvoice error:', err);
     return NextResponse.redirect(
       `${base}/c/${creator.handle}?error=payment_provider_error`,
       303,
     );
   }
 
-  // Service-role insert — payment_invoices RLS blocks client writes.
   const admin = createAdminClient();
   const { error: insertError } = await admin.from('payment_invoices').insert({
     id: invoiceRowId,
     subscriber_id: user.id,
     creator_id: creator.id,
     tier_id: tier.id,
-    provider: 'nowpayments',
-    provider_invoice_id: nowInvoice.id,
+    provider: 'cryptomus',
+    provider_invoice_id: cryptInvoice.uuid,
     status: 'pending',
     amount_cents: tier.price_cents,
     currency: tier.currency,
@@ -131,5 +125,5 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  return NextResponse.redirect(nowInvoice.invoice_url, 303);
+  return NextResponse.redirect(cryptInvoice.url, 303);
 }

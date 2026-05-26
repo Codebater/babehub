@@ -35,7 +35,17 @@ export const ELEVATED_LIMITS = {
   jobs: 25,
 } as const;
 
-export type Limits = typeof FREE_LIMITS;
+// `Limits` widens the numeric literals so both FREE_LIMITS and
+// ELEVATED_LIMITS are assignable to it. Without this, TS treats
+// `typeof FREE_LIMITS` as `{ videos: 2, ... }` and balks at the
+// elevated set whose `videos` is `10`.
+export type Limits = {
+  videos: number;
+  pictures: number;
+  publicPosts: number;
+  privatePosts: number;
+  jobs: number;
+};
 
 /**
  * Minimal viewer shape — what every "is this user premium / elevated"
