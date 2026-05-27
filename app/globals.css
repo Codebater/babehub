@@ -83,3 +83,11 @@ html.theme-pink input::placeholder,
 html.theme-pink textarea::placeholder {
   color: #6b7280; /* gray-500 */
 }
+
+/* iOS safe-area padding utility — used by the mobile bottom sheets so
+   content isn't hidden behind the home indicator on notched iPhones. */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  }
+}

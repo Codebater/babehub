@@ -29,6 +29,7 @@ const config: Config = {
       animation: {
         'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
         'fade-in-down': 'fadeInDown 1s ease-out forwards',
+        'slide-up': 'slideUp 0.28s cubic-bezier(0.32,0.72,0,1) forwards',
         marquee: 'marquee 40s linear infinite',
         'marquee-right': 'marquee-right 40s linear infinite',
       },
@@ -40,6 +41,10 @@ const config: Config = {
         fadeInDown: {
           '0%': { opacity: '0', transform: 'translateY(-20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
         },
         marquee: {
           from: { transform: 'translateX(0)' },

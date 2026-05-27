@@ -1,10 +1,4 @@
 import {
-  Compass,
-  User,
-  LayoutDashboard,
-  Settings,
-  Plus,
-  LogIn,
   Home,
   Clapperboard,
   Radio,
@@ -17,6 +11,7 @@ import { Link } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/server';
 import SidebarLink from './SidebarLink';
 import ProfileMenu from './ProfileMenu';
+import MobileNav from './MobileNav';
 import Script from 'next/script';
 import SurveyModalProvider from './SurveyModalProvider';
 import ExoClickStickyBanner from './_components/ExoClickStickyBanner';
@@ -240,33 +235,12 @@ export default async function SocialLayout({ children }: { children: React.React
       </div>
 
       {/* ── Mobile bottom tab bar ─────────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-border-color bg-card/95 px-2 py-2 backdrop-blur md:hidden">
-        <SidebarLink compact href="/explore" label="Explore">
-          <Compass className="h-5 w-5" />
-        </SidebarLink>
-        {profile ? (
-          <>
-            <SidebarLink compact href={`/c/${profile.handle}`} label="Profile">
-              <User className="h-5 w-5" />
-            </SidebarLink>
-            {isCreator && (
-              <SidebarLink compact href="/app/dashboard/posts/new" label="New">
-                <Plus className="h-5 w-5" />
-              </SidebarLink>
-            )}
-            <SidebarLink compact href="/app/dashboard" label="Dashboard">
-              <LayoutDashboard className="h-5 w-5" />
-            </SidebarLink>
-            <SidebarLink compact href="/app/settings" label="Settings">
-              <Settings className="h-5 w-5" />
-            </SidebarLink>
-          </>
-        ) : (
-          <SidebarLink compact href="/app/login" label="Sign in">
-            <LogIn className="h-5 w-5" />
-          </SidebarLink>
-        )}
-      </nav>
+      <MobileNav
+        profile={profile ? { handle: profile.handle, display_name: profile.display_name, avatar_url: profile.avatar_url } : null}
+        isCreator={isCreator}
+        isAdmin={isAdmin}
+        hasProfessionalProfile={hasProfessionalProfile}
+      />
     </div>
       <ExoClickStickyBanner />
       {/* Pop-under zone 5935772 — triggers once per session on first user click */}
