@@ -212,28 +212,23 @@ export async function updateJob(jobId: string, formData: FormData): Promise<JobA
 
   const wantsPublish = formData.get('publish') === '1';
 
-  const patch: Record<string, unknown> = {
-    title,
-    description: ((formData.get('description') as string) || '').trim().slice(0, 5000),
-    budget_min_cents,
-    budget_max_cents,
-    currency: ((formData.get('currency') as string) || 'EUR').toUpperCase().slice(0, 3),
-    location_kind: locationKind,
-    location_text: ((formData.get('location_text') as string) || '').trim() || null,
-    tags: csvToArray((formData.get('tags') as string) || '', 12),
-    categories: csvToArray((formData.get('categories') as string) || '', 8),
-    requires_verification: formData.get('requires_verification') === '1',
-    visibility,
-  };
-  if (expires_at) patch.expires_at = expires_at;
-  if (wantsPublish) {
-    patch.status = 'published' as JobStatus;
-    patch.published_at = new Date().toISOString();
-  }
-
   const { error } = await supabase
     .from('jobs')
-    .update(patch)
+    .update({
+      title,
+      description: ((formData.get('description') as string) || '').trim().slice(0, 5000),
+      budget_min_cents,
+      budget_max_cents,
+      currency: ((formData.get('currency') as string) || 'EUR').toUpperCase().slice(0, 3),
+      location_kind: locationKind,
+      location_text: ((formData.get('location_text') as string) || '').trim() || null,
+      tags: csvToArray((formData.get('tags') as string) || '', 12),
+      categories: csvToArray((formData.get('categories') as string) || '', 8),
+      requires_verification: formData.get('requires_verification') === '1',
+      visibility,
+      ...(expires_at ? { expires_at } : {}),
+      ...(wantsPublish ? { status: 'published' as JobStatus, published_at: new Date().toISOString() } : {}),
+    })
     .eq('id', jobId)
     .eq('poster_id', user.id);
 
