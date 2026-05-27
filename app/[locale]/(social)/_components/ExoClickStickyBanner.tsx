@@ -7,30 +7,19 @@ import { useEffect } from 'react';
  * ins tag once per page. ExoClick's script handles the fixed/sticky
  * positioning — the ins tag just needs to be in the DOM.
  *
- * Zone 5935770 is babehub.net's sticky banner zone (728×90 desktop /
- * responsive mobile). The script is injected once even if this
- * component re-mounts.
+ * Zone 5935770 is babehub.net's sticky banner zone.
  */
 export default function ExoClickStickyBanner() {
   useEffect(() => {
-    const existing = document.querySelector(
-      'script[src*="a.magsrv.com/ad-provider.js"]',
-    );
-    type W = { AdProvider?: Array<{ push?: (v: unknown) => void }> };
-    const push = () => {
-      const w = window as unknown as W;
-      w.AdProvider = w.AdProvider ?? [];
-      w.AdProvider.push({ serve: {} });
-    };
-    if (existing) {
-      push();
-      return;
-    }
+    const win = window as unknown as Record<string, unknown[]>;
+    win.AdProvider = (win.AdProvider as unknown[]) ?? [];
+    win.AdProvider.push({ serve: {} });
+
+    if (document.querySelector('script[src*="a.magsrv.com/ad-provider.js"]')) return;
     const s = document.createElement('script');
     s.async = true;
     s.type = 'application/javascript';
     s.src = 'https://a.magsrv.com/ad-provider.js';
-    s.onload = push;
     document.head.appendChild(s);
   }, []);
 
