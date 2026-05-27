@@ -41,6 +41,7 @@ export const metadata: Metadata = {
   icons: { icon: '/favicon.png', apple: '/favicon.png' },
   other: {
     'google-site-verification': 'o5JrL8VSLTJcm1Y3liJ41MTvLIx6lzS-QlH7iHKd4hM',
+    '6a97888e-site-verification': 'f0dbbe21efdb52edc5a865db796962bd',
   },
 };
 
