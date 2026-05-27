@@ -181,6 +181,78 @@ export async function createJobAndRedirect(formData: FormData): Promise<void> {
   redirect(`/app/recruiter/jobs/${res.id}/applications`);
 }
 
+/** Update an existing job the viewer owns. */
+export async function updateJob(jobId: string, formData: FormData): Promise<JobActionResult> {
+  const { user, supabase } = await requireOnboarded();
+
+  const title = ((formData.get('title') as string) || '').trim().slice(0, 200);
+  if (!title) return { ok: false, error: 'Title is required.' };
+
+  const locationKindRaw = (formData.get('location_kind') as string) || 'remote';
+  const locationKind: LocationKind =
+    locationKindRaw === 'remote' || locationKindRaw === 'onsite' || locationKindRaw === 'hybrid'
+      ? locationKindRaw
+      : 'remote';
+
+  const visibilityRaw = (formData.get('visibility') as string) || 'public';
+  const visibility =
+    visibilityRaw === 'public' || visibilityRaw === 'verified_only' || visibilityRaw === 'invite'
+      ? visibilityRaw
+      : 'public';
+
+  const budget_min_cents = parseWholeUnitsToCents((formData.get('budget_min') as string | null) ?? null);
+  const budget_max_cents = parseWholeUnitsToCents((formData.get('budget_max') as string | null) ?? null);
+
+  const deadlineRaw = ((formData.get('expires_at') as string) || '').trim();
+  let expires_at: string | null = null;
+  if (deadlineRaw) {
+    const d = new Date(`${deadlineRaw}T23:59:59Z`);
+    if (!Number.isNaN(d.getTime())) expires_at = d.toISOString();
+  }
+
+  const wantsPublish = formData.get('publish') === '1';
+
+  const patch: Record<string, unknown> = {
+    title,
+    description: ((formData.get('description') as string) || '').trim().slice(0, 5000),
+    budget_min_cents,
+    budget_max_cents,
+    currency: ((formData.get('currency') as string) || 'EUR').toUpperCase().slice(0, 3),
+    location_kind: locationKind,
+    location_text: ((formData.get('location_text') as string) || '').trim() || null,
+    tags: csvToArray((formData.get('tags') as string) || '', 12),
+    categories: csvToArray((formData.get('categories') as string) || '', 8),
+    requires_verification: formData.get('requires_verification') === '1',
+    visibility,
+  };
+  if (expires_at) patch.expires_at = expires_at;
+  if (wantsPublish) {
+    patch.status = 'published' as JobStatus;
+    patch.published_at = new Date().toISOString();
+  }
+
+  const { error } = await supabase
+    .from('jobs')
+    .update(patch)
+    .eq('id', jobId)
+    .eq('poster_id', user.id);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath('/jobs');
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath('/app/recruiter/dashboard');
+  return { ok: true, id: jobId };
+}
+
+export async function updateJobAndRedirect(jobId: string, formData: FormData): Promise<void> {
+  const res = await updateJob(jobId, formData);
+  if (!res.ok) {
+    redirect(`/app/recruiter/jobs/${jobId}/edit?error=${encodeURIComponent(res.error)}`);
+  }
+  redirect(`/app/recruiter/jobs/${jobId}/applications`);
+}
+
 /** Flip a job between draft / published / paused / closed. */
 export async function setJobStatus(
   jobId: string,

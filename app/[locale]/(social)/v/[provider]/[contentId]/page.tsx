@@ -7,6 +7,7 @@ import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadInteractionSummary } from '@/lib/interactions/load';
 import VideoActions from '@/components/VideoActions';
 import CommentThread from '@/components/CommentThread';
+import AdStrip from '@/app/[locale]/(social)/_components/AdStrip';
 
 /**
  * `/v/{provider}/{contentId}` — dedicated page for one video. Lives
@@ -238,6 +239,11 @@ export default async function VideoPage({ params, searchParams }: Props) {
           </p>
         )}
 
+        {/* Ad strip */}
+        <div className="mt-6">
+          <AdStrip placement="video-eporner" />
+        </div>
+
         {/* Comments */}
         <section className="mt-8 border-t border-border-color/40 pt-6">
           <h2 className="mb-4 text-lg font-bold text-text-main">
@@ -337,6 +343,11 @@ export default async function VideoPage({ params, searchParams }: Props) {
           {summary.commentCount}{' '}
           {summary.commentCount === 1 ? 'comment' : 'comments'}
         </span>
+      </div>
+
+      {/* Ad strip */}
+      <div className="mt-6">
+        <AdStrip placement="video-creator" />
       </div>
 
       <section className="mt-8 border-t border-border-color/40 pt-6">

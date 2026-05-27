@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { Briefcase, Plus, MailOpen, Pause, Archive } from 'lucide-react';
+import { Briefcase, Plus, MailOpen, Pause, Archive, Pencil } from 'lucide-react';
 import { requireRecruiter } from '@/lib/auth/guards';
 
 export const dynamic = 'force-dynamic';
@@ -102,20 +102,29 @@ export default async function RecruiterDashboardPage() {
                       {job.location_kind}
                     </p>
                   </div>
-                  <Link
-                    href={
-                      `/app/recruiter/jobs/${job.id}/applications` as '/app/recruiter/jobs/[id]/applications'
-                    }
-                    className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-main transition-colors hover:border-primary hover:text-primary"
-                  >
-                    <MailOpen className="h-3.5 w-3.5" />
-                    {counts.total} {counts.total === 1 ? 'applicant' : 'applicants'}
-                    {counts.pending > 0 && (
-                      <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">
-                        {counts.pending} new
-                      </span>
-                    )}
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Link
+                      href={`/app/recruiter/jobs/${job.id}/edit` as never}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-main transition-colors hover:border-primary hover:text-primary"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </Link>
+                    <Link
+                      href={
+                        `/app/recruiter/jobs/${job.id}/applications` as '/app/recruiter/jobs/[id]/applications'
+                      }
+                      className="inline-flex items-center gap-2 rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-main transition-colors hover:border-primary hover:text-primary"
+                    >
+                      <MailOpen className="h-3.5 w-3.5" />
+                      {counts.total} {counts.total === 1 ? 'applicant' : 'applicants'}
+                      {counts.pending > 0 && (
+                        <span className="rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary">
+                          {counts.pending} new
+                        </span>
+                      )}
+                    </Link>
+                  </div>
                 </div>
               </li>
             );

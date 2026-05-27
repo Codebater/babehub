@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { requireRecruiter } from '@/lib/auth/guards';
+import { requireOnboarded } from '@/lib/auth/guards';
 import { createJobAndRedirect } from '@/lib/jobs/actions';
 import ChipPicker from '../../../../../_components/ChipPicker';
 import JobDeadlinePicker from './JobDeadlinePicker';
@@ -62,7 +62,7 @@ type Props = {
  * inspects `publish=1` in the body to decide.
  */
 export default async function NewJobPage({ searchParams }: Props) {
-  await requireRecruiter();
+  await requireOnboarded();
   const { error } = await searchParams;
 
   return (
