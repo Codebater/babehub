@@ -5,58 +5,90 @@ import { ArrowRight } from 'lucide-react';
 import { useSurveyModal } from '../SurveyModalProvider';
 
 /**
- * `<AdStrip>` — a thin, deliberately old-school "Advertisement" rail
- * that sits between content sections on public pages and **rotates
- * through creatives every few seconds** like a 2000s banner ad.
+ * `<AdStrip>` — full-width ad rail.
  *
- * Why the rotation:
- *   - Real banner inventory has multiple creatives in a single slot;
- *     rotating in place gives this placeholder the same "we have ad
- *     supply" feel even though every creative currently points back
- *     to the BannerInquiryModal.
- *   - Different headlines pitch different angles (reach, anonymity,
- *     placement options, response time) — whichever lands with the
- *     visitor at the moment they look at it.
+ * Priority:
+ *   1. ExoClick  — if NEXT_PUBLIC_EXOCLICK_ZONE_STRIP is set
+ *   2. JuicyAds  — if NEXT_PUBLIC_JUICYADS_SPOT_STRIP is set
+ *   3. Placeholder rotating banner (house ad, opens BannerInquiryModal)
  *
- * Design intent stays "newspaper-rule strip":
- *   - dashed top/bottom border (newspaper-rule feel)
- *   - monospace ADVERTISEMENT eyebrow chip
- *   - bold uppercase headline + sub line
- *   - whole strip is one big <button> — click anywhere → opens the
- *     B2B BannerInquiryModal until a real advertiser is plugged in.
+ * ExoClick setup:
+ *   - Create a Display Banner zone in your ExoClick Publisher dashboard
+ *   - Recommended sizes: 728×90 (desktop) + 300×100 (mobile)
+ *   - Set NEXT_PUBLIC_EXOCLICK_ZONE_STRIP to the numeric zone ID
+ *   - Optionally set NEXT_PUBLIC_EXOCLICK_ZONE_STRIP_MOBILE for the
+ *     mobile zone (falls back to the desktop zone if unset)
  *
- * Variants:
- *   - 'thin'    (default) — rotating, full-bleed feel.
- *   - 'compact'             — single-line condensed pill, static
- *                            (rotation would be noisy in dense layouts).
- *
- * Tracking: `placement` is dropped on a data-attr so any analytics
- * layer wired in later can attribute clicks without code changes.
+ * JuicyAds setup:
+ *   - Set NEXT_PUBLIC_JUICYADS_SPOT_STRIP to your spot UUID
  */
 type Props = {
   variant?: 'thin' | 'compact';
-  /** Override the rotation interval (ms). Default 6000. */
   intervalMs?: number;
-  /** Identifier for the slot's location, e.g. "explore-top". */
   placement?: string;
 };
 
+// ── ExoClick ────────────────────────────────────────────────────────
+const EXOCLICK_ZONE_DESKTOP = process.env.NEXT_PUBLIC_EXOCLICK_ZONE_STRIP;
+const EXOCLICK_ZONE_MOBILE = process.env.NEXT_PUBLIC_EXOCLICK_ZONE_STRIP_MOBILE ?? EXOCLICK_ZONE_DESKTOP;
+
+function ExoClickAd({ placement }: { placement: string }) {
+  useEffect(() => {
+    if (document.querySelector('script[src*="a.magsrv.com/ad-provider.js"]')) return;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://a.magsrv.com/ad-provider.js';
+    document.head.appendChild(s);
+  }, []);
+
+  return (
+    <div data-ad-placement={placement} className="flex w-full justify-center overflow-hidden py-1">
+      {/* Desktop zone */}
+      {EXOCLICK_ZONE_DESKTOP && (
+        <ins
+          className="eas6a97888e2 hidden sm:block"
+          data-zoneid={EXOCLICK_ZONE_DESKTOP}
+        />
+      )}
+      {/* Mobile zone */}
+      {EXOCLICK_ZONE_MOBILE && (
+        <ins
+          className="eas6a97888e2 sm:hidden"
+          data-zoneid={EXOCLICK_ZONE_MOBILE}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── JuicyAds ────────────────────────────────────────────────────────
+const JUICYADS_SPOT = process.env.NEXT_PUBLIC_JUICYADS_SPOT_STRIP;
+
+function JuicyAdsAd({ placement }: { placement: string }) {
+  useEffect(() => {
+    if (document.querySelector('script[src*="cdn.juicyads.com"]')) return;
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://cdn.juicyads.com/jp.js';
+    document.head.appendChild(s);
+  }, []);
+
+  return (
+    <div data-ad-placement={placement} className="flex w-full justify-center overflow-hidden py-1">
+      <ins className="juicyads" data-cfg={JUICYADS_SPOT} />
+    </div>
+  );
+}
+
+// ── Placeholder ─────────────────────────────────────────────────────
 type Creative = {
-  /** Tracking key for the individual creative. */
   key: string;
-  /** Tiny eyebrow chip text. Defaults to "Advertisement". */
   eyebrow?: string;
   headline: string;
   sub: string;
-  /** Optional accent shade applied to the eyebrow chip + hover halo. */
   accent?: 'pink' | 'amber' | 'sky' | 'mono';
 };
 
-/**
- * The default carousel — five creatives that each pitch the slot
- * from a different angle. Stable order so SSR ↔ client first paint
- * stays identical; rotation only starts after hydration.
- */
 const DEFAULT_CREATIVES: Creative[] = [
   {
     key: 'reach',
@@ -113,6 +145,7 @@ const ACCENT_CLASS: Record<NonNullable<Creative['accent']>, { chip: string; halo
   },
 };
 
+// ── Main export ─────────────────────────────────────────────────────
 export default function AdStrip({
   variant = 'thin',
   intervalMs = 6000,
@@ -120,7 +153,10 @@ export default function AdStrip({
 }: Props) {
   const { openBanner } = useSurveyModal();
 
-  // ── Compact: static, single-line. Rotation would be noisy. ─────
+  // Real ad networks take priority over the placeholder
+  if (EXOCLICK_ZONE_DESKTOP) return <ExoClickAd placement={placement} />;
+  if (JUICYADS_SPOT) return <JuicyAdsAd placement={placement} />;
+
   if (variant === 'compact') {
     return (
       <button
@@ -142,18 +178,9 @@ export default function AdStrip({
     );
   }
 
-  // ── Thin: rotating banner. ─────────────────────────────────────
   return <RotatingStrip placement={placement} intervalMs={intervalMs} onClick={openBanner} />;
 }
 
-/**
- * Inner component handling the rotation state. Split out so we don't
- * need useState/useEffect at all when the parent is 'compact'.
- *
- * The strip starts at index 0 on every render (SSR-safe — no client-
- * only random seed leaks into the markup); the rotation timer kicks
- * in after hydration via useEffect.
- */
 function RotatingStrip({
   placement,
   intervalMs,
@@ -164,9 +191,6 @@ function RotatingStrip({
   onClick: () => void;
 }) {
   const [index, setIndex] = useState(0);
-  // `fading` toggles a one-tick opacity-0 right before the swap so the
-  // creative cross-fades instead of jump-cutting. 250ms fade out → set
-  // new index → 250ms fade back in. Total 500ms transition per swap.
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
@@ -208,7 +232,6 @@ function RotatingStrip({
         >
           Ad
         </span>
-
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-black uppercase tracking-wide text-text-main sm:text-base">
             {c.headline}
@@ -217,17 +240,12 @@ function RotatingStrip({
             {c.sub}
           </p>
         </div>
-
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-text-main/15 bg-text-main/[0.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-main transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
           <span className="hidden sm:inline">Pitch a slot</span>
           <span className="sm:hidden">Pitch</span>
           <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
-
-      {/* Old-school carousel dots — bottom-right, decorative. Active
-          dot in primary pink, others muted. Visible on desktop only;
-          mobile keeps the strip clean. */}
       <div className="pointer-events-none absolute bottom-1 right-3 hidden gap-1 sm:flex">
         {DEFAULT_CREATIVES.map((cr, i) => (
           <span
