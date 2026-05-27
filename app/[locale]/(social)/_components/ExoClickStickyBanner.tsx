@@ -16,12 +16,11 @@ export default function ExoClickStickyBanner() {
     const existing = document.querySelector(
       'script[src*="a.magsrv.com/ad-provider.js"]',
     );
+    type W = { AdProvider?: Array<{ push?: (v: unknown) => void }> };
     const push = () => {
-      (window as { AdProvider?: { push: (v: unknown) => void }[] }).AdProvider =
-        (window as { AdProvider?: { push: (v: unknown) => void }[] }).AdProvider ?? [];
-      (window as { AdProvider: { push: (v: unknown) => void }[] }).AdProvider.push({
-        serve: {},
-      });
+      const w = window as unknown as W;
+      w.AdProvider = w.AdProvider ?? [];
+      w.AdProvider.push({ serve: {} });
     };
     if (existing) {
       push();
