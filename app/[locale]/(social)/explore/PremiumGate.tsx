@@ -14,8 +14,8 @@ import { Lock, Sparkles, ArrowRight } from 'lucide-react';
  *
  * Server component — no JS needed. The blur is CSS, the click block
  * is `pointer-events-none` on the children container, the unlock
- * CTA is a regular Link (currently to /app/premium placeholder; the
- * NOWPayments checkout flow lands in a follow-up turn).
+ * CTA is a regular Link to /app/premium where the NOWPayments
+ * checkout flow lives ($10/mo, 30 days).
  */
 export default function PremiumGate({
   locked,

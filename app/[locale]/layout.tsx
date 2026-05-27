@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
 import { Poppins } from 'next/font/google';
 import { routing, type AppLocale } from '@/i18n/routing';
+import AgeGate from './_components/AgeGate';
 import '../globals.css';
 
 const poppins = Poppins({
@@ -111,6 +112,10 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
+        {/* Mandatory 18+ confirmation. Shows on first visit per browser,
+            covers every page underneath. Reads/writes localStorage in a
+            useEffect — SSR-safe, never blocks search-engine crawl. */}
+        <AgeGate />
         <Analytics />
       </body>
     </html>

@@ -27,7 +27,7 @@ export default async function SubscriptionLandingPage({ params }: Props) {
   const { data: invoice } = await supabase
     .from('payment_invoices')
     .select(
-      'id, status, amount_cents, currency, subscription_id, metadata, subscriber_id, creator:profiles!payment_invoices_creator_id_fkey(handle, display_name)',
+      'id, status, amount_cents, currency, subscription_id, purpose, metadata, subscriber_id, creator:profiles!payment_invoices_creator_id_fkey(handle, display_name)',
     )
     .eq('id', id)
     .maybeSingle();
@@ -39,15 +39,36 @@ export default async function SubscriptionLandingPage({ params }: Props) {
   const creator = Array.isArray(invoice.creator) ? invoice.creator[0] : invoice.creator;
   const creatorHandle = creator?.handle ?? '';
   const creatorName = creator?.display_name || creatorHandle;
+  const isPremium = invoice.purpose === 'premium';
 
   const isPending = PENDING_STATUSES.has(invoice.status);
-  const isSuccess = SUCCESS_STATUSES.has(invoice.status) && invoice.subscription_id;
+  // Premium success doesn't write a subscriptions row — only check the
+  // status for premium invoices. Tier subscriptions need both the status
+  // AND the subscription_id (proof the IPN created the row).
+  const isSuccess = SUCCESS_STATUSES.has(invoice.status) && (isPremium || invoice.subscription_id);
   const isFailure = FAILURE_STATUSES.has(invoice.status);
 
   return (
     <main className="mx-auto max-w-xl px-6 py-16">
       <div className="rounded-3xl border border-border-color bg-card p-8 text-center">
-        {isSuccess && (
+        {isSuccess && isPremium && (
+          <>
+            <CheckCircle2 className="mx-auto h-16 w-16 text-amber-400" />
+            <h1 className="mt-4 text-3xl font-black text-text-main">You&apos;re Premium!</h1>
+            <p className="mt-2 text-text-secondary">
+              The full Casting catalog + every creator&apos;s otherwise-blurred
+              posts are unlocked. Premium runs for 30 days; come back any time
+              to extend.
+            </p>
+            <Link
+              href="/explore"
+              className="mt-8 inline-block rounded-full bg-amber-400 px-6 py-3 font-black text-black shadow-lg shadow-amber-400/30 transition-all hover:bg-amber-300 hover:scale-[1.02]"
+            >
+              Explore the unlocked catalog →
+            </Link>
+          </>
+        )}
+        {isSuccess && !isPremium && (
           <>
             <CheckCircle2 className="mx-auto h-16 w-16 text-green-400" />
             <h1 className="mt-4 text-3xl font-black text-text-main">You&apos;re subscribed!</h1>
@@ -99,10 +120,10 @@ export default async function SubscriptionLandingPage({ params }: Props) {
               No charge was made. You can try again any time.
             </p>
             <Link
-              href={`/c/${creatorHandle}`}
+              href={isPremium ? '/app/premium' : `/c/${creatorHandle}`}
               className="mt-8 inline-block rounded-full border border-primary px-6 py-3 font-bold text-primary transition-colors hover:bg-primary hover:text-white"
             >
-              Back to {creatorName}&apos;s profile
+              {isPremium ? 'Try Premium again' : `Back to ${creatorName}'s profile`}
             </Link>
           </>
         )}

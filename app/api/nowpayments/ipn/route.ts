@@ -68,16 +68,17 @@ export async function POST(request: NextRequest) {
     | {
         id: string;
         subscriber_id: string;
-        creator_id: string;
-        tier_id: string;
+        creator_id: string | null;
+        tier_id: string | null;
         subscription_id: string | null;
+        purpose: string;
       }
     | null;
 
   if (order_id) {
     const { data } = await admin
       .from('payment_invoices')
-      .select('id, subscriber_id, creator_id, tier_id, subscription_id')
+      .select('id, subscriber_id, creator_id, tier_id, subscription_id, purpose')
       .eq('id', order_id)
       .maybeSingle();
     invoice = data ?? null;
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
   if (!invoice && invoice_id != null) {
     const { data } = await admin
       .from('payment_invoices')
-      .select('id, subscriber_id, creator_id, tier_id, subscription_id')
+      .select('id, subscriber_id, creator_id, tier_id, subscription_id, purpose')
       .eq('provider', 'nowpayments')
       .eq('provider_invoice_id', String(invoice_id))
       .maybeSingle();
@@ -107,38 +108,72 @@ export async function POST(request: NextRequest) {
   } = { status: payment_status };
   if (payment_id != null) updates.provider_payment_id = String(payment_id);
 
-  // Terminal success — open the paywall.
-  if (payment_status === 'finished' && !invoice.subscription_id) {
+  // Terminal success — open the paywall (or flip premium).
+  if (payment_status === 'finished') {
     const periodStart = new Date();
     const periodEnd = new Date(periodStart);
     periodEnd.setUTCDate(periodEnd.getUTCDate() + 30);
 
-    const providerSubId = String(payment_id ?? invoice_id ?? invoice.id);
+    if (invoice.purpose === 'premium') {
+      // Premium top-up: extend the subscriber's premium_until window.
+      // If they're already premium with a future expiry, push it +30d
+      // from the current expiry (stacking). Otherwise +30d from now.
+      const { data: prof } = await admin
+        .from('profiles')
+        .select('is_premium, premium_until')
+        .eq('id', invoice.subscriber_id)
+        .maybeSingle();
 
-    const { data: sub, error: subError } = await admin
-      .from('subscriptions')
-      .insert({
-        subscriber_id: invoice.subscriber_id,
-        creator_id: invoice.creator_id,
-        tier_id: invoice.tier_id,
-        status: 'active',
-        provider: 'nowpayments',
-        provider_subscription_id: providerSubId,
-        current_period_start: periodStart.toISOString(),
-        current_period_end: periodEnd.toISOString(),
-      })
-      .select('id')
-      .single();
-
-    if (subError) {
-      // Duplicate provider_subscription_id (23505) means we already
-      // processed this — log and move on rather than failing the IPN.
-      if (subError.code !== '23505') {
-        console.error('subscriptions insert error:', subError);
-        return new NextResponse('Subscription create failed', { status: 500 });
+      let newUntil = periodEnd;
+      if (prof?.premium_until) {
+        const existingUntil = new Date(prof.premium_until);
+        if (existingUntil.getTime() > Date.now()) {
+          newUntil = new Date(existingUntil);
+          newUntil.setUTCDate(newUntil.getUTCDate() + 30);
+        }
       }
-    } else if (sub) {
-      updates.subscription_id = sub.id;
+
+      const { error: profErr } = await admin
+        .from('profiles')
+        .update({
+          is_premium: true,
+          premium_until: newUntil.toISOString(),
+        })
+        .eq('id', invoice.subscriber_id);
+
+      if (profErr) {
+        console.error('profiles premium update error:', profErr);
+        return new NextResponse('Premium update failed', { status: 500 });
+      }
+    } else if (!invoice.subscription_id && invoice.creator_id && invoice.tier_id) {
+      // tier_subscription path — create the subscriptions row.
+      const providerSubId = String(payment_id ?? invoice_id ?? invoice.id);
+
+      const { data: sub, error: subError } = await admin
+        .from('subscriptions')
+        .insert({
+          subscriber_id: invoice.subscriber_id,
+          creator_id: invoice.creator_id,
+          tier_id: invoice.tier_id,
+          status: 'active',
+          provider: 'nowpayments',
+          provider_subscription_id: providerSubId,
+          current_period_start: periodStart.toISOString(),
+          current_period_end: periodEnd.toISOString(),
+        })
+        .select('id')
+        .single();
+
+      if (subError) {
+        // Duplicate provider_subscription_id (23505) means we already
+        // processed this — log and move on rather than failing the IPN.
+        if (subError.code !== '23505') {
+          console.error('subscriptions insert error:', subError);
+          return new NextResponse('Subscription create failed', { status: 500 });
+        }
+      } else if (sub) {
+        updates.subscription_id = sub.id;
+      }
     }
   }
 

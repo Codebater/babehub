@@ -385,49 +385,52 @@ export type Database = {
         Row: {
           amount_cents: number
           created_at: string
-          creator_id: string
+          creator_id: string | null
           currency: string
           id: string
           metadata: Json
           provider: Database["public"]["Enums"]["payment_provider"]
           provider_invoice_id: string
           provider_payment_id: string | null
+          purpose: string
           status: string
           subscriber_id: string
           subscription_id: string | null
-          tier_id: string
+          tier_id: string | null
           updated_at: string
         }
         Insert: {
           amount_cents: number
           created_at?: string
-          creator_id: string
+          creator_id?: string | null
           currency: string
           id?: string
           metadata?: Json
           provider: Database["public"]["Enums"]["payment_provider"]
           provider_invoice_id: string
           provider_payment_id?: string | null
+          purpose?: string
           status?: string
           subscriber_id: string
           subscription_id?: string | null
-          tier_id: string
+          tier_id?: string | null
           updated_at?: string
         }
         Update: {
           amount_cents?: number
           created_at?: string
-          creator_id?: string
+          creator_id?: string | null
           currency?: string
           id?: string
           metadata?: Json
           provider?: Database["public"]["Enums"]["payment_provider"]
           provider_invoice_id?: string
           provider_payment_id?: string | null
+          purpose?: string
           status?: string
           subscriber_id?: string
           subscription_id?: string | null
-          tier_id?: string
+          tier_id?: string | null
           updated_at?: string
         }
         Relationships: [
