@@ -163,6 +163,10 @@ export default async function VideoPage({ params, searchParams }: Props) {
 
     return (
       <main className="mx-auto max-w-5xl px-6 py-6 md:py-8">
+        {/* Pre-roll banner */}
+        <div className="mb-3">
+          <AdStrip placement="video-preroll-eporner" />
+        </div>
         {/* Player */}
         <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
           <iframe
@@ -269,6 +273,10 @@ export default async function VideoPage({ params, searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-6 md:py-8">
+      {/* Pre-roll banner */}
+      <div className="mb-3">
+        <AdStrip placement="video-preroll-creator" />
+      </div>
       {videoUrl ? (
         <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
           <video

@@ -34,6 +34,11 @@ const EXOCLICK_ZONE_MOBILE = process.env.NEXT_PUBLIC_EXOCLICK_ZONE_STRIP_MOBILE 
 
 function ExoClickAd({ placement }: { placement: string }) {
   useEffect(() => {
+    // Always push so new ins tags are picked up after client-side navigation.
+    const w = window as unknown as Record<string, unknown[]>;
+    w.AdProvider = w.AdProvider ?? [];
+    w.AdProvider.push({ serve: {} });
+
     if (document.querySelector('script[src*="a.magsrv.com/ad-provider.js"]')) return;
     const s = document.createElement('script');
     s.async = true;
@@ -43,20 +48,7 @@ function ExoClickAd({ placement }: { placement: string }) {
 
   return (
     <div data-ad-placement={placement} className="flex w-full justify-center overflow-hidden py-1">
-      {/* Desktop zone */}
-      {EXOCLICK_ZONE_DESKTOP && (
-        <ins
-          className="eas6a97888e2 hidden sm:block"
-          data-zoneid={EXOCLICK_ZONE_DESKTOP}
-        />
-      )}
-      {/* Mobile zone */}
-      {EXOCLICK_ZONE_MOBILE && (
-        <ins
-          className="eas6a97888e2 sm:hidden"
-          data-zoneid={EXOCLICK_ZONE_MOBILE}
-        />
-      )}
+      <ins className="eas6a97888e2" data-zoneid={EXOCLICK_ZONE_DESKTOP} />
     </div>
   );
 }
