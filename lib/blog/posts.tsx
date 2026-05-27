@@ -107,7 +107,7 @@ export const ALL_POSTS: BlogPost[] = [
 
         <h2>6. Set up crypto payouts day one</h2>
         <p>
-          BabeHub processes subscription payments via crypto (Cryptomus)
+          BabeHub processes subscription payments via crypto (NOWPayments)
           with CCBill card processing landing in Q3. Crypto payouts hit
           your wallet in under an hour, never get reversed, and don&apos;t
           require sharing a bank account. Read our deeper write-up on{' '}
@@ -177,7 +177,7 @@ export const ALL_POSTS: BlogPost[] = [
 
         <h2>2. No category rejection</h2>
         <p>
-          Cryptomus — the rail BabeHub uses today — doesn&apos;t care
+          NOWPayments — the rail BabeHub uses today — doesn&apos;t care
           what category your business falls into. The protocol is content-
           neutral. You can&apos;t get deplatformed for what you sell;
           you can only get deplatformed for fraud, sanctions, or money

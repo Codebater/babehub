@@ -27,7 +27,7 @@ A two-sided platform combining a **creator discovery feed**, a **subscription / 
 |---|---|
 | Framework | Next.js 15 App Router (RSC + Server Actions), TypeScript, Tailwind CSS v3 |
 | Auth + DB + Storage | Supabase (Postgres + RLS, Auth, Storage) |
-| Payments | Cryptomus (crypto subscriptions + premium top-ups); CCBill planned for cards |
+| Payments | NOWPayments (crypto subscriptions + premium top-ups); CCBill planned for cards |
 | External video catalog | eporner v2 API (cached 5 min, AI-filtered) |
 | Submissions | Survey + B2B inquiry forms → Supabase tables (Airtable mirror optional) |
 | Hosting | Vercel (linked to this repo via `.vercel/project.json`) |
@@ -58,10 +58,11 @@ NEXT_PUBLIC_SUPABASE_URL=https://gpewtvzaatcqyquogxlh.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
 SUPABASE_SERVICE_ROLE_KEY=...      # server-only, never expose
 
-# Cryptomus — ask the project owner for keys
-CRYPTOMUS_MERCHANT_ID=...
-CRYPTOMUS_PAYMENT_API_KEY=...        # signs requests + verifies webhooks
-CRYPTOMUS_USER_API_KEY=...           # payout endpoints (not yet wired)
+# NOWPayments — ask the project owner for keys
+NOWPAYMENTS_API_KEY=...
+NOWPAYMENTS_IPN_SECRET=...
+NOWPAYMENTS_PUBLIC_KEY=...           # account UUID (reserved for future flows)
+NOWPAYMENTS_SANDBOX=false            # true = sandbox.nowpayments.io, no real crypto
 
 # Optional — Airtable mirror for survey + inquiry submissions
 AIRTABLE_API_KEY=
@@ -97,7 +98,7 @@ babehub/
 │   │   │       ├── settings/, onboarding/, subscriptions/
 │   │   │       └── admin/         # admin hub (Users / Jobs / Apps / Inquiries / Blog)
 │   │   └── app/(public)/login/    # magic-link + Google OAuth + admin login
-│   ├── api/                       # route handlers (survey, cryptomus, etc.)
+│   ├── api/                       # route handlers (survey, nowpayments, etc.)
 │   ├── auth/callback/             # Supabase magic-link / OAuth callback
 │   ├── sitemap.ts                 # includes jobs + blog dynamically
 │   └── robots.ts
@@ -109,7 +110,7 @@ babehub/
 │   ├── limits/                    # free vs elevated content caps
 │   ├── admin/counts.ts            # hub badges
 │   ├── eporner/client.ts          # external video catalog wrapper (AI-filtered)
-│   ├── cryptomus/, interactions/, storage/, casting/, site.ts
+│   ├── nowpayments/, interactions/, storage/, casting/, site.ts
 ├── supabase/migrations/           # 17 applied migrations (Phase 1 + Phase 2)
 ├── types/supabase.ts              # generated DB types (regen on schema change)
 ├── locales/{de,en,es,fr,ja,pt,th}.ts

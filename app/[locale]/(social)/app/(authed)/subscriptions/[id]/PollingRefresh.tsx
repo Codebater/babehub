@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 /**
  * Polls the current route every 5 seconds while the user waits for the
- * Cryptomus webhook to confirm their payment. Each refresh hits the server
+ * NOWPayments IPN to confirm their payment. Each refresh hits the server
  * component, which re-reads the `payment_invoices` row; once the status
  * flips out of the pending bucket, the parent renders the success or
  * failure branch and unmounts this component (stopping the poll).

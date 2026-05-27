@@ -8,39 +8,17 @@ export const dynamic = 'force-dynamic';
 
 type Props = { params: Promise<{ id: string; locale: string }> };
 
-// Status groupings cover both providers — current rows use Cryptomus
-// status values, but legacy NOWPayments rows still exist and use the
-// names below.
+// NOWPayments payment_status grouping.
 const PENDING_STATUSES = new Set([
-  // generic
   'pending',
-  // cryptomus in-flight
-  'process',
-  'check',
-  'confirm_check',
-  // legacy nowpayments in-flight
   'waiting',
   'confirming',
   'confirmed',
   'sending',
   'partially_paid',
 ]);
-const SUCCESS_STATUSES = new Set([
-  'paid',
-  'paid_over',
-  // legacy nowpayments terminal success
-  'finished',
-]);
-const FAILURE_STATUSES = new Set([
-  'fail',
-  'wrong_amount',
-  'cancel',
-  'system_fail',
-  // legacy nowpayments terminal failures
-  'failed',
-  'expired',
-  'refunded',
-]);
+const SUCCESS_STATUSES = new Set(['finished']);
+const FAILURE_STATUSES = new Set(['failed', 'expired', 'refunded']);
 
 export default async function SubscriptionLandingPage({ params }: Props) {
   const { id } = await params;
@@ -116,11 +94,7 @@ export default async function SubscriptionLandingPage({ params }: Props) {
                 ? "Looks like the invoice timed out before payment was received."
                 : invoice.status === 'refunded'
                   ? 'This payment was refunded.'
-                  : invoice.status === 'wrong_amount'
-                    ? "The amount received didn't match the invoice."
-                    : invoice.status === 'cancel'
-                      ? 'The payment was cancelled.'
-                      : "We couldn't confirm a successful payment for this invoice."}
+                  : "We couldn't confirm a successful payment for this invoice."}
               {' '}
               No charge was made. You can try again any time.
             </p>

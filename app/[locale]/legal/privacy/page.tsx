@@ -6,7 +6,7 @@ import { Link } from '@/i18n/navigation';
  *   - Supabase Auth (email / OAuth identifiers, optional Google)
  *   - Supabase Postgres (profile, posts, tiers, subscriptions, invoices)
  *   - Supabase Storage (avatars, covers, post media)
- *   - Cryptomus (crypto payment processing, no card data ever touches us)
+ *   - NOWPayments (crypto payment processing, no card data ever touches us)
  *   - CCBill (future — card / SEPA payment processing)
  *   - Airtable (application form submissions; deletable via the
  *     /legal/delete-my-application self-service link)
@@ -106,10 +106,9 @@ export default function PrivacyPage() {
               here, protected by row-level security.
             </li>
             <li>
-              <strong>Cryptomus</strong> — processes crypto subscription
-              invoices. They receive the invoice amount, currency, and a
-              transaction reference when you initiate a payment. Cards
-              and bank data never touch our servers.
+              <strong>NOWPayments</strong> — processes crypto subscription
+              invoices. They receive the invoice amount, currency, and your
+              email when you initiate a payment.
             </li>
             <li>
               <strong>CCBill</strong> <em>(future)</em> — when card / SEPA

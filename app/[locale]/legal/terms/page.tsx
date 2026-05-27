@@ -68,7 +68,7 @@ export default function TermsPage() {
           <h2 className="mb-2 text-xl font-bold">3. Payments</h2>
           <p className="text-text-main/90">
             Subscriptions, tips, and other paid transactions on Babe Hub are
-            processed today through <strong>Cryptomus</strong> (cryptocurrency).
+            processed today through <strong>NOWPayments</strong> (cryptocurrency).
             A second processor, <strong>CCBill</strong> (card and SEPA), is
             planned for a future release and will be offered alongside crypto
             once enabled. By initiating any payment you accept that:
