@@ -34,8 +34,17 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
+    // PKCE failure on cross-browser clicks ("code verifier not found in
+    // storage") is by far the most common cause. Surface a friendly
+    // message + steer the user toward the 6-digit code fallback instead
+    // of leaking Supabase's raw error string.
+    const looksLikePkceMiss =
+      /code verifier|pkce|code_verifier/i.test(error.message);
+    const friendly = looksLikePkceMiss
+      ? 'This magic link was opened in a different browser than where you requested it. Request a new link and either click it in the same browser, or paste the 6-digit code from the email.'
+      : error.message;
     return NextResponse.redirect(
-      `${origin}/app/login?error=${encodeURIComponent(error.message)}`,
+      `${origin}/app/login?error=${encodeURIComponent(friendly)}`,
     );
   }
 

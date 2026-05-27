@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { getRequestOrigin } from '@/lib/site';
 
@@ -10,7 +11,28 @@ export type LoginState = {
   error?: string;
 };
 
+export type TokenLoginState = {
+  ok?: boolean;
+  email?: string;
+  error?: string;
+  /** Where to send the user after the token verifies. */
+  next?: string;
+};
+
+export type PasswordSignUpState = {
+  ok?: boolean;
+  email?: string;
+  handle?: string;
+  error?: string;
+};
+
+export type PasswordSignInState = {
+  email?: string;
+  error?: string;
+};
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const HANDLE_RE = /^[a-z0-9_]{3,30}$/;
 
 /**
  * Server Action: send a magic-link email via Supabase Auth.
@@ -57,6 +79,157 @@ export async function sendMagicLink(_prev: LoginState, formData: FormData): Prom
   }
 
   return { ok: true, email };
+}
+
+/**
+ * Server Action: email + password + handle signup.
+ *
+ * Supabase Auth handles the password hashing, session creation, and the
+ * verification email. We pass the chosen handle through raw_user_meta_data
+ * so the `handle_new_user` DB trigger uses it as the profile's @handle on
+ * the auto-created row (migration 0019).
+ *
+ * Email delivery goes via the SMTP server configured in Supabase Dashboard
+ * → Authentication → Emails → SMTP Settings. Point that at Resend's SMTP
+ * (smtp.resend.com:465, user "resend", password = Resend API key) so we
+ * don't hit Supabase's default-sender rate limit.
+ *
+ * If "Confirm email" is ON in Supabase Auth settings (the default), the
+ * user gets a verification email containing a link to /auth/callback.
+ * They MUST click it from the same browser (PKCE) — same caveat as the
+ * magic-link flow, same token-fallback applies.
+ */
+export async function signUpWithPassword(
+  _prev: PasswordSignUpState,
+  formData: FormData,
+): Promise<PasswordSignUpState> {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  const handle = String(formData.get('handle') ?? '').trim().toLowerCase();
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return { error: 'Please enter a valid email address.', email, handle };
+  }
+  if (!HANDLE_RE.test(handle)) {
+    return {
+      error: 'Username must be 3-30 lowercase letters, digits, or underscores.',
+      email,
+      handle,
+    };
+  }
+  if (password.length < 8) {
+    return { error: 'Password must be at least 8 characters.', email, handle };
+  }
+
+  const supabase = await createClient();
+  const origin = await getRequestOrigin();
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+      data: { handle, display_name: handle },
+    },
+  });
+
+  if (error) {
+    return { error: error.message, email, handle };
+  }
+
+  // If "Confirm email" is OFF in Supabase Auth, signUp returns a live
+  // session immediately and we go straight to onboarding. If it's ON
+  // (default), the user needs to click the verification email first;
+  // until then the form sits on "check your inbox".
+  if (data?.session) {
+    redirect('/explore');
+  }
+
+  return { ok: true, email, handle };
+}
+
+/**
+ * Server Action: existing-account sign-in with email + password.
+ */
+export async function signInWithPassword(
+  _prev: PasswordSignInState,
+  formData: FormData,
+): Promise<PasswordSignInState> {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
+  const next = String(formData.get('next') ?? '').trim();
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return { error: 'Please enter a valid email address.', email };
+  }
+  if (!password) {
+    return { error: 'Enter your password.', email };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    return { error: error.message, email };
+  }
+
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/explore';
+  redirect(safeNext);
+}
+
+/**
+ * Server Action: verify the 6-digit code Supabase emails alongside the
+ * magic link. Used as the cross-browser fallback when the PKCE flow fails
+ * ("code verifier not found in storage" — happens when the user clicks
+ * the magic link in a different browser than where they requested it).
+ *
+ * Token verification does NOT use PKCE, so it works from any browser.
+ * On success Supabase sets the session cookies via the cookie-aware
+ * server client, and we redirect to /explore (or the requested next).
+ */
+export async function verifyEmailToken(
+  _prev: TokenLoginState,
+  formData: FormData,
+): Promise<TokenLoginState> {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  const token = String(formData.get('token') ?? '').trim();
+  const next = String(formData.get('next') ?? '').trim();
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return { error: 'Please enter a valid email address.', email };
+  }
+  if (!/^\d{6}$/.test(token)) {
+    return { error: 'Enter the 6-digit code from your email.', email };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: 'email',
+  });
+
+  if (error || !data?.user) {
+    return { error: error?.message ?? 'Could not verify that code.', email };
+  }
+
+  // Same admin-bootstrap logic the /auth/callback route runs after a
+  // PKCE exchange — keeps both paths behaviour-equivalent.
+  try {
+    const allowList = (process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+    if (allowList.includes(email)) {
+      const admin = createAdminClient();
+      await admin.from('profiles').update({ role: 'admin' }).eq('id', data.user.id);
+    }
+  } catch {
+    /* admin promotion is best-effort */
+  }
+
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/explore';
+  redirect(safeNext);
 }
 
 /**
