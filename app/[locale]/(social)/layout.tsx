@@ -18,6 +18,7 @@ import { createClient } from '@/lib/supabase/server';
 import SidebarLink from './SidebarLink';
 import ProfileMenu from './ProfileMenu';
 import SurveyModalProvider from './SurveyModalProvider';
+import ExoClickStickyBanner from './_components/ExoClickStickyBanner';
 import SidebarCalendar, { type CalendarEvent } from './SidebarCalendar';
 import SidebarPitchButton from './SidebarPitchButton';
 import { ALL_POSTS } from '@/lib/blog/posts';
@@ -266,6 +267,7 @@ export default async function SocialLayout({ children }: { children: React.React
         )}
       </nav>
     </div>
+      <ExoClickStickyBanner />
     </SurveyModalProvider>
   );
 }

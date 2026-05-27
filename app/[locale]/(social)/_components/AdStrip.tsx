@@ -153,7 +153,8 @@ export default function AdStrip({
 }: Props) {
   const { openBanner } = useSurveyModal();
 
-  // Real ad networks take priority over the placeholder
+  // Slot-based ad zones — activate by setting the env vars documented above.
+  // The sticky banner (ExoClickStickyBanner in the layout) is separate.
   if (EXOCLICK_ZONE_DESKTOP) return <ExoClickAd placement={placement} />;
   if (JUICYADS_SPOT) return <JuicyAdsAd placement={placement} />;
 
