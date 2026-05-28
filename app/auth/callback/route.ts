@@ -74,6 +74,14 @@ export async function GET(request: NextRequest) {
     // reason to fail the sign-in itself.
   }
 
+  // Password-reset flow: Supabase appends `?type=recovery` when the user
+  // clicked a reset-password email link. Redirect to the set-new-password
+  // page instead of the normal post-login destination.
+  const type = searchParams.get('type');
+  if (type === 'recovery') {
+    return NextResponse.redirect(`${origin}/app/reset-password`);
+  }
+
   // Honor `?next=/some/path` if provided (e.g. deep-link after sign-in),
   // but only if it's a relative path on this origin (defense against
   // open-redirect abuse).

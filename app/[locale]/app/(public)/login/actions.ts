@@ -234,6 +234,28 @@ export async function verifyEmailToken(
 }
 
 /**
+ * Server Action: send a password-reset email. The user receives a single
+ * email with a link → /auth/callback?type=recovery → /app/reset-password
+ * where they set their new password. No PKCE required for recovery links.
+ */
+export async function sendPasswordReset(
+  _prev: { ok?: boolean; email?: string; error?: string },
+  formData: FormData,
+): Promise<{ ok?: boolean; email?: string; error?: string }> {
+  const email = String(formData.get('email') ?? '').trim().toLowerCase();
+  if (!email || !EMAIL_RE.test(email)) {
+    return { error: 'Please enter a valid email address.', email };
+  }
+  const supabase = await createClient();
+  const origin = await getRequestOrigin();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?type=recovery`,
+  });
+  if (error) return { error: error.message, email };
+  return { ok: true, email };
+}
+
+/**
  * Server Action: kick off the Google OAuth sign-in flow.
  *
  * Flow:
