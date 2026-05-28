@@ -138,11 +138,12 @@ export async function signUpWithPassword(
   }
 
   // If "Confirm email" is OFF in Supabase Auth, signUp returns a live
-  // session immediately and we go straight to onboarding. If it's ON
-  // (default), the user needs to click the verification email first;
-  // until then the form sits on "check your inbox".
+  // session immediately — send the user to onboarding so they pick a
+  // handle, bio, and fan-vs-creator role before landing in the app.
+  // If "Confirm email" is ON (default), the user clicks the email link
+  // which hits /auth/callback → /app/onboarding.
   if (data?.session) {
-    redirect('/explore');
+    redirect('/app/onboarding');
   }
 
   return { ok: true, email, handle };

@@ -24,7 +24,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/app/professional/edit';
+  const next = searchParams.get('next') ?? '/app/onboarding';
 
   if (!code) {
     return NextResponse.redirect(`${origin}/app/login?error=missing_code`);
@@ -77,6 +77,6 @@ export async function GET(request: NextRequest) {
   // Honor `?next=/some/path` if provided (e.g. deep-link after sign-in),
   // but only if it's a relative path on this origin (defense against
   // open-redirect abuse).
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/app/professional/edit';
+  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/app/onboarding';
   return NextResponse.redirect(`${origin}${safeNext}`);
 }
