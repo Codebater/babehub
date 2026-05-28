@@ -19,6 +19,10 @@ const SLOT_META: Record<string, { label: string; hint: string }> = {
     label: 'Hero — Feature image',
     hint: 'Large image shown in the Hero section (right side on desktop). Ideal: 1200×900px.',
   },
+  mkt_dashboard_feature: {
+    label: 'Watch Your Growth — Centre image',
+    hint: 'Portrait-style photo shown inside the dashboard mockup card. Ideal: 400×600px (portrait).',
+  },
   mkt_howitworks_feature: {
     label: 'How It Works — Illustration',
     hint: 'Decorative illustration shown beside the step list. Ideal: 800×600px.',
@@ -38,6 +42,7 @@ export default async function AdminMarketingPage() {
   // Build a flat map of key → current URL for quick lookup
   const currentUrls: Record<string, string> = {};
   if (settings.hero_feature) currentUrls['mkt_hero_feature'] = settings.hero_feature;
+  if (settings.dashboard_feature) currentUrls['mkt_dashboard_feature'] = settings.dashboard_feature;
   if (settings.howitworks_feature) currentUrls['mkt_howitworks_feature'] = settings.howitworks_feature;
   GALLERY_KEYS.forEach((k, i) => {
     const url = settings.gallery[i];
@@ -69,8 +74,8 @@ export default async function AdminMarketingPage() {
           <ImageIcon className="h-3.5 w-3.5" />
           Section images
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {['mkt_hero_feature', 'mkt_howitworks_feature'].map((key) => {
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {['mkt_hero_feature', 'mkt_dashboard_feature', 'mkt_howitworks_feature'].map((key) => {
             const meta = SLOT_META[key];
             return (
               <ImageSlot

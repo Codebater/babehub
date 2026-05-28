@@ -7,6 +7,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export type MarketingSettings = {
   /** Large feature image shown in the Hero section */
   hero_feature?: string;
+  /** Centre image inside the "Watch Your Growth" dashboard section */
+  dashboard_feature?: string;
   /** Illustration shown beside HowItWorks steps */
   howitworks_feature?: string;
   /** Up to 6 showcase images in the gallery grid */
@@ -24,6 +26,7 @@ export const GALLERY_KEYS = [
 
 export const ALL_MARKETING_KEYS = [
   'mkt_hero_feature',
+  'mkt_dashboard_feature',
   'mkt_howitworks_feature',
   ...GALLERY_KEYS,
 ] as const;
@@ -32,7 +35,7 @@ export const ALL_MARKETING_KEYS = [
 export async function loadMarketingSettings(): Promise<MarketingSettings> {
   try {
     const admin = createAdminClient();
-    // site_settings is not in the generated Supabase types — cast to any
+    // site_settings is not in the generated Supabase types — cast to any to bypass strict typing
     const { data } = await (admin as any)
       .from('site_settings')
       .select('key, value')
@@ -44,6 +47,7 @@ export async function loadMarketingSettings(): Promise<MarketingSettings> {
 
     return {
       hero_feature: map.get('mkt_hero_feature') || undefined,
+      dashboard_feature: map.get('mkt_dashboard_feature') || undefined,
       howitworks_feature: map.get('mkt_howitworks_feature') || undefined,
       gallery: GALLERY_KEYS.map((k) => map.get(k) ?? '').filter(Boolean),
     };

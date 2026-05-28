@@ -6,9 +6,15 @@ import { useTranslations } from 'next-intl';
 
 interface MarketingDashboardProps {
   onApplyClick?: () => void;
+  /** Centre portrait image inside the dashboard mockup card.
+   *  Falls back to the bundled Unsplash placeholder when not set. */
+  featureImageUrl?: string;
 }
 
-export default function MarketingDashboard({ onApplyClick }: MarketingDashboardProps) {
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1000';
+
+export default function MarketingDashboard({ onApplyClick, featureImageUrl }: MarketingDashboardProps) {
   const t = useTranslations();
 
   return (
@@ -55,7 +61,7 @@ export default function MarketingDashboard({ onApplyClick }: MarketingDashboardP
             <div className="relative z-10 w-full max-w-[208px] h-full flex items-end justify-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=1000"
+                src={featureImageUrl ?? FALLBACK_IMAGE}
                 alt="Professional OnlyFans Model Management & Growth Agency"
                 className="w-full h-full object-cover rounded-xl shadow-xl"
                 referrerPolicy="no-referrer"

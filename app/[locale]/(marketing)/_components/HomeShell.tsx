@@ -87,7 +87,7 @@ export default function HomeShell({ settings }: { settings?: MarketingSettings }
         )}
 
         <Benefits onApplyClick={open} sectionRef={benefitsRef} />
-        <MarketingDashboard onApplyClick={open} />
+        <MarketingDashboard onApplyClick={open} featureImageUrl={settings?.dashboard_feature} />
         <LogoCloudMarquee />
         <HowItWorks illustrationUrl={settings?.howitworks_feature} />
         <GallerySection images={settings?.gallery ?? []} />
