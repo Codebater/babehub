@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import LoginForm from './LoginForm';
-import { Briefcase, DollarSign } from 'lucide-react';
+import { Briefcase, TrendingUp, ShieldCheck, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Sign In — Babe Hub | Adult Creator Jobs & Monetization',
@@ -32,44 +32,80 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6 py-12">
-      <div className="w-full max-w-md">
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 py-10">
+      {/* Ambient glow — purely decorative */}
+      <div
+        className="pointer-events-none absolute -top-40 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]"
+        aria-hidden
+      />
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* ── Brand header ───────────────────────────────────────── */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black tracking-tight text-text-main">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
+            Free to join
+          </p>
+          <h1 className="text-3xl font-black tracking-tight text-text-main sm:text-4xl">
             Join Babe Hub
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            Sign in or create a free account to get started.
+            The #1 platform for adult creators &amp; agencies.
           </p>
 
-          {/* Value props */}
-          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center sm:gap-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border-color bg-secondary px-4 py-2 text-xs font-semibold text-text-main">
-              <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
-              Apply for casting calls &amp; jobs
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border-color bg-secondary px-4 py-2 text-xs font-semibold text-text-main">
-              <DollarSign className="h-3.5 w-3.5 text-primary shrink-0" />
-              Monetize your content
-            </span>
+          {/* Value props — 2×2 card grid, fully visible on mobile */}
+          <div className="mt-6 grid grid-cols-2 gap-3 text-left">
+            <div className="flex flex-col gap-2.5 rounded-2xl border border-border-color bg-card p-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
+                <Briefcase className="h-4.5 w-4.5 h-[18px] w-[18px] text-primary" />
+              </span>
+              <span className="text-xs font-semibold leading-snug text-text-main">
+                Apply for casting calls &amp; jobs
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 rounded-2xl border border-border-color bg-card p-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
+                <TrendingUp className="h-[18px] w-[18px] text-primary" />
+              </span>
+              <span className="text-xs font-semibold leading-snug text-text-main">
+                Monetize your content
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 rounded-2xl border border-border-color bg-card p-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
+                <ShieldCheck className="h-[18px] w-[18px] text-primary" />
+              </span>
+              <span className="text-xs font-semibold leading-snug text-text-main">
+                Get verified &amp; build your brand
+              </span>
+            </div>
+            <div className="flex flex-col gap-2.5 rounded-2xl border border-border-color bg-card p-4">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15">
+                <Users className="h-[18px] w-[18px] text-primary" />
+              </span>
+              <span className="text-xs font-semibold leading-snug text-text-main">
+                Connect with top agencies
+              </span>
+            </div>
           </div>
         </div>
 
-        {error && (
-          <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-400">
-            {decodeURIComponent(error)}
-          </div>
-        )}
+        {/* ── Auth card ──────────────────────────────────────────── */}
+        <div className="rounded-2xl border border-border-color bg-card p-6 shadow-xl shadow-black/30">
+          {error && (
+            <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-400">
+              {decodeURIComponent(error)}
+            </div>
+          )}
+          <LoginForm />
+        </div>
 
-        <LoginForm />
-
-        <p className="mt-8 text-center text-xs text-text-secondary">
+        <p className="mt-6 text-center text-xs text-text-secondary">
           By signing in you agree to our{' '}
-          <a href="/terms" className="underline-offset-2 hover:underline">
+          <a href="/terms" className="text-text-secondary underline-offset-2 hover:text-text-main hover:underline">
             terms
           </a>{' '}
           and{' '}
-          <a href="/privacy" className="underline-offset-2 hover:underline">
+          <a href="/privacy" className="text-text-secondary underline-offset-2 hover:text-text-main hover:underline">
             privacy notice
           </a>
           .

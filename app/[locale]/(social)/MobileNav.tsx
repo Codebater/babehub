@@ -5,7 +5,6 @@ import {
   Compass,
   LayoutGrid,
   Briefcase,
-  User,
   LogIn,
   Plus,
   Star,
@@ -16,10 +15,11 @@ import {
   Gem,
   Users,
   BookOpen,
-  Home,
+  Megaphone,
   ShieldAlert,
   FileText,
   X,
+  User,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { usePathname } from 'next/navigation';
@@ -39,14 +39,62 @@ type Props = {
 };
 
 const CATEGORIES = [
-  { label: 'Casting', href: '/explore?q=casting', icon: <Clapperboard className="h-6 w-6" /> },
-  { label: 'Live Cams', href: '/explore?q=live%20cams', icon: <Radio className="h-6 w-6" /> },
-  { label: 'Luxury', href: '/explore?q=luxury', icon: <Gem className="h-6 w-6" /> },
-  { label: 'Creators', href: '/creators', icon: <Users className="h-6 w-6" /> },
-  { label: 'Jobs', href: '/jobs', icon: <Briefcase className="h-6 w-6" /> },
-  { label: 'Blog', href: '/blog', icon: <BookOpen className="h-6 w-6" /> },
-  { label: 'Explore', href: '/explore', icon: <Compass className="h-6 w-6" /> },
-  { label: 'Marketing', href: '/marketing', icon: <Home className="h-6 w-6" /> },
+  {
+    label: 'Casting',
+    href: '/explore?q=casting',
+    icon: Clapperboard,
+    color: 'bg-pink-500/15 text-pink-400',
+    glow: 'shadow-pink-500/20',
+  },
+  {
+    label: 'Live Cams',
+    href: '/explore?q=live%20cams',
+    icon: Radio,
+    color: 'bg-blue-500/15 text-blue-400',
+    glow: 'shadow-blue-500/20',
+  },
+  {
+    label: 'Luxury',
+    href: '/explore?q=luxury',
+    icon: Gem,
+    color: 'bg-amber-500/15 text-amber-400',
+    glow: 'shadow-amber-500/20',
+  },
+  {
+    label: 'Creators',
+    href: '/creators',
+    icon: Users,
+    color: 'bg-purple-500/15 text-purple-400',
+    glow: 'shadow-purple-500/20',
+  },
+  {
+    label: 'Jobs',
+    href: '/jobs',
+    icon: Briefcase,
+    color: 'bg-emerald-500/15 text-emerald-400',
+    glow: 'shadow-emerald-500/20',
+  },
+  {
+    label: 'Blog',
+    href: '/blog',
+    icon: BookOpen,
+    color: 'bg-orange-500/15 text-orange-400',
+    glow: 'shadow-orange-500/20',
+  },
+  {
+    label: 'Explore',
+    href: '/explore',
+    icon: Compass,
+    color: 'bg-teal-500/15 text-teal-400',
+    glow: 'shadow-teal-500/20',
+  },
+  {
+    label: 'Marketing',
+    href: '/marketing',
+    icon: Megaphone,
+    color: 'bg-indigo-500/15 text-indigo-400',
+    glow: 'shadow-indigo-500/20',
+  },
 ];
 
 export default function MobileNav({
@@ -64,130 +112,158 @@ export default function MobileNav({
   return (
     <>
       {/* ── Bottom Tab Bar ─────────────────────────────────────────────── */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch justify-around border-t border-border-color bg-card/95 backdrop-blur md:hidden">
-        {/* Explore */}
-        <Link
-          href="/explore"
-          className={`flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
-            isActive('/explore') ? 'text-primary' : 'text-text-secondary hover:text-text-main'
-          }`}
-        >
-          <Compass className="h-5 w-5" />
-          Explore
-        </Link>
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        {/* Frosted glass bar */}
+        <div className="flex items-stretch justify-around border-t border-white/[0.06] bg-black/85 shadow-[0_-1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-2xl">
 
-        {/* Browse — opens category sheet */}
-        <button
-          type="button"
-          onClick={() => setSheet((s) => (s === 'browse' ? null : 'browse'))}
-          className={`flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
-            sheet === 'browse' ? 'text-primary' : 'text-text-secondary hover:text-text-main'
-          }`}
-        >
-          <LayoutGrid className="h-5 w-5" />
-          Browse
-        </button>
-
-        {/* Create (creators) or Jobs (everyone else) */}
-        {isCreator ? (
+          {/* Explore */}
           <Link
-            href="/app/dashboard/posts/new"
-            className="flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-text-secondary transition-colors hover:text-text-main"
+            href="/explore"
+            className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30">
-              <Plus className="h-4 w-4 text-white" />
+            <span className={`flex h-9 w-9 items-center justify-center rounded-2xl transition-all ${isActive('/explore') ? 'bg-primary/20' : ''}`}>
+              <Compass className={`h-5 w-5 transition-colors ${isActive('/explore') ? 'text-primary' : 'text-white/50'}`} />
             </span>
-            <span className="-mt-0.5">New</span>
+            <span className={`text-[9px] font-semibold uppercase tracking-wider transition-colors ${isActive('/explore') ? 'text-primary' : 'text-white/40'}`}>
+              Explore
+            </span>
           </Link>
-        ) : (
-          <Link
-            href="/jobs"
-            className={`flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
-              isActive('/jobs') ? 'text-primary' : 'text-text-secondary hover:text-text-main'
-            }`}
-          >
-            <Briefcase className="h-5 w-5" />
-            Jobs
-          </Link>
-        )}
 
-        {/* Me / Account — opens account sheet or sign-in */}
-        {profile ? (
-          <button
-            type="button"
-            onClick={() => setSheet((s) => (s === 'me' ? null : 'me'))}
-            className={`flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-widest transition-colors ${
-              sheet === 'me' ? 'text-primary' : 'text-text-secondary hover:text-text-main'
-            }`}
-          >
-            {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className={`h-6 w-6 rounded-full object-cover ring-2 transition-all ${
-                  sheet === 'me' ? 'ring-primary' : 'ring-transparent'
-                }`}
-              />
-            ) : (
-              <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary/40 to-pink-600/40 text-[10px] font-black text-white ring-2 transition-all ${
-                  sheet === 'me' ? 'ring-primary' : 'ring-transparent'
-                }`}
-              >
-                {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+          {/* Browse — opens category sheet */}
+          <div className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5">
+            <button
+              type="button"
+              onClick={() => setSheet((s) => (s === 'browse' ? null : 'browse'))}
+              className="flex w-full flex-col items-center gap-0.5"
+            >
+              <span className={`flex h-9 w-9 items-center justify-center rounded-2xl transition-all ${sheet === 'browse' ? 'bg-primary/20' : ''}`}>
+                <LayoutGrid className={`h-5 w-5 transition-colors ${sheet === 'browse' ? 'text-primary' : 'text-white/50'}`} />
               </span>
+              <span className={`text-[9px] font-semibold uppercase tracking-wider transition-colors ${sheet === 'browse' ? 'text-primary' : 'text-white/40'}`}>
+                Browse
+              </span>
+            </button>
+          </div>
+
+          {/* Centre action — New post (creators) or Jobs */}
+          <div className="flex flex-1 flex-col items-center justify-center py-2">
+            {isCreator ? (
+              <Link
+                href="/app/dashboard/posts/new"
+                className="flex flex-col items-center gap-0.5"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-pink-600 shadow-lg shadow-primary/40 transition-transform active:scale-95">
+                  <Plus className="h-5 w-5 text-white" />
+                </span>
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-white/40">New</span>
+              </Link>
+            ) : (
+              <Link
+                href="/jobs"
+                className="flex flex-col items-center gap-0.5"
+              >
+                <span className={`flex h-9 w-9 items-center justify-center rounded-2xl transition-all ${isActive('/jobs') ? 'bg-primary/20' : ''}`}>
+                  <Briefcase className={`h-5 w-5 transition-colors ${isActive('/jobs') ? 'text-primary' : 'text-white/50'}`} />
+                </span>
+                <span className={`text-[9px] font-semibold uppercase tracking-wider transition-colors ${isActive('/jobs') ? 'text-primary' : 'text-white/40'}`}>
+                  Jobs
+                </span>
+              </Link>
             )}
-            Me
-          </button>
-        ) : (
-          <Link
-            href="/app/login"
-            className="flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-semibold uppercase tracking-widest text-text-secondary transition-colors hover:text-text-main"
-          >
-            <LogIn className="h-5 w-5" />
-            Sign in
-          </Link>
-        )}
+          </div>
+
+          {/* Me / Account */}
+          <div className="flex flex-1 flex-col items-center justify-center gap-0.5 py-2.5">
+            {profile ? (
+              <button
+                type="button"
+                onClick={() => setSheet((s) => (s === 'me' ? null : 'me'))}
+                className="flex w-full flex-col items-center gap-0.5"
+              >
+                <span className={`flex h-9 w-9 items-center justify-center rounded-2xl transition-all ${sheet === 'me' ? 'ring-2 ring-primary ring-offset-1 ring-offset-black' : ''}`}>
+                  {profile.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      className="h-8 w-8 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-pink-600 text-[11px] font-black text-white">
+                      {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                <span className={`text-[9px] font-semibold uppercase tracking-wider transition-colors ${sheet === 'me' ? 'text-primary' : 'text-white/40'}`}>
+                  Me
+                </span>
+              </button>
+            ) : (
+              <Link
+                href="/app/login"
+                className="flex flex-col items-center gap-0.5"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-2xl">
+                  <LogIn className="h-5 w-5 text-white/50" />
+                </span>
+                <span className="text-[9px] font-semibold uppercase tracking-wider text-white/40">
+                  Sign in
+                </span>
+              </Link>
+            )}
+          </div>
+        </div>
       </nav>
 
       {/* ── Browse Category Sheet ────────────────────────────────────────── */}
       {sheet === 'browse' && (
         <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={close}
             aria-hidden
           />
-          <div className="absolute bottom-0 left-0 right-0 animate-slide-up rounded-t-3xl border-t border-border-color bg-card pb-safe">
-            <div className="flex items-center justify-between border-b border-border-color/40 px-5 py-4">
-              <p className="text-sm font-bold uppercase tracking-widest text-text-secondary">
-                Browse
-              </p>
+          {/* Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 animate-slide-up rounded-t-3xl bg-[#0f0f0f] pb-safe">
+            {/* Pull handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="h-1 w-10 rounded-full bg-white/20" />
+            </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3">
+              <p className="text-sm font-bold text-white/70">Browse</p>
               <button
                 type="button"
                 onClick={close}
-                className="flex h-7 w-7 items-center justify-center rounded-full text-text-secondary hover:bg-secondary hover:text-text-main"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white/60 transition-colors hover:bg-white/20"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-1 p-4 pb-20">
-              {CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.href}
-                  href={cat.href as '/explore'}
-                  onClick={close}
-                  className="flex flex-col items-center gap-2 rounded-2xl px-2 py-4 text-center transition-colors hover:bg-secondary active:bg-secondary"
-                >
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary text-text-main">
-                    {cat.icon}
-                  </span>
-                  <span className="text-[11px] font-semibold leading-tight text-text-main">
-                    {cat.label}
-                  </span>
-                </Link>
-              ))}
+            {/* Category grid */}
+            <div className="grid grid-cols-4 gap-2 px-4 pb-28 pt-2">
+              {CATEGORIES.map((cat) => {
+                const Icon = cat.icon;
+                return (
+                  <Link
+                    key={cat.href}
+                    href={cat.href as '/explore'}
+                    onClick={close}
+                    className="flex flex-col items-center gap-2.5 rounded-2xl p-3 text-center transition-all active:scale-95"
+                  >
+                    <span className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg ${cat.color} ${cat.glow}`}>
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <span className="text-[10px] font-semibold leading-tight text-white/80">
+                      {cat.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -196,54 +272,74 @@ export default function MobileNav({
       {/* ── Account Sheet ────────────────────────────────────────────────── */}
       {sheet === 'me' && profile && (
         <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={close}
             aria-hidden
           />
-          <div className="absolute bottom-0 left-0 right-0 animate-slide-up rounded-t-3xl border-t border-border-color bg-card pb-safe">
-            {/* Profile header */}
-            <div className="flex items-center gap-4 border-b border-border-color/40 px-5 py-5">
-              <span className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-secondary">
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-lg font-black text-white">
-                    {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
-                  </span>
-                )}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-bold text-text-main">
-                  {profile.display_name || profile.handle}
-                </p>
-                <p className="truncate text-sm text-text-secondary">@{profile.handle}</p>
-              </div>
-              <button
-                type="button"
-                onClick={close}
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-text-secondary hover:bg-secondary hover:text-text-main"
-              >
-                <X className="h-4 w-4" />
-              </button>
+          {/* Sheet */}
+          <div className="absolute bottom-0 left-0 right-0 animate-slide-up rounded-t-3xl bg-[#0f0f0f] pb-safe">
+            {/* Pull handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="h-1 w-10 rounded-full bg-white/20" />
             </div>
 
+            {/* Profile header with gradient */}
+            <div className="relative overflow-hidden px-5 pb-5 pt-3">
+              {/* Ambient glow behind avatar */}
+              <div className="pointer-events-none absolute -top-10 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" aria-hidden />
+              <div className="relative flex items-center gap-4">
+                <span className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl ring-2 ring-primary/40">
+                  {profile.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profile.avatar_url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary to-pink-600 text-xl font-black text-white">
+                      {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-base font-black text-white">
+                    {profile.display_name || profile.handle}
+                  </p>
+                  <p className="truncate text-sm text-white/50">@{profile.handle}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={close}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/60 hover:bg-white/20"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="mx-5 h-px bg-white/[0.06]" />
+
             {/* Menu items */}
-            <div className="px-3 py-3 pb-20">
+            <div className="px-3 py-3">
               {isAdmin && (
-                <SheetLink href="/app/admin" onClick={close} icon={<ShieldAlert className="h-4 w-4 text-primary" />}>
+                <AccountLink
+                  href="/app/admin"
+                  onClick={close}
+                  icon={<ShieldAlert className="h-4 w-4" />}
+                  iconBg="bg-primary/20 text-primary"
+                >
                   Admin hub
-                </SheetLink>
+                </AccountLink>
               )}
-              <SheetLink
+              <AccountLink
                 href={hasProfessionalProfile ? (`/c/${profile.handle}` as '/c/[handle]') : '/app/professional/edit'}
                 onClick={close}
                 icon={<User className="h-4 w-4" />}
+                iconBg="bg-white/10 text-white/70"
               >
                 My profile
                 {!hasProfessionalProfile && (
@@ -251,28 +347,49 @@ export default function MobileNav({
                     Set up
                   </span>
                 )}
-              </SheetLink>
-              <SheetLink href="/favorites" onClick={close} icon={<Star className="h-4 w-4" />}>
+              </AccountLink>
+              <AccountLink
+                href="/favorites"
+                onClick={close}
+                icon={<Star className="h-4 w-4" />}
+                iconBg="bg-amber-500/15 text-amber-400"
+              >
                 Favorites
-              </SheetLink>
-              <SheetLink href="/app/dashboard" onClick={close} icon={<LayoutDashboard className="h-4 w-4" />}>
+              </AccountLink>
+              <AccountLink
+                href="/app/dashboard"
+                onClick={close}
+                icon={<LayoutDashboard className="h-4 w-4" />}
+                iconBg="bg-blue-500/15 text-blue-400"
+              >
                 Dashboard
-              </SheetLink>
+              </AccountLink>
               {isCreator && (
-                <SheetLink href="/app/dashboard/posts/new" onClick={close} icon={<Plus className="h-4 w-4" />}>
+                <AccountLink
+                  href="/app/dashboard/posts/new"
+                  onClick={close}
+                  icon={<Plus className="h-4 w-4" />}
+                  iconBg="bg-primary/20 text-primary"
+                >
                   New post
-                </SheetLink>
+                </AccountLink>
               )}
-              <SheetLink href="/app/creator/applications" onClick={close} icon={<FileText className="h-4 w-4" />}>
+              <AccountLink
+                href="/app/creator/applications"
+                onClick={close}
+                icon={<FileText className="h-4 w-4" />}
+                iconBg="bg-emerald-500/15 text-emerald-400"
+              >
                 My applications
-              </SheetLink>
+              </AccountLink>
+            </div>
 
-              <div className="my-2 border-t border-border-color/40" />
-
+            {/* Sign out — distinct red zone */}
+            <div className="mx-3 mb-6 mt-1 overflow-hidden rounded-2xl border border-red-500/20 bg-red-500/5">
               <form action={signOut}>
                 <button
                   type="submit"
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-text-secondary transition-colors hover:bg-red-500/10 hover:text-red-400 active:bg-red-500/10"
+                  className="flex w-full items-center gap-3 px-4 py-3.5 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/10 active:bg-red-500/10"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign out
@@ -286,24 +403,30 @@ export default function MobileNav({
   );
 }
 
-function SheetLink({
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+
+function AccountLink({
   href,
   onClick,
   icon,
+  iconBg,
   children,
 }: {
   href: string;
   onClick: () => void;
   icon: React.ReactNode;
+  iconBg: string;
   children: React.ReactNode;
 }) {
   return (
     <Link
       href={href as '/favorites'}
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-text-main transition-colors hover:bg-secondary active:bg-secondary"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-white/80 transition-colors hover:bg-white/5 active:bg-white/5"
     >
-      {icon}
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
+        {icon}
+      </span>
       {children}
     </Link>
   );
