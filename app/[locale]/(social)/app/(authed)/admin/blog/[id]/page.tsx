@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Link } from '@/i18n/navigation';
 import { ArrowLeft, ShieldAlert } from 'lucide-react';
 import { requireAdmin } from '@/lib/auth/guards';
-import { upsertBlogPost } from '../../../actions';
+import { upsertBlogPost } from '../../actions';
 
 export const dynamic = 'force-dynamic';
 
