@@ -38,7 +38,7 @@ const tabClass = (active: boolean) =>
 /* ── Sign-in form ───────────────────────────────────────────────────── */
 
 const initialSignIn: PasswordSignInState = {};
-const initialReset = {};
+const initialReset: { ok?: boolean; email?: string; error?: string } = {};
 
 function SignInPasswordForm() {
   const [state, action] = useActionState(signInWithPassword, initialSignIn);
