@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { Plus, FileText, Calendar, ShieldAlert, ExternalLink } from 'lucide-react';
+import { Plus, FileText, Calendar, ShieldAlert, ExternalLink, Pencil } from 'lucide-react';
 import { requireAdmin } from '@/lib/auth/guards';
 import { ALL_POSTS } from '@/lib/blog/posts';
 import AdminBlogDeleteButton from './AdminBlogDeleteButton';
@@ -114,6 +114,13 @@ export default async function AdminBlogPage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
+                    <Link
+                      href={`/app/admin/blog/${p.id}` as never}
+                      className="inline-flex items-center gap-1 rounded-md border border-border-color px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Edit
+                    </Link>
                     <Link
                       href={`/blog/${p.slug}` as '/blog/[slug]'}
                       className="inline-flex items-center gap-1 rounded-md border border-border-color px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"

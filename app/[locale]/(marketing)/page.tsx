@@ -31,9 +31,11 @@ export default async function HomePage({
   if (sp.embed === '1') {
     const { Suspense } = await import('react');
     const HomeShell = (await import('./_components/HomeShell')).default;
+    const { loadMarketingSettings } = await import('@/lib/marketing/settings');
+    const settings = await loadMarketingSettings();
     return (
       <Suspense fallback={null}>
-        <HomeShell />
+        <HomeShell settings={settings} />
       </Suspense>
     );
   }

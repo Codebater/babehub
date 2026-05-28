@@ -10,6 +10,7 @@ import {
   Megaphone,
   ArrowLeft,
   FileText,
+  ImageIcon,
 } from 'lucide-react';
 import type { AdminCounts } from '@/lib/admin/counts';
 
@@ -86,6 +87,13 @@ export default function AdminNav({ counts }: { counts: AdminCounts }) {
       count: counts.blogPosts,
       pending: counts.blogDrafts,
       accent: 'primary',
+    },
+    {
+      href: '/app/admin/marketing',
+      label: 'Marketing',
+      icon: <ImageIcon className="h-4 w-4" />,
+      count: 0,
+      accent: 'sky',
     },
   ];
 

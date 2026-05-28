@@ -8,11 +8,13 @@ import Benefits from './Benefits';
 import MarketingDashboard from './MarketingDashboard';
 import LogoCloudMarquee from './LogoCloudMarquee';
 import HowItWorks from './HowItWorks';
+import GallerySection from './GallerySection';
 import FAQ from './FAQ';
 import Apply from './Apply';
 import Footer from './Footer';
 import SurveyModal from './SurveyModal';
 import BannerInquiryModal from './BannerInquiryModal';
+import type { MarketingSettings } from '@/lib/marketing/settings';
 
 /**
  * Marketing home shell. Mirrors the old `App.tsx` orchestration minus the
@@ -28,7 +30,7 @@ import BannerInquiryModal from './BannerInquiryModal';
  * loads this page in an iframe and doesn't want a double-stacked
  * marketing Header on top of the platform sidebar.
  */
-export default function HomeShell() {
+export default function HomeShell({ settings }: { settings?: MarketingSettings }) {
   const searchParams = useSearchParams();
   const isEmbedded = searchParams?.get('embed') === '1';
   const [isSurveyModalOpen, setIsSurveyModalOpen] = useState(false);
@@ -67,10 +69,28 @@ export default function HomeShell() {
       {!isEmbedded && <Header onApplyClick={open} />}
       <main>
         <Hero onApplyClick={open} />
+
+        {/* Hero feature image — shown between hero and benefits when set */}
+        {settings?.hero_feature && (
+          <section className="py-12 bg-background transition-colors duration-700">
+            <div className="container mx-auto px-6">
+              <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-border-color/30 shadow-2xl shadow-primary/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={settings.hero_feature}
+                  alt="Featured creator showcase"
+                  className="w-full object-cover"
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
         <Benefits onApplyClick={open} sectionRef={benefitsRef} />
         <MarketingDashboard onApplyClick={open} />
         <LogoCloudMarquee />
-        <HowItWorks />
+        <HowItWorks illustrationUrl={settings?.howitworks_feature} />
+        <GallerySection images={settings?.gallery ?? []} />
         <FAQ />
         <Apply onApplyClick={openBanner} />
       </main>

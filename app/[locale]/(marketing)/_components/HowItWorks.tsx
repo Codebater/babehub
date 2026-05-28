@@ -6,7 +6,7 @@ import TextReveal from './TextReveal';
 
 type LineMetrics = { top: number; height: number };
 
-export default function HowItWorks() {
+export default function HowItWorks({ illustrationUrl }: { illustrationUrl?: string }) {
   const t = useTranslations();
 
   const steps = useMemo(
@@ -96,6 +96,60 @@ export default function HowItWorks() {
     };
   }, []);
 
+  const stepsColumn = (
+    <div ref={containerRef} className="relative">
+      <div
+        className="pointer-events-none absolute left-5 z-0 w-px -translate-x-1/2 bg-border-color"
+        style={{ top: lineMetrics.top, height: lineMetrics.height }}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute left-5 z-0 w-0.5 origin-top bg-primary will-change-transform"
+        style={{
+          top: lineMetrics.top,
+          height: lineMetrics.height,
+          transform: `translateX(-50%) scaleY(${lineProgress})`,
+          transformOrigin: 'top center',
+        }}
+        aria-hidden
+      />
+      <div className="relative z-10 flex flex-col">
+        {steps.map((step, i) => {
+          const isActive = i <= activeStepIndex;
+          return (
+            <div key={i} className="flex gap-5 pb-16 last:pb-0 md:gap-6">
+              <div className="flex w-10 shrink-0 justify-center">
+                <div
+                  ref={(el) => {
+                    markerRefs.current[i] = el;
+                  }}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                    isActive
+                      ? 'scale-110 border-primary bg-primary text-white shadow-lg shadow-primary/40'
+                      : 'scale-100 border-border-color bg-secondary text-primary'
+                  }`}
+                >
+                  <span className="font-bold">{step.number}</span>
+                </div>
+              </div>
+              <div
+                ref={(el) => {
+                  stepRefs.current[i] = el;
+                }}
+                className={`min-w-0 flex-1 transition-all duration-700 ${
+                  isActive ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-50'
+                }`}
+              >
+                <h3 className="mb-2 text-2xl font-bold text-text-main">{step.title}</h3>
+                <p className="text-text-secondary">{step.description}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
     <section id="how-it-works" className="py-20 bg-secondary transition-colors duration-700">
       <div className="container mx-auto px-6">
@@ -107,57 +161,26 @@ export default function HowItWorks() {
             {t('howItWorks.subtitle')}
           </TextReveal>
         </div>
-        <div ref={containerRef} className="relative mx-auto max-w-2xl">
-          <div
-            className="pointer-events-none absolute left-5 z-0 w-px -translate-x-1/2 bg-border-color"
-            style={{ top: lineMetrics.top, height: lineMetrics.height }}
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute left-5 z-0 w-0.5 origin-top bg-primary will-change-transform"
-            style={{
-              top: lineMetrics.top,
-              height: lineMetrics.height,
-              transform: `translateX(-50%) scaleY(${lineProgress})`,
-              transformOrigin: 'top center',
-            }}
-            aria-hidden
-          />
-          <div className="relative z-10 flex flex-col">
-            {steps.map((step, i) => {
-              const isActive = i <= activeStepIndex;
-              return (
-                <div key={i} className="flex gap-5 pb-16 last:pb-0 md:gap-6">
-                  <div className="flex w-10 shrink-0 justify-center">
-                    <div
-                      ref={(el) => {
-                        markerRefs.current[i] = el;
-                      }}
-                      className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-500 ${
-                        isActive
-                          ? 'scale-110 border-primary bg-primary text-white shadow-lg shadow-primary/40'
-                          : 'scale-100 border-border-color bg-secondary text-primary'
-                      }`}
-                    >
-                      <span className="font-bold">{step.number}</span>
-                    </div>
-                  </div>
-                  <div
-                    ref={(el) => {
-                      stepRefs.current[i] = el;
-                    }}
-                    className={`min-w-0 flex-1 transition-all duration-700 ${
-                      isActive ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-50'
-                    }`}
-                  >
-                    <h3 className="mb-2 text-2xl font-bold text-text-main">{step.title}</h3>
-                    <p className="text-text-secondary">{step.description}</p>
-                  </div>
-                </div>
-              );
-            })}
+
+        {illustrationUrl ? (
+          /* Two-column layout when an illustration is set */
+          <div className="mx-auto flex max-w-5xl flex-col items-center gap-12 lg:flex-row lg:items-start lg:gap-16">
+            <div className="w-full lg:flex-1">{stepsColumn}</div>
+            <div className="w-full lg:flex-1 flex items-center justify-center">
+              <div className="overflow-hidden rounded-3xl border border-border-color/30 shadow-2xl shadow-primary/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={illustrationUrl}
+                  alt="How it works illustration"
+                  className="w-full object-cover"
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Single-column centered layout — original behaviour */
+          <div className="mx-auto max-w-2xl">{stepsColumn}</div>
+        )}
       </div>
     </section>
   );
