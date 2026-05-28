@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { Link } from '@/i18n/navigation';
 import LoginForm from './LoginForm';
 import { Briefcase, TrendingUp, ShieldCheck, Users } from 'lucide-react';
 
@@ -101,13 +102,13 @@ export default async function LoginPage({
 
         <p className="mt-6 text-center text-xs text-text-secondary">
           By signing in you agree to our{' '}
-          <a href="/terms" className="text-text-secondary underline-offset-2 hover:text-text-main hover:underline">
+          <Link href={'/terms' as never} className="underline-offset-2 hover:text-text-main hover:underline">
             terms
-          </a>{' '}
+          </Link>{' '}
           and{' '}
-          <a href="/privacy" className="text-text-secondary underline-offset-2 hover:text-text-main hover:underline">
+          <Link href={'/privacy' as never} className="underline-offset-2 hover:text-text-main hover:underline">
             privacy notice
-          </a>
+          </Link>
           .
         </p>
       </div>
