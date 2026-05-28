@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { ShieldCheck, ShieldAlert, FileText, Image as ImageIcon, Globe } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, FileText, Image as ImageIcon, Globe, Sparkles } from 'lucide-react';
 import { requireAdmin } from '@/lib/auth/guards';
 import AdminUserActions from './AdminUserActions';
 
@@ -73,6 +73,9 @@ export default async function AdminUsersPage() {
   const frozenCount = (profiles ?? []).filter((p) => p.is_frozen).length;
   const bannedCount = (profiles ?? []).filter((p) => p.is_banned).length;
   const appliedCount = (profiles ?? []).filter((p) => p.applied_babehub).length;
+  const premiumCount = (profiles ?? []).filter(
+    (p) => p.is_premium && (!p.premium_until || new Date(p.premium_until) > new Date()),
+  ).length;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-6 md:px-6 md:py-10">
@@ -94,12 +97,13 @@ export default async function AdminUsersPage() {
       </header>
 
       {/* ── Quick counters ─────────────────────────────────────── */}
-      <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <section className="mb-6 grid grid-cols-3 gap-3 sm:grid-cols-6">
         <Counter label="Users" value={total} />
         <Counter label="Verified" value={verifiedCount} accent="primary" />
+        <Counter label="Premium" value={premiumCount} accent="amber" />
         <Counter label="Frozen" value={frozenCount} accent="sky" />
         <Counter label="Banned" value={bannedCount} accent="red" />
-        <Counter label="Applied" value={appliedCount} accent="amber" />
+        <Counter label="Applied" value={appliedCount} accent="green" />
       </section>
 
       {/* ── Users table ────────────────────────────────────────── */}
@@ -111,6 +115,7 @@ export default async function AdminUsersPage() {
               <th className="px-3 py-3">Role</th>
               <th className="px-3 py-3">Country</th>
               <th className="px-3 py-3">Content</th>
+              <th className="px-3 py-3">Premium</th>
               <th className="px-3 py-3">Applied</th>
               <th className="px-3 py-3">Status</th>
               <th className="px-4 py-3 text-right">Actions</th>
@@ -177,8 +182,32 @@ export default async function AdminUsersPage() {
                     </span>
                   </td>
                   <td className="px-3 py-3 text-xs">
+                    {(() => {
+                      const active =
+                        p.is_premium &&
+                        (!p.premium_until || new Date(p.premium_until) > new Date());
+                      if (!active) return <span className="text-text-secondary/40">—</span>;
+                      const until = p.premium_until
+                        ? new Date(p.premium_until).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: '2-digit',
+                          })
+                        : null;
+                      return (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300"
+                          title={until ? `Expires ${until}` : undefined}
+                        >
+                          <Sparkles className="h-2.5 w-2.5" />
+                          {until ?? 'Active'}
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-3 py-3 text-xs">
                     {p.applied_babehub ? (
-                      <span className="inline-flex rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+                      <span className="inline-flex rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-green-400">
                         Yes
                       </span>
                     ) : (
@@ -244,7 +273,7 @@ function Counter({
 }: {
   label: string;
   value: number;
-  accent?: 'primary' | 'sky' | 'red' | 'amber';
+  accent?: 'primary' | 'sky' | 'red' | 'amber' | 'green';
 }) {
   const tone =
     accent === 'primary'
@@ -255,7 +284,9 @@ function Counter({
           ? 'text-red-400'
           : accent === 'amber'
             ? 'text-amber-300'
-            : 'text-text-main';
+            : accent === 'green'
+              ? 'text-green-400'
+              : 'text-text-main';
   return (
     <div className="rounded-xl border border-border-color bg-card p-3">
       <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-text-secondary">
