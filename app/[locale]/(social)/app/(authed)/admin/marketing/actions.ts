@@ -50,15 +50,14 @@ export async function upsertSiteImage(formData: FormData): Promise<void> {
   if (!imageUrl) throw new Error('Provide an image file or paste a URL.');
 
   // Upsert the setting row
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (admin as any)
+  const { error } = await (admin as never)
     .from('site_settings')
     .upsert(
       { key, value: imageUrl, updated_at: new Date().toISOString() },
       { onConflict: 'key' },
     );
 
-  if (error) throw new Error(`Settings save failed: ${error.message}`);
+  if (error) throw new Error(`Settings save failed: ${(error as { message: string }).message}`);
 
   revalidatePath('/');
   revalidatePath('/marketing');
@@ -69,8 +68,7 @@ export async function upsertSiteImage(formData: FormData): Promise<void> {
 export async function deleteSiteImage(key: string): Promise<void> {
   await requireAdmin();
   const admin = createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any).from('site_settings').delete().eq('key', key);
+  await (admin as never).from('site_settings').delete().eq('key', key);
   revalidatePath('/');
   revalidatePath('/marketing');
   revalidatePath('/app/admin/marketing');

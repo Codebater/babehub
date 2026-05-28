@@ -32,15 +32,13 @@ export const ALL_MARKETING_KEYS = [
 export async function loadMarketingSettings(): Promise<MarketingSettings> {
   try {
     const admin = createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (admin as any)
+    const { data } = await (admin as never)
       .from('site_settings')
       .select('key, value')
       .in('key', ALL_MARKETING_KEYS);
 
     const map = new Map<string, string>(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (data ?? []).map((r: any) => [r.key as string, r.value as string]),
+      (data ?? []).map((r: { key: string; value: string }) => [r.key, r.value]),
     );
 
     return {
