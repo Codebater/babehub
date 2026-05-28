@@ -14,7 +14,6 @@ export default function HowItWorks({ illustrationUrl }: { illustrationUrl?: stri
       { number: '01', title: t('howItWorks.step1.title'), description: t('howItWorks.step1.description') },
       { number: '02', title: t('howItWorks.step2.title'), description: t('howItWorks.step2.description') },
       { number: '03', title: t('howItWorks.step3.title'), description: t('howItWorks.step3.description') },
-      { number: '04', title: t('howItWorks.step4.title'), description: t('howItWorks.step4.description') },
     ],
     [t],
   );

@@ -96,22 +96,18 @@ export default {
   },
   howItWorks: {
     title: 'Your Path to Success',
-    subtitle: 'A simple, transparent process to get started — regardless of where you are in your career.',
+    subtitle: 'Three steps. That is all it takes to go from applicant to earning more.',
     step1: {
       title: 'Apply',
-      description: 'Fill out our short, confidential application. Tell us about your current platforms, niche, and earnings goals. Takes under 5 minutes.',
+      description: 'Fill out our short, confidential application in under 5 minutes. Tell us your niche — OnlyFans, live cams, luxury, or casting — and where you want to take your career.',
     },
     step2: {
       title: 'Discovery Call',
-      description: 'If you are a strong fit we will schedule a brief, private call to discuss your vision, your niche — cams, OnlyFans, luxury, casting — and exactly how we can grow your income.',
+      description: 'We review every application personally. Strong fits are invited to a private discovery call where we map out your opportunities, agree on the plan, and answer every question you have.',
     },
     step3: {
-      title: 'Onboarding & Strategy',
-      description: 'We set up your personalised growth strategy. For select talent we also offer optional paid campaign packages to accelerate launch — completely your choice, zero pressure.',
-    },
-    step4: {
-      title: 'Exponential Growth',
-      description: 'Watch your earnings, follower count, and brand recognition climb as our team executes your strategy 24/7 across every platform you work on.',
+      title: 'Job Opportunities, Traffic & Collabs',
+      description: 'Once onboarded you get immediate access: casting calls and paid job opportunities in your niche, targeted traffic campaigns that grow your audience across every platform, and vetted creator collaborations that open new revenue streams — all managed by our team.',
     },
   },
   testimonials: {
