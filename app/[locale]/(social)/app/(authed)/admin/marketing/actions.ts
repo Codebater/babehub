@@ -49,8 +49,9 @@ export async function upsertSiteImage(formData: FormData): Promise<void> {
 
   if (!imageUrl) throw new Error('Provide an image file or paste a URL.');
 
-  // Upsert the setting row
-  const { error } = await (admin as never)
+  // Upsert the setting row — site_settings is not in generated types, cast to any
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { error } = await (admin as any)
     .from('site_settings')
     .upsert(
       { key, value: imageUrl, updated_at: new Date().toISOString() },
@@ -68,7 +69,7 @@ export async function upsertSiteImage(formData: FormData): Promise<void> {
 export async function deleteSiteImage(key: string): Promise<void> {
   await requireAdmin();
   const admin = createAdminClient();
-  await (admin as never).from('site_settings').delete().eq('key', key);
+  await (admin as any).from('site_settings').delete().eq('key', key);
   revalidatePath('/');
   revalidatePath('/marketing');
   revalidatePath('/app/admin/marketing');

@@ -32,7 +32,8 @@ export const ALL_MARKETING_KEYS = [
 export async function loadMarketingSettings(): Promise<MarketingSettings> {
   try {
     const admin = createAdminClient();
-    const { data } = await (admin as never)
+    // site_settings is not in the generated Supabase types — cast to any
+    const { data } = await (admin as any)
       .from('site_settings')
       .select('key, value')
       .in('key', ALL_MARKETING_KEYS);
