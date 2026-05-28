@@ -1,11 +1,19 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import LoginForm from './LoginForm';
+import { Briefcase, DollarSign } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title: 'Sign In — Babe Hub | Adult Creator Jobs & Monetization',
+  description:
+    'Join Babe Hub to apply for casting calls and adult creator jobs, or monetize your content as a verified creator. Free to join.',
+  robots: { index: false },
+};
 
 /**
  * `/app/login`. Public; redirects already-signed-in users straight to the
- * explore feed (platform's main surface) so we never show the magic-link
- * form to someone with an active session.
+ * explore feed. Google OAuth removed — email (magic link or password) only.
  */
 export default async function LoginPage({
   searchParams,
@@ -27,10 +35,24 @@ export default async function LoginPage({
     <main className="flex min-h-screen items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-black tracking-tight text-text-main">Sign in to Babe Hub</h1>
+          <h1 className="text-3xl font-black tracking-tight text-text-main">
+            Join Babe Hub
+          </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            We&apos;ll email you a magic link — no password needed.
+            Sign in or create a free account to get started.
           </p>
+
+          {/* Value props */}
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center sm:gap-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-border-color bg-secondary px-4 py-2 text-xs font-semibold text-text-main">
+              <Briefcase className="h-3.5 w-3.5 text-primary shrink-0" />
+              Apply for casting calls &amp; jobs
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border-color bg-secondary px-4 py-2 text-xs font-semibold text-text-main">
+              <DollarSign className="h-3.5 w-3.5 text-primary shrink-0" />
+              Monetize your content
+            </span>
+          </div>
         </div>
 
         {error && (
@@ -42,7 +64,15 @@ export default async function LoginPage({
         <LoginForm />
 
         <p className="mt-8 text-center text-xs text-text-secondary">
-          By signing in you agree to our terms and acknowledge the privacy notice.
+          By signing in you agree to our{' '}
+          <a href="/terms" className="underline-offset-2 hover:underline">
+            terms
+          </a>{' '}
+          and{' '}
+          <a href="/privacy" className="underline-offset-2 hover:underline">
+            privacy notice
+          </a>
+          .
         </p>
       </div>
     </main>

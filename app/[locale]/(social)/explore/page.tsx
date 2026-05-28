@@ -38,17 +38,99 @@ import PremiumGate from './PremiumGate';
  */
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: 'Explore — Babe Hub',
-  description:
-    'Discover videos on Babe Hub. Browse the latest from creators and our global video catalog.',
-  openGraph: {
-    title: 'Explore — Babe Hub',
-    description: 'Discover videos on Babe Hub.',
-    type: 'website',
+// Per-category SEO — each browse surface gets its own targeted title,
+// description, and keyword set so Google can rank each entry point
+// independently (casting vs live cams vs luxury vs general explore).
+const CATEGORY_META: Record<
+  string,
+  { title: string; description: string; keywords: string[] }
+> = {
+  casting: {
+    title: 'Adult Casting Calls & Auditions — Babe Hub',
+    description:
+      'Browse the latest adult casting calls and auditions. Apply directly to real paid gigs posted by verified agencies, studios, and brands on Babe Hub.',
+    keywords: [
+      'adult casting calls',
+      'OnlyFans casting',
+      'adult model auditions',
+      'creator casting calls',
+      'adult content casting',
+      'paid casting work',
+      'casting agency adult',
+    ],
   },
-  alternates: { canonical: '/explore' },
+  'live cams': {
+    title: 'Live Cam Model Jobs & Opportunities — Babe Hub',
+    description:
+      'Find live cam model jobs and webcam work opportunities. Connect with studios and agencies hiring cam models worldwide — remote and flexible.',
+    keywords: [
+      'cam model jobs',
+      'live cam model',
+      'webcam model work',
+      'cam studio jobs',
+      'live streaming model jobs',
+      'work from home cam model',
+    ],
+  },
+  luxury: {
+    title: 'Luxury Adult Content Creator Opportunities — Babe Hub',
+    description:
+      'Premium luxury adult content opportunities for top-tier creators. High-budget projects, brand deals, and exclusive placements for verified creators.',
+    keywords: [
+      'luxury adult content',
+      'premium creator opportunities',
+      'high budget adult content',
+      'luxury casting calls',
+      'elite adult creator work',
+    ],
+  },
 };
+
+const DEFAULT_META = {
+  title: 'Explore Adult Creators & Videos — Babe Hub',
+  description:
+    'Discover adult content creators, casting calls, live cams, and more on Babe Hub. Browse thousands of creator videos and find your next opportunity.',
+  keywords: [
+    'adult content creators',
+    'OnlyFans creators',
+    'adult video explore',
+    'creator discovery',
+    'adult content platform',
+  ],
+};
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const { q } = await searchParams;
+  const cat = q?.toLowerCase().trim() ?? '';
+  const meta = CATEGORY_META[cat] ?? {
+    ...DEFAULT_META,
+    ...(cat
+      ? {
+          title: `${cat.charAt(0).toUpperCase() + cat.slice(1)} Creators — Babe Hub`,
+          description: `Discover ${cat} adult content creators and opportunities on Babe Hub.`,
+        }
+      : {}),
+  };
+  const canonical = cat ? `/explore?q=${encodeURIComponent(cat)}` : '/explore';
+  return {
+    title: meta.title,
+    description: meta.description,
+    keywords: meta.keywords,
+    alternates: { canonical },
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      type: 'website',
+      url: `https://babehub.net${canonical}`,
+      images: ['/og-image.png'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: meta.title,
+      description: meta.description,
+    },
+  };
+}
 
 type Props = {
   searchParams: Promise<{ q?: string }>;

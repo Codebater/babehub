@@ -44,7 +44,10 @@ export default async function CreatorApplicationsPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
-      <p className="text-sm text-text-secondary">
+      <h1 className="text-2xl font-black tracking-tight text-text-main md:text-3xl">
+        My applications
+      </h1>
+      <p className="mt-1 text-sm text-text-secondary">
         Every job you&apos;ve applied to, with current status. Recruiters update
         these from their inbox.
       </p>

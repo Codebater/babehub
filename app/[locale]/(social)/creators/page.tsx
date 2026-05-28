@@ -14,10 +14,28 @@ import ApplyButton from '../_components/ApplyButton';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Creators — Babe Hub',
+  title: 'Adult Content Creators — Find & Book Top Talent on Babe Hub',
   description:
-    'Babe Hub creators — coming soon. Apply now to be one of the first featured talents.',
+    'Discover and book verified adult content creators on Babe Hub. Agencies and brands: find top OnlyFans talent, cam models, and influencers ready to collaborate.',
+  keywords: [
+    'adult content creators',
+    'OnlyFans creators',
+    'find OnlyFans models',
+    'book adult creators',
+    'adult influencer platform',
+    'top cam models',
+    'adult talent roster',
+    'verified OnlyFans creators',
+    'hire adult content creators',
+  ],
   alternates: { canonical: '/creators' },
+  openGraph: {
+    title: 'Adult Content Creators — Babe Hub',
+    description:
+      'Find and book verified adult content creators, OnlyFans models, and cam talent on Babe Hub.',
+    type: 'website',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function CreatorsPage() {

@@ -20,15 +20,35 @@ export const revalidate = 300;
  * Google sees the page as a publication, not just a listing.
  */
 export const metadata: Metadata = {
-  title: 'Blog — Babe Hub',
+  title: 'Blog — OnlyFans Tips, Creator Guides & Industry Insights',
   description:
-    'Playbooks, payments deep-dives and brand-side guides for creators, agencies and brands working with adult content.',
+    'OnlyFans growth tips, creator monetization playbooks, casting call guides, and adult industry insights. Learn how to scale your content income on Babe Hub.',
+  keywords: [
+    'OnlyFans tips',
+    'OnlyFans growth guide',
+    'how to make money OnlyFans',
+    'content creator monetization',
+    'adult creator advice',
+    'OnlyFans marketing tips',
+    'creator income guide',
+    'adult content industry',
+    'casting call tips',
+    'how to get casting calls',
+    'adult model career tips',
+  ],
   alternates: { canonical: '/blog' },
   openGraph: {
-    title: 'Babe Hub Blog',
+    title: 'Babe Hub Blog — Creator Guides & OnlyFans Tips',
     description:
-      'Creator launch guides, payment deep-dives, and brand placement playbooks.',
+      'Actionable guides on OnlyFans growth, creator monetization, and landing casting calls.',
     type: 'website',
+    images: ['/og-image.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Babe Hub Blog — Creator Guides & OnlyFans Tips',
+    description:
+      'Actionable guides on OnlyFans growth, creator monetization, and landing casting calls.',
   },
 };
 

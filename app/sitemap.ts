@@ -29,11 +29,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: locale === routing.defaultLocale ? 1.0 : 0.8,
   }));
 
+  // Static surfaces + per-category explore URLs (each gets its own
+  // title/description via generateMetadata in explore/page.tsx, so
+  // submitting them individually gives Google the right signal for each).
   const publicSurfaces: MetadataRoute.Sitemap = [
     { url: `${DOMAIN}/explore`, lastModified: today, changeFrequency: 'hourly', priority: 0.9 },
-    { url: `${DOMAIN}/jobs`, lastModified: today, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${DOMAIN}/blog`, lastModified: today, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${DOMAIN}/creators`, lastModified: today, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${DOMAIN}/explore?q=casting`, lastModified: today, changeFrequency: 'hourly', priority: 0.95 },
+    { url: `${DOMAIN}/explore?q=live%20cams`, lastModified: today, changeFrequency: 'hourly', priority: 0.9 },
+    { url: `${DOMAIN}/explore?q=luxury`, lastModified: today, changeFrequency: 'daily', priority: 0.85 },
+    { url: `${DOMAIN}/jobs`, lastModified: today, changeFrequency: 'daily', priority: 0.95 },
+    { url: `${DOMAIN}/blog`, lastModified: today, changeFrequency: 'weekly', priority: 0.85 },
+    { url: `${DOMAIN}/creators`, lastModified: today, changeFrequency: 'weekly', priority: 0.8 },
   ];
 
   const blogEntries: MetadataRoute.Sitemap = ALL_POSTS.map((post) => ({
@@ -87,11 +93,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Same swallow as above — sitemap stays robust.
   }
 
+  // Verified creator profiles — is_verified = true means they've been
+  // approved and their public /c/{handle} page is worth indexing.
+  // Unverified profiles are excluded: they're typically incomplete and
+  // we don't want thin user pages competing with our money keywords.
+  let creatorEntries: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = await createClient();
+    const { data: creators } = await supabase
+      .from('profiles')
+      .select('handle, verified_at')
+      .eq('is_verified', true)
+      .not('handle', 'is', null)
+      .limit(5000);
+    creatorEntries = (creators ?? []).map((c) => ({
+      url: `${DOMAIN}/c/${c.handle}`,
+      lastModified: c.verified_at ? new Date(c.verified_at) : today,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    }));
+  } catch {
+    // Partial output preferred over throwing.
+  }
+
   return [
     ...homeEntries,
     ...publicSurfaces,
     ...blogEntries,
     ...dbBlogEntries,
     ...jobEntries,
+    ...creatorEntries,
   ];
 }

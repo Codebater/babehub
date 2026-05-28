@@ -17,25 +17,61 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://babehub.net'),
-  title: 'Babe Hub | The Best Model Agency for Top Creators',
+  title: {
+    default: 'Babe Hub | Adult Creator Jobs, Casting Calls & Monetization',
+    template: '%s — Babe Hub',
+  },
   description:
-    'Babe Hub is the #1 OnlyFans management agency helping creators and models scale their income to top 0.1%. Professional chatting, marketing, and brand building.',
-  keywords:
-    'OnlyFans management, OnlyFans agency, model management, OnlyFans growth, OnlyFans marketing, content creator agency, OnlyFans model agency, OnlyFans marketing agency, OnlyFans account manager, OnlyFans scaling, top 0.1% OnlyFans',
+    'Babe Hub is the #1 platform for adult creator jobs, casting calls, and OnlyFans management. Apply for paid gigs, find cam model work, and scale your content income to the top 0.1%.',
+  keywords: [
+    // Creator job seekers
+    'adult casting calls',
+    'OnlyFans casting',
+    'adult model jobs',
+    'cam model jobs',
+    'content creator jobs',
+    'adult creator jobs',
+    'OnlyFans auditions',
+    'adult content work from home',
+    'paid creator work',
+    'creator casting calls',
+    // Agencies / recruiters
+    'OnlyFans management agency',
+    'OnlyFans agency',
+    'adult talent agency',
+    'find OnlyFans models',
+    'hire adult content creators',
+    'adult content agency',
+    // Monetization
+    'how to monetize content',
+    'OnlyFans tips',
+    'make money as content creator',
+    'OnlyFans growth',
+    'OnlyFans marketing',
+    // Discovery
+    'top OnlyFans creators',
+    'adult content creators',
+    'live cam models',
+    'luxury adult content',
+    // Brand
+    'Babe Hub',
+    'BabeHub',
+    'babehub.net',
+  ],
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     url: 'https://babehub.net/',
-    title: 'Babe Hub | The Best Model Agency for Top Creators',
+    title: 'Babe Hub | Adult Creator Jobs, Casting Calls & Monetization',
     description:
-      "Scale your OnlyFans income with the world's leading management agency. We handle chatting, marketing, and strategy while you create.",
+      'Apply for adult casting calls, find creator jobs, or scale your OnlyFans income with the #1 management agency. Join thousands of creators on Babe Hub.',
     images: ['/og-image.png'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Babe Hub | The Best Model Agency for Top Creators',
+    title: 'Babe Hub | Adult Creator Jobs, Casting Calls & Monetization',
     description:
-      "Scale your OnlyFans income with the world's leading management agency. We handle chatting, marketing, and strategy while you create.",
+      'Apply for adult casting calls, find creator jobs, or scale your OnlyFans income with the #1 management agency.',
     images: ['/og-image.png'],
   },
   icons: { icon: '/favicon.png', apple: '/favicon.png' },
@@ -49,26 +85,29 @@ const ORG_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'Babe Hub',
+  alternateName: 'BabeHub',
   url: 'https://babehub.net',
   logo: 'https://babehub.net/logo.png',
   description:
-    'Premium OnlyFans Management & Model Growth Agency helping creators reach the top 0.1%.',
+    'Babe Hub is the #1 platform for adult creator jobs, casting calls, OnlyFans management, and creator monetization.',
   sameAs: ['https://twitter.com/babehub', 'https://instagram.com/babehub'],
 };
 
 const SERVICE_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  serviceType: 'OnlyFans Management',
+  serviceType: 'Adult Creator Platform',
   provider: { '@type': 'Organization', name: 'Babe Hub' },
   areaServed: 'Worldwide',
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'OnlyFans Services',
+    name: 'Babe Hub Services',
     itemListElement: [
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: '24/7 Account Management' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Adult Creator Job Board' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Casting Calls & Auditions' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'OnlyFans Management' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Creator Monetization' } },
       { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Social Media Marketing' } },
-      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Professional Chatting' } },
     ],
   },
 };
