@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { Briefcase, MapPin, ShieldCheck, Clock, Sparkles } from 'lucide-react';
+import { Briefcase, MapPin, ShieldCheck, Clock, Sparkles, Mail } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import ApplyToJobForm from './ApplyToJobForm';
 
@@ -367,6 +367,17 @@ export default async function JobDetailPage({ params }: Props) {
           >
             Sign in to apply
           </Link>
+        ) : !viewer.email_confirmed_at ? (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5">
+            <p className="flex items-center gap-2 text-sm font-bold text-text-main">
+              <Mail className="h-4 w-4 text-amber-400" />
+              Verify your email to apply
+            </p>
+            <p className="mt-1 text-xs text-text-secondary">
+              We sent a confirmation link to your email address. Click it to unlock job
+              applications — it only takes a second.
+            </p>
+          </div>
         ) : (
           <ApplyToJobForm jobId={job.id} jobTitle={job.title} />
         )}

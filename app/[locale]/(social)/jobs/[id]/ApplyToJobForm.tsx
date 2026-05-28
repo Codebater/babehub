@@ -27,6 +27,7 @@ export default function ApplyToJobForm({
     const fd = new FormData();
     fd.set('job_id', jobId);
     fd.set('intro_message', body);
+    fd.set('_trap', ''); // honeypot — always empty for real users
     startTransition(async () => {
       const res = await applyToJob(fd);
       if (res.ok) setStatus({ kind: 'sent' });

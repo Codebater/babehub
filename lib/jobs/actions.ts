@@ -332,8 +332,45 @@ export async function setApplicationStatus(
 export async function applyToJob(formData: FormData): Promise<JobActionResult> {
   const { user, supabase } = await requireOnboarded();
 
+  // ── Anti-spam: honeypot field must be empty ───────────────────────
+  // Hidden text input that real users never see or fill. Bots that
+  // blindly fill all form fields will trigger this.
+  const trap = (formData.get('_trap') as string | null) ?? '';
+  if (trap) return { ok: false, error: 'Submission rejected.' };
+
   const jobId = (formData.get('job_id') as string) || '';
   if (!jobId) return { ok: false, error: 'Missing job id.' };
+
+  // ── Email verification gate ───────────────────────────────────────
+  // Require a confirmed email before allowing any application. Keeps
+  // fake/throwaway accounts from spamming recruiters. With Supabase
+  // "Confirm email" ON: email_confirmed_at is null until the user
+  // clicks the link. With it OFF: auto-confirmed at signup, so the
+  // check always passes (rate-limits cover that case instead).
+  if (!user.email_confirmed_at) {
+    return {
+      ok: false,
+      error:
+        'Please verify your email address before applying. Check your inbox for a verification link.',
+    };
+  }
+
+  // ── Daily rate limit: 10 applications per user per day ───────────
+  // Prevents even verified accounts from batch-applying to every job.
+  const todayStart = new Date();
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const { count: dailyCount } = await supabase
+    .from('job_applications')
+    .select('id', { count: 'exact', head: true })
+    .eq('applicant_id', user.id)
+    .gte('created_at', todayStart.toISOString());
+
+  if ((dailyCount ?? 0) >= 10) {
+    return {
+      ok: false,
+      error: 'Daily application limit reached (10 per day). Come back tomorrow.',
+    };
+  }
 
   const introMessage = ((formData.get('intro_message') as string) || '')
     .trim()

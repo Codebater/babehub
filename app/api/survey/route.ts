@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Apply BabeHub survey submission endpoint.
@@ -36,6 +37,8 @@ type SurveyFormBody = {
   goals?: string;
   interestedInCampaigns?: boolean;
   agreesToProfitShare?: boolean;
+  /** Honeypot — must be absent/empty. Bots that auto-fill forms set this. */
+  _trap?: string;
 };
 
 function toErrorMessage(err: unknown): string {
@@ -106,11 +109,43 @@ async function mirrorToAirtable(body: SurveyFormBody) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => ({}))) as SurveyFormBody;
+
+    // ── Anti-spam: honeypot ─────────────────────────────────────────
+    // If the hidden `_trap` field is non-empty, this is a bot. Silently
+    // succeed so bots don't know they were caught.
+    if (body._trap) {
+      return NextResponse.json({ success: true });
+    }
+
     if (!body.email?.trim()) {
       return NextResponse.json(
         { error: 'Bad Request', details: 'Missing email' },
         { status: 400 },
       );
+    }
+
+    // ── Anti-spam: rate limit — 3 submissions per email per day ──────
+    // Uses the admin client (bypasses RLS) so we can count all rows for
+    // this email regardless of who submitted them.
+    try {
+      const adminClient = createAdminClient();
+      const dayStart = new Date();
+      dayStart.setUTCHours(0, 0, 0, 0);
+      const { count: todayCount } = await adminClient
+        .from('survey_submissions')
+        .select('id', { count: 'exact', head: true })
+        .eq('email', body.email.trim().toLowerCase())
+        .gte('created_at', dayStart.toISOString());
+
+      if ((todayCount ?? 0) >= 3) {
+        return NextResponse.json(
+          { error: 'Too many submissions. Please try again tomorrow.' },
+          { status: 429 },
+        );
+      }
+    } catch {
+      // Rate-limit check is best-effort; don't block valid submissions
+      // if the count query fails for any reason.
     }
 
     // Primary: insert into Supabase. Anyone can insert (RLS policy

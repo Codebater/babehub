@@ -103,6 +103,14 @@ export async function signUpWithPassword(
   _prev: PasswordSignUpState,
   formData: FormData,
 ): Promise<PasswordSignUpState> {
+  // ── Anti-spam: honeypot ─────────────────────────────────────────
+  // The signup form renders a visually-hidden text field named `_trap`.
+  // Real users never see or touch it. Bots that auto-fill all inputs
+  // will fill it. Silently return ok so bots don't know they were
+  // caught (they'd just iterate evasions if we returned an error).
+  const trap = String(formData.get('_trap') ?? '');
+  if (trap) return { ok: true, email: '', handle: '' };
+
   const email = String(formData.get('email') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
   const handle = String(formData.get('handle') ?? '').trim().toLowerCase();
@@ -128,7 +136,11 @@ export async function signUpWithPassword(
     email,
     password,
     options: {
-      emailRedirectTo: `${origin}/auth/callback`,
+      // After the user clicks the confirmation link in their inbox, send
+      // them to /explore rather than /app/onboarding — by the time they
+      // verify they've already been through onboarding (instant-signup
+      // flow with "Confirm email" OFF), so landing on the feed is right.
+      emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent('/explore')}`,
       data: { handle, display_name: handle },
     },
   });

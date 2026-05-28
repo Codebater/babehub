@@ -180,6 +180,16 @@ function SignUpPasswordForm() {
 
   return (
     <form action={action} className="space-y-3">
+      {/* Honeypot anti-spam — must stay empty. Visually hidden so real
+          users never see it; bots that blindly fill all inputs fill it. */}
+      <input
+        name="_trap"
+        type="text"
+        tabIndex={-1}
+        aria-hidden="true"
+        autoComplete="off"
+        style={{ position: 'absolute', left: '-9999px', height: 1, width: 1, opacity: 0 }}
+      />
       <div>
         <label htmlFor="signup-handle" className="mb-1 block text-sm font-medium text-text-secondary">
           Username
