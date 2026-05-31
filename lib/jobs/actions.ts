@@ -331,6 +331,21 @@ export async function setApplicationStatus(
     .eq('id', applicationId);
   if (error) return { ok: false, error: error.message };
 
+  // Notify the applicant when the recruiter takes a notable action.
+  // Skip 'pending' and 'withdrawn' (no meaningful message to surface).
+  const notifyStatuses = ['viewed', 'shortlisted', 'accepted', 'rejected'];
+  if (notifyStatuses.includes(status) && application.applicant_id) {
+    const { data: jobRow } = await supabase
+      .from('jobs')
+      .select('title')
+      .eq('id', application.job_id)
+      .maybeSingle();
+    const jobTitle = jobRow?.title ?? 'your application';
+    const { notifyUserInChat, ChatMessages } = await import('@/lib/chat/notify');
+    const msg = ChatMessages.jobStatus(jobTitle, status);
+    if (msg) await notifyUserInChat(application.applicant_id, msg);
+  }
+
   revalidatePath(`/app/recruiter/jobs/${application.job_id}/applications`);
   revalidatePath('/app/creator/applications');
   return { ok: true, id: applicationId };
@@ -384,6 +399,14 @@ export async function applyToJob(formData: FormData): Promise<JobActionResult> {
     .trim()
     .slice(0, 2000);
 
+  // Fetch the job title so we can include it in the chat notification.
+  const { data: jobRow } = await supabase
+    .from('jobs')
+    .select('title')
+    .eq('id', jobId)
+    .maybeSingle();
+  const jobTitle = jobRow?.title ?? 'this position';
+
   // Phase 2 polish (Sprint 4): handle intro_media_ids upload here.
   const { data, error } = await supabase
     .from('job_applications')
@@ -402,6 +425,10 @@ export async function applyToJob(formData: FormData): Promise<JobActionResult> {
     }
     return { ok: false, error: error.message };
   }
+
+  // Notify the applicant in their chat thread
+  const { notifyUserInChat, ChatMessages } = await import('@/lib/chat/notify');
+  await notifyUserInChat(user.id, ChatMessages.jobApplied(jobTitle));
 
   revalidatePath(`/jobs/${jobId}`);
   revalidatePath('/app/creator/applications');

@@ -184,6 +184,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Notify the user in their admin chat thread (signed-in only).
+    if (user?.id) {
+      const { notifyUserInChat, ChatMessages } = await import('@/lib/chat/notify');
+      await notifyUserInChat(user.id, ChatMessages.surveyReceived());
+    }
+
     // Optional Airtable mirror — runs after the Supabase insert
     // succeeds. Wrapped in try/catch so an Airtable outage never
     // takes the form down.

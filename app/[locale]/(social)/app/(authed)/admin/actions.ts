@@ -189,6 +189,14 @@ async function updateSubmissionStatus(
   status: 'new' | 'reviewing' | 'contacted' | 'accepted' | 'rejected',
 ) {
   const { supabase, user } = await requireAdmin();
+
+  // Fetch the row first so we can grab user_id (for chat notification)
+  const { data: row } = await supabase
+    .from(table)
+    .select('user_id')
+    .eq('id', id)
+    .maybeSingle();
+
   await supabase
     .from(table)
     .update({
@@ -197,6 +205,18 @@ async function updateSubmissionStatus(
       reviewed_by: user.id,
     })
     .eq('id', id);
+
+  // Notify the applicant in their chat thread (survey submissions only,
+  // and only when a user_id is linked — anonymous submissions can't be notified).
+  if (table === 'survey_submissions') {
+    const applicantId = (row as any)?.user_id as string | null;
+    if (applicantId && status !== 'new') {
+      const { notifyUserInChat, ChatMessages } = await import('@/lib/chat/notify');
+      const msg = ChatMessages.surveyStatus(status);
+      if (msg) await notifyUserInChat(applicantId, msg);
+    }
+  }
+
   revalidatePath('/app/admin/applications');
   revalidatePath('/app/admin/inquiries');
 }
