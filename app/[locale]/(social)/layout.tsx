@@ -12,9 +12,7 @@ import { createClient } from '@/lib/supabase/server';
 import SidebarLink from './SidebarLink';
 import ProfileMenu from './ProfileMenu';
 import MobileNav from './MobileNav';
-import Script from 'next/script';
 import SurveyModalProvider from './SurveyModalProvider';
-import ExoClickStickyBanner from './_components/ExoClickStickyBanner';
 import SidebarCalendar, { type CalendarEvent } from './SidebarCalendar';
 import SidebarPitchButton from './SidebarPitchButton';
 import { ALL_POSTS } from '@/lib/blog/posts';
@@ -242,9 +240,6 @@ export default async function SocialLayout({ children }: { children: React.React
         hasProfessionalProfile={hasProfessionalProfile}
       />
     </div>
-      <ExoClickStickyBanner />
-      {/* Pop-under zone 5935772 — triggers once per session on first user click */}
-      <Script src="/exoclick-popunder.js" strategy="afterInteractive" />
     </SurveyModalProvider>
   );
 }

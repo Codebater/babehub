@@ -145,8 +145,6 @@ export default function AdStrip({
 }: Props) {
   const { openBanner } = useSurveyModal();
 
-  // Slot-based ad zones — activate by setting the env vars documented above.
-  // The sticky banner (ExoClickStickyBanner in the layout) is separate.
   if (EXOCLICK_ZONE_DESKTOP) return <ExoClickAd placement={placement} />;
   if (JUICYADS_SPOT) return <JuicyAdsAd placement={placement} />;
 
@@ -156,17 +154,17 @@ export default function AdStrip({
         type="button"
         onClick={openBanner}
         data-ad-placement={placement}
-        className="group flex w-full items-center justify-between gap-3 rounded-md border border-dashed border-border-color/60 bg-card/40 px-4 py-2 text-left transition-colors hover:border-primary/60 hover:bg-primary/[0.04]"
+        className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border-color/50 bg-card/60 px-4 py-2.5 text-left backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-primary/[0.03]"
       >
         <div className="flex min-w-0 items-center gap-3">
-          <span className="rounded-sm border border-border-color px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-text-secondary">
-            Ad
+          <span className="shrink-0 rounded-md border border-border-color/60 bg-secondary px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-text-secondary/70">
+            Sponsored
           </span>
-          <span className="truncate text-xs font-medium text-text-secondary group-hover:text-text-main">
+          <span className="truncate text-xs text-text-secondary group-hover:text-text-main">
             {DEFAULT_CREATIVES[0].headline}
           </span>
         </div>
-        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-secondary transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+        <ArrowRight className="h-3.5 w-3.5 shrink-0 text-text-secondary/50 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
       </button>
     );
   }
@@ -193,7 +191,7 @@ function RotatingStrip({
       window.setTimeout(() => {
         setIndex((i) => (i + 1) % DEFAULT_CREATIVES.length);
         setFading(false);
-      }, 250);
+      }, 200);
     }, intervalMs);
     return () => window.clearInterval(id);
   }, [intervalMs]);
@@ -208,48 +206,37 @@ function RotatingStrip({
       data-ad-placement={placement}
       data-ad-creative={c.key}
       aria-label={`Sponsored slot: ${c.headline}`}
-      className={`group relative block w-full overflow-hidden border-y border-dashed border-border-color/70 bg-card/30 py-3 text-left transition-colors hover:border-primary/50 sm:py-4 ${accent.halo}`}
+      className="group relative block w-full overflow-hidden rounded-2xl border border-border-color/60 bg-gradient-to-r from-card via-card to-primary/[0.04] py-3.5 text-left shadow-sm transition-all hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 sm:py-4"
     >
       <div
-        className={`flex items-center gap-3 px-4 transition-opacity duration-300 sm:gap-5 sm:px-6 ${
+        className={`flex items-center gap-3 px-5 transition-opacity duration-200 sm:gap-5 sm:px-6 ${
           fading ? 'opacity-0' : 'opacity-100'
         }`}
       >
-        <span
-          className={`hidden shrink-0 rounded-sm border px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.25em] sm:inline-flex ${accent.chip}`}
-        >
-          {c.eyebrow ?? 'Advertisement'}
+        {/* Sponsored label */}
+        <span className="shrink-0 rounded-md border border-border-color/50 bg-secondary/80 px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-secondary/60">
+          Sponsored
         </span>
-        <span
-          className={`inline-flex shrink-0 rounded-sm border px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] sm:hidden ${accent.chip}`}
-        >
-          Ad
-        </span>
+
+        {/* Copy */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black uppercase tracking-wide text-text-main sm:text-base">
+          <p className="truncate text-sm font-bold text-text-main transition-colors group-hover:text-primary sm:text-[15px]">
             {c.headline}
           </p>
-          <p className="mt-0.5 hidden truncate text-xs text-text-secondary sm:block">
+          <p className="mt-0.5 hidden truncate text-xs text-text-secondary/70 sm:block">
             {c.sub}
           </p>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-text-main/15 bg-text-main/[0.04] px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-main transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
-          <span className="hidden sm:inline">Pitch a slot</span>
-          <span className="sm:hidden">Pitch</span>
+
+        {/* CTA */}
+        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-[11px] font-bold tracking-wide text-primary ring-1 ring-primary/20 transition-all group-hover:bg-primary group-hover:text-white group-hover:ring-primary/60">
+          Get in touch
           <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
-      <div className="pointer-events-none absolute bottom-1 right-3 hidden gap-1 sm:flex">
-        {DEFAULT_CREATIVES.map((cr, i) => (
-          <span
-            key={cr.key}
-            aria-hidden
-            className={`h-1 w-1 rounded-full transition-colors ${
-              i === index ? 'bg-primary' : 'bg-text-secondary/30'
-            }`}
-          />
-        ))}
-      </div>
+
+      {/* Subtle right-side glow on hover */}
+      <div className="pointer-events-none absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-primary/[0.06] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
     </button>
   );
 }

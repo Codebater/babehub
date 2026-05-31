@@ -32,7 +32,7 @@ export default async function AdminUsersPage() {
   const { data: profiles } = await supabase
     .from('profiles')
     .select(
-      'id, handle, display_name, avatar_url, role, country, is_verified, verified_at, is_frozen, is_banned, applied_babehub, is_premium, premium_until, created_at',
+      'id, handle, display_name, avatar_url, role, country, gender, is_verified, verified_at, is_frozen, is_banned, applied_babehub, is_premium, premium_until, created_at',
     )
     .order('created_at', { ascending: false })
     .limit(200);
@@ -113,6 +113,7 @@ export default async function AdminUsersPage() {
             <tr>
               <th className="px-4 py-3">User</th>
               <th className="px-3 py-3">Role</th>
+              <th className="px-3 py-3">Gender</th>
               <th className="px-3 py-3">Country</th>
               <th className="px-3 py-3">Content</th>
               <th className="px-3 py-3">Premium</th>
@@ -155,6 +156,15 @@ export default async function AdminUsersPage() {
                     </Link>
                   </td>
                   <td className="px-3 py-3 text-xs capitalize text-text-secondary">{p.role}</td>
+                  <td className="px-3 py-3 text-xs text-text-secondary">
+                    {(() => {
+                      const g = (p as any).gender as string | null;
+                      if (!g) return <span className="text-text-secondary/40">—</span>;
+                      const label = g === 'non_binary' ? 'Non-binary' : g.charAt(0).toUpperCase() + g.slice(1);
+                      const color = g === 'woman' ? 'text-pink-400' : g === 'man' ? 'text-sky-400' : 'text-amber-400';
+                      return <span className={`font-medium ${color}`}>{label}</span>;
+                    })()}
+                  </td>
                   <td className="px-3 py-3 text-xs text-text-secondary">
                     {p.country ? (
                       <span className="inline-flex items-center gap-1">

@@ -103,6 +103,7 @@ export default async function ProfessionalEditPage() {
               handle: profile.handle,
               display_name: profile.display_name,
               bio: profile.bio,
+              gender: (profile as any).gender ?? null,
             }}
             role={profile.role}
           />

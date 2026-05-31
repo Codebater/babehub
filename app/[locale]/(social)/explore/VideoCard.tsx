@@ -58,7 +58,7 @@ export default function VideoCard({
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border-color bg-card text-left transition-colors hover:border-primary">
+    <div className="group flex flex-col overflow-hidden rounded-lg border border-border-color bg-card text-left transition-colors hover:border-primary sm:rounded-2xl">
       <Link href={watchHref} className="block">
         <div className="relative aspect-video bg-black">
           {thumb && (
@@ -72,47 +72,49 @@ export default function VideoCard({
           )}
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
-            <span className="rounded-full bg-primary/90 p-4 opacity-0 transition-opacity group-hover:opacity-100">
-              <Play className="h-6 w-6 fill-white text-white" />
+            <span className="rounded-full bg-primary/90 p-2 opacity-0 transition-opacity group-hover:opacity-100 sm:p-4">
+              <Play className="h-4 w-4 fill-white text-white sm:h-6 sm:w-6" />
             </span>
           </div>
 
           {castingNumber !== undefined && (
-            <div className="absolute left-2 top-2 overflow-hidden rounded-md border border-white/40 bg-black font-mono text-white shadow-2xl">
+            <div className="absolute left-1.5 top-1.5 overflow-hidden rounded-md border border-white/40 bg-black font-mono text-white shadow-2xl sm:left-2 sm:top-2">
               <div
-                className="h-2 w-full"
+                className="h-1.5 w-full sm:h-2"
                 style={{
                   backgroundImage:
                     'repeating-linear-gradient(-30deg, #ffffff 0 8px, #000000 8px 16px)',
                 }}
                 aria-hidden
               />
-              <div className="px-2.5 py-1.5">
-                <p className="text-[8px] font-bold uppercase leading-none tracking-[0.25em] text-white/70">
+              <div className="px-1.5 py-1 sm:px-2.5 sm:py-1.5">
+                <p className="text-[7px] font-bold uppercase leading-none tracking-[0.2em] text-white/70 sm:text-[8px] sm:tracking-[0.25em]">
                   Casting · Take
                 </p>
-                <p className="mt-1 text-lg font-black leading-none tracking-tight">
+                <p className="mt-0.5 text-sm font-black leading-none tracking-tight sm:mt-1 sm:text-lg">
                   {formatCastingNumber(castingNumber)}
                 </p>
               </div>
             </div>
           )}
 
-          <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white">
-            <Clock className="h-3 w-3" />
+          {/* Duration — bottom-right */}
+          <span className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 rounded bg-black/75 px-1 py-0.5 text-[10px] font-medium text-white sm:bottom-2 sm:right-2 sm:gap-1 sm:rounded-md sm:px-2 sm:text-xs">
+            <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
             {video.length_min}
           </span>
 
-          <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white">
-            <Eye className="h-3 w-3" />
+          {/* Views — bottom-left, hidden on very small to avoid clutter */}
+          <span className="absolute bottom-1.5 left-1.5 hidden items-center gap-0.5 rounded bg-black/75 px-1 py-0.5 text-[10px] font-medium text-white sm:bottom-2 sm:left-2 sm:flex sm:gap-1 sm:rounded-md sm:px-2 sm:text-xs">
+            <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
             {formatViews(video.views)}
           </span>
         </div>
       </Link>
 
-      <div className="flex-1 p-3">
+      <div className="flex-1 p-2 sm:p-3">
         <Link href={watchHref} className="block">
-          <h3 className="line-clamp-2 text-sm font-medium text-text-main group-hover:text-primary">
+          <h3 className="line-clamp-2 text-[11px] font-medium leading-snug text-text-main group-hover:text-primary sm:text-sm">
             {video.title}
           </h3>
         </Link>
@@ -120,9 +122,9 @@ export default function VideoCard({
         {primaryCreator && (
           <Link
             href={`/c/${primaryCreator.handle}` as '/c/[handle]'}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/60 px-2 py-1 transition-colors hover:bg-primary/15"
+            className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-secondary/60 px-1.5 py-0.5 transition-colors hover:bg-primary/15 sm:mt-2 sm:gap-1.5 sm:px-2 sm:py-1"
           >
-            <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-secondary">
+            <span className="h-4 w-4 shrink-0 overflow-hidden rounded-full bg-secondary sm:h-5 sm:w-5">
               {primaryCreator.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -131,13 +133,13 @@ export default function VideoCard({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[9px] font-black text-white">
+                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[8px] font-black text-white">
                   {primaryCreator.displayName.slice(0, 1).toUpperCase()}
                 </span>
               )}
             </span>
-            <span className="flex items-center gap-0.5 text-[11px] font-medium text-text-secondary">
-              <ShieldCheck className="h-3 w-3 text-primary" />
+            <span className="flex items-center gap-0.5 text-[10px] font-medium text-text-secondary sm:text-[11px]">
+              <ShieldCheck className="h-2.5 w-2.5 text-primary sm:h-3 sm:w-3" />
               @{primaryCreator.handle}
             </span>
           </Link>

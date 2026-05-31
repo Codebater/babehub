@@ -6,7 +6,7 @@ import { requireOnboarded } from '@/lib/auth/guards';
 export type SettingsState = {
   ok?: boolean;
   error?: string;
-  values?: { handle?: string; display_name?: string; bio?: string };
+  values?: { handle?: string; display_name?: string; bio?: string; gender?: string };
 };
 
 const HANDLE_RE = /^[a-z0-9_]{3,30}$/;
@@ -19,6 +19,8 @@ const RESERVED_HANDLES = new Set([
   'support', 'help', 'contact', 'about', 'terms', 'privacy',
 ]);
 
+const VALID_GENDERS = new Set(['man', 'woman', 'non_binary']);
+
 export async function updateProfileText(
   _prev: SettingsState,
   formData: FormData,
@@ -26,8 +28,10 @@ export async function updateProfileText(
   const handle = String(formData.get('handle') ?? '').trim().toLowerCase();
   const display_name = String(formData.get('display_name') ?? '').trim();
   const bio = String(formData.get('bio') ?? '').trim();
+  const genderRaw = String(formData.get('gender') ?? '').trim();
+  const gender = VALID_GENDERS.has(genderRaw) ? genderRaw : null;
 
-  const values = { handle, display_name, bio };
+  const values = { handle, display_name, bio, gender: gender ?? '' };
 
   if (!HANDLE_RE.test(handle)) {
     return {
@@ -48,9 +52,10 @@ export async function updateProfileText(
   const { user, profile, supabase } = await requireOnboarded();
   const previousHandle = profile.handle;
 
-  const { error } = await supabase
+  const db = supabase as any;
+  const { error } = await db
     .from('profiles')
-    .update({ handle, display_name, bio })
+    .update({ handle, display_name, bio, ...(gender !== null ? { gender } : {}) })
     .eq('id', user.id);
 
   if (error) {

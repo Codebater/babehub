@@ -47,13 +47,17 @@ const initial: SettingsState = {};
 const inputClass =
   'w-full rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-primary focus:outline-none [color-scheme:dark]';
 
+const GENDER_OPTIONS = [
+  { value: 'man', label: 'Man' },
+  { value: 'woman', label: 'Woman' },
+  { value: 'non_binary', label: 'Non-binary' },
+] as const;
+
 export default function SettingsForm({
   defaults,
 }: {
-  defaults: { handle: string; display_name: string; bio: string };
-  /** Kept on the prop signature for forward-compat — the role-based
-   *  UI moved off this form. Drop the argument from callers when
-   *  ready; for now we silently accept and ignore. */
+  defaults: { handle: string; display_name: string; bio: string; gender?: string | null };
+  /** Kept on the prop signature for forward-compat. */
   role?: string;
 }) {
   const [state, formAction] = useActionState(updateProfileText, initial);
@@ -111,6 +115,48 @@ export default function SettingsForm({
           className={`${inputClass} resize-y`}
         />
       </label>
+
+      {/* Gender */}
+      <fieldset>
+        <legend className="mb-2 block text-sm font-bold text-text-main">Gender</legend>
+        <div className="flex flex-wrap gap-2">
+          {GENDER_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all ${
+                (values.gender ?? '') === opt.value
+                  ? 'border-primary bg-primary/10 text-primary'
+                  : 'border-border-color bg-secondary text-text-secondary hover:border-primary/40'
+              }`}
+            >
+              <input
+                type="radio"
+                name="gender"
+                value={opt.value}
+                defaultChecked={(values.gender ?? '') === opt.value}
+                className="sr-only"
+              />
+              {opt.label}
+            </label>
+          ))}
+          <label
+            className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all ${
+              !values.gender
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border-color bg-secondary text-text-secondary hover:border-primary/40'
+            }`}
+          >
+            <input
+              type="radio"
+              name="gender"
+              value=""
+              defaultChecked={!values.gender}
+              className="sr-only"
+            />
+            Prefer not to say
+          </label>
+        </div>
+      </fieldset>
 
       {state.error && (
         <div className="rounded-md border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs text-red-400">
