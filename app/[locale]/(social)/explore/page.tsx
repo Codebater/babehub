@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
 import { loadFeedPage } from './data';
 import { loadFeaturedCreatorVideos } from './creators';
 import VideoCard from './VideoCard';
@@ -14,6 +15,7 @@ import { assignCastingNumbers } from '@/lib/casting/numbers';
 import AdStrip from '../_components/AdStrip';
 import { createClient } from '@/lib/supabase/server';
 import { isElevated } from '@/lib/limits';
+import { SEO_TAGS } from '@/lib/seo/tags';
 import PremiumGate from './PremiumGate';
 
 /**
@@ -334,6 +336,22 @@ export default async function ExplorePage({ searchParams }: Props) {
             </div>
           </>
         )}
+      </section>
+
+      {/* ── Browse by category — internal linking to the SEO landing pages ─ */}
+      <section className="mt-12 border-t border-border-color/40 pt-6">
+        <h2 className="mb-3 text-sm font-bold text-text-main">Browse by category</h2>
+        <div className="flex flex-wrap gap-2">
+          {SEO_TAGS.map((t) => (
+            <Link
+              key={t.slug}
+              href={`/videos/${t.slug}` as never}
+              className="rounded-full border border-border-color bg-card px-3 py-1.5 text-xs font-medium text-text-secondary transition-all hover:border-primary/40 hover:text-primary"
+            >
+              {t.label}
+            </Link>
+          ))}
+        </div>
       </section>
 
       <footer className="mt-8 px-1">

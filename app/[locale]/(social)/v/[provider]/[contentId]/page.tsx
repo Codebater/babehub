@@ -9,6 +9,7 @@ import VideoActions from '@/components/VideoActions';
 import CommentThread from '@/components/CommentThread';
 import AdStrip from '@/app/[locale]/(social)/_components/AdStrip';
 import ApplyButton from '@/app/[locale]/(social)/_components/ApplyButton';
+import { slugify } from '@/lib/seo/tags';
 
 /**
  * `/v/{provider}/{contentId}` — dedicated page for one video. Lives
@@ -91,11 +92,28 @@ export async function generateMetadata({
 
   if (provider === 'eporner') {
     const title = sp.title ?? 'Video';
+    const kw = (sp.keywords ?? '')
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean);
+    const kwLabel = kw.slice(0, 6).join(', ');
+    const description = kwLabel
+      ? `Watch ${title} free on Babe Hub. ${kwLabel}. HD adult video — discover more, find creators, and apply to casting calls.`
+      : `Watch ${title} free on Babe Hub — HD adult video. Discover creators and apply to casting calls.`;
     return {
-      title: `${title} — Babe Hub`,
-      description: 'Watch on Babe Hub.',
-      openGraph: { title, images: sp.thumb ? [sp.thumb] : undefined },
-      robots: { index: false, follow: false },
+      title: `${title} — Watch Free | Babe Hub`,
+      description,
+      openGraph: {
+        type: 'video.other',
+        title,
+        description,
+        images: sp.thumb ? [sp.thumb] : undefined,
+      },
+      // Individual catalog video pages are param-driven (eporner has no
+      // get-by-id endpoint), so a bare crawl can't self-render. Keep them
+      // noindex but FOLLOW so their keyword links pass equity to the
+      // indexable /videos/{tag} category pages — the real SEO engine.
+      robots: { index: false, follow: true },
     };
   }
   if (provider === 'creator_post') {
@@ -242,7 +260,7 @@ export default async function VideoPage({ params, searchParams }: Props) {
               {keywordList.map((kw) => (
                 <Link
                   key={kw}
-                  href={`/explore?q=${encodeURIComponent(kw)}`}
+                  href={`/videos/${slugify(kw)}` as never}
                   className="rounded-full border border-border-color/50 bg-secondary/40 px-2.5 py-1 text-[10px] text-text-secondary/70 transition-all hover:border-primary/40 hover:bg-primary/8 hover:text-primary"
                 >
                   {kw}

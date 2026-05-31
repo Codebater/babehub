@@ -26,7 +26,9 @@ export default function robots(): MetadataRoute.Robots {
           '/app/login',      // auth screens
           '/app/reset-password',
           '/favorites',      // personal saved items
-          '/v/',             // per-video pages (thin third-party catalog content)
+          // /v/ (video watch pages) and /videos/ (category landing pages)
+          // are intentionally crawlable — they carry VideoObject schema and
+          // drive video-search traffic.
         ],
       },
     ],

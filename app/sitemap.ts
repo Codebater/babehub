@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { routing } from '@/i18n/routing';
 import { ALL_POSTS } from '@/lib/blog/posts';
+import { SEO_TAGS } from '@/lib/seo/tags';
 import { createClient } from '@/lib/supabase/server';
 
 const DOMAIN = 'https://babehub.net';
@@ -41,6 +42,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${DOMAIN}/blog`, lastModified: today, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${DOMAIN}/creators`, lastModified: today, changeFrequency: 'weekly', priority: 0.8 },
   ];
+
+  // Programmatic category/keyword landing pages (/videos/{slug}) — the
+  // primary video-SEO engine. Each targets a high-volume adult-category
+  // term with a live video grid + VideoObject ItemList schema.
+  const tagEntries: MetadataRoute.Sitemap = SEO_TAGS.map((t) => ({
+    url: `${DOMAIN}/videos/${t.slug}`,
+    lastModified: today,
+    changeFrequency: 'daily',
+    priority: 0.85,
+  }));
 
   const blogEntries: MetadataRoute.Sitemap = ALL_POSTS.map((post) => ({
     url: `${DOMAIN}/blog/${post.slug}`,
@@ -119,6 +130,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...homeEntries,
     ...publicSurfaces,
+    ...tagEntries,
     ...blogEntries,
     ...dbBlogEntries,
     ...jobEntries,
