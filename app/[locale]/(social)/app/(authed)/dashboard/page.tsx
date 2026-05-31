@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Star,
   Settings as SettingsIcon,
+  MessageSquare,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
@@ -247,6 +248,12 @@ export default async function DashboardPage() {
                 title="Edit profile"
                 hint="Identity & pro details"
               />
+              <ActionCard
+                href="/app/chat"
+                icon={<MessageSquare className="h-4 w-4" />}
+                title="Team chat"
+                hint="Message BabeHub · Beta"
+              />
             </ul>
           </section>
         </>
@@ -271,7 +278,7 @@ export default async function DashboardPage() {
               Your fan history stays — you just unlock creator features.
             </p>
             <Link
-              href="/app/onboarding"
+              href="/app/professional/edit"
               className="relative mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] hover:bg-pink-400"
             >
               Switch to creator
@@ -307,6 +314,12 @@ export default async function DashboardPage() {
                 icon={<SettingsIcon className="h-4 w-4" />}
                 title="Edit profile"
                 hint="Handle & bio"
+              />
+              <ActionCard
+                href="/app/chat"
+                icon={<MessageSquare className="h-4 w-4" />}
+                title="Team chat"
+                hint="Message BabeHub · Beta"
               />
             </ul>
           </section>

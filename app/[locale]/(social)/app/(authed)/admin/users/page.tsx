@@ -1,5 +1,5 @@
 import { Link } from '@/i18n/navigation';
-import { ShieldCheck, ShieldAlert, FileText, Image as ImageIcon, Globe, Sparkles } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, FileText, Image as ImageIcon, Globe, Sparkles, MessageSquare } from 'lucide-react';
 import { requireAdmin } from '@/lib/auth/guards';
 import AdminUserActions from './AdminUserActions';
 
@@ -232,16 +232,26 @@ export default async function AdminUsersPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <AdminUserActions
-                      userId={p.id}
-                      isVerified={p.is_verified}
-                      isFrozen={p.is_frozen}
-                      isBanned={p.is_banned}
-                      isPremium={
-                        p.is_premium &&
-                        (!p.premium_until || new Date(p.premium_until) > new Date())
-                      }
-                    />
+                    <div className="flex flex-wrap items-center gap-2 justify-end">
+                      <Link
+                        href={`/app/admin/chat/${p.handle}` as never}
+                        className="inline-flex items-center gap-1 rounded-md border border-border-color px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
+                        title="Open chat with this user"
+                      >
+                        <MessageSquare className="h-3 w-3" />
+                        Message
+                      </Link>
+                      <AdminUserActions
+                        userId={p.id}
+                        isVerified={p.is_verified}
+                        isFrozen={p.is_frozen}
+                        isBanned={p.is_banned}
+                        isPremium={
+                          p.is_premium &&
+                          (!p.premium_until || new Date(p.premium_until) > new Date())
+                        }
+                      />
+                    </div>
                   </td>
                 </tr>
               );

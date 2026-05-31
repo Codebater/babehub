@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   FileText,
   ImageIcon,
+  MessageSquare,
 } from 'lucide-react';
 import type { AdminCounts } from '@/lib/admin/counts';
 
@@ -94,6 +95,14 @@ export default function AdminNav({ counts }: { counts: AdminCounts }) {
       icon: <ImageIcon className="h-4 w-4" />,
       count: 0,
       accent: 'sky',
+    },
+    {
+      href: '/app/admin/chat',
+      label: 'Chat',
+      icon: <MessageSquare className="h-4 w-4" />,
+      count: counts.totalChats,
+      pending: counts.unreadChats,
+      accent: 'primary',
     },
   ];
 
