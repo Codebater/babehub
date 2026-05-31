@@ -50,13 +50,19 @@ const THEMES: Record<Theme, {
 };
 
 export default function FeaturedSlot({ theme = 'default' as Theme }: { theme?: Theme }) {
-  const { openBanner } = useSurveyModal();
+  const { openApply, openBanner } = useSurveyModal();
   const t = THEMES[theme];
+
+  // Casting / live cams / default slots are creator-facing — clicking them
+  // means "I want to perform / be cast", so they open the creator apply
+  // survey. Only the luxury slot ("Feature your brand") is a B2B placement
+  // pitch, so it opens the banner-inquiry modal instead.
+  const onClick = theme === 'luxury' ? openBanner : openApply;
 
   return (
     <button
       type="button"
-      onClick={openBanner}
+      onClick={onClick}
       className="group flex flex-col text-left"
     >
       {/* Thumbnail — matches VideoCard exactly */}
