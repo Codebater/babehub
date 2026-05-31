@@ -187,6 +187,13 @@ export default async function VideoPage({ params, searchParams }: Props) {
               title={title}
               allow="autoplay; fullscreen; encrypted-media"
               allowFullScreen
+              // Sandbox the third-party player: the video still plays
+              // (allow-scripts + allow-same-origin), but WITHOUT
+              // allow-popups / allow-top-navigation the catalog player's
+              // overlay ad links can't open new tabs or redirect the page
+              // — so the yellow sponsor links become dead, non-functional.
+              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
+              referrerPolicy="no-referrer"
               className="h-full w-full border-0"
             />
           </div>

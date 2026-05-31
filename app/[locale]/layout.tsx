@@ -93,6 +93,24 @@ const ORG_SCHEMA = {
   sameAs: ['https://twitter.com/babehub', 'https://instagram.com/babehub'],
 };
 
+const WEBSITE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Babe Hub',
+  alternateName: 'BabeHub',
+  url: 'https://babehub.net',
+  // Sitelinks search box: lets Google surface a search field for branded
+  // queries that deep-links into our /explore feed.
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://babehub.net/explore?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 const SERVICE_SCHEMA = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -142,6 +160,10 @@ export default async function LocaleLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
         />
         <script
           type="application/ld+json"
