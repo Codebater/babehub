@@ -36,7 +36,7 @@ export async function adminOpenThread(userId: string): Promise<string> {
 export async function adminSendMessage(
   threadId: string,
   body: string,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; remaining?: number }> {
   const { user, profile } = await requireOnboarded();
   if (profile.role !== 'admin') return { ok: false, error: 'Forbidden' };
 

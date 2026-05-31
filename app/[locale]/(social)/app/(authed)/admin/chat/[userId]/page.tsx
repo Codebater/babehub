@@ -60,7 +60,7 @@ export default async function AdminThreadPage({
       {/* Thread header */}
       <header className="flex items-center gap-4 border-b border-border-color bg-card px-4 py-3 md:px-6">
         <Link
-          href="/app/admin/chat"
+          href={"/app/admin/chat" as never}
           className="flex shrink-0 items-center gap-1.5 rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
