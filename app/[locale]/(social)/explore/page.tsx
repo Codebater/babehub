@@ -334,11 +334,9 @@ export default async function ExplorePage({ searchParams }: Props) {
         )}
       </section>
 
-      <footer className="mt-12 border-t border-border-color/40 pt-6 text-xs text-text-secondary">
-        <p>
-          Catalog videos sourced from the public eporner.com API. Creator videos are
-          uploaded by Babe Hub creators. By browsing, you confirm you are 18+ and that
-          adult content is legal in your jurisdiction.
+      <footer className="mt-8 px-1">
+        <p className="text-[9px] leading-relaxed text-text-secondary/20 select-none">
+          Catalog videos are sourced via the public eporner.com API under their standard syndication terms. Creator-uploaded content is hosted by BabeHub. All persons depicted are 18+. By accessing this page you confirm you are at least 18 years of age and that adult content is lawful in your jurisdiction. BabeHub is not the producer of any third-party catalog content. DMCA / content removal: legal@babehub.net.
         </p>
       </footer>
     </main>
