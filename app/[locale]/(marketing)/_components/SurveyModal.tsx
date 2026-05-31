@@ -535,7 +535,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                         onChange={(e) => set('interestedInCampaigns', e.target.checked)}
                         label={
                           <span>
-                            Yes — I'm interested in optional{' '}
+                            Yes — I&apos;m interested in optional{' '}
                             <strong className="text-white">paid campaigns</strong> and agree to work
                             under <strong className="text-white">NDAs</strong> where required.
                           </span>
@@ -547,7 +547,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                         onChange={(e) => set('agreesToProfitShare', e.target.checked)}
                         label={
                           <span>
-                            I acknowledge BabeHub's{' '}
+                            I acknowledge BabeHub&apos;s{' '}
                             <strong className="text-white">30–40% revenue share</strong>. The exact split
                             will be confirmed during the discovery call.
                           </span>
