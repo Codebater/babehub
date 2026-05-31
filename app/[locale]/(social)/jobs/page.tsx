@@ -239,11 +239,13 @@ export default async function JobsPage({ searchParams }: Props) {
           sponsorship. */}
       {!isFiltered && sortKey === 'newest' && featuredJobs.length > 0 && (
         <section className="mb-6">
-          <p className="mb-3 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300">
+          <p className="mb-2.5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300">
             <Sparkles className="h-3 w-3" />
             Featured this month
           </p>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
+          {/* Horizontal strip layout — works great on mobile and desktop */}
+          <ul className="space-y-2">
             {featuredJobs.slice(0, 3).map((job) => {
               const featuredBudget = formatBudget(
                 job.budget_min_cents,
@@ -254,22 +256,38 @@ export default async function JobsPage({ searchParams }: Props) {
                 <li key={job.id}>
                   <Link
                     href={`/jobs/${job.id}` as '/jobs/[id]'}
-                    className="group block h-full overflow-hidden rounded-2xl border border-amber-400/30 bg-gradient-to-br from-card to-amber-950/15 p-4 transition-all hover:border-amber-400/60 hover:scale-[1.01]"
+                    className="group flex items-center overflow-hidden rounded-xl border border-amber-400/20 bg-gradient-to-r from-amber-950/20 via-card to-card transition-all hover:border-amber-400/40 hover:from-amber-950/30"
                   >
-                    <p className="inline-flex items-center gap-1 rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
-                      <Sparkles className="h-3 w-3" />
-                      Featured
-                      {job.published_at &&
-                        ` · ${new Date(job.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
-                    </p>
-                    <h3 className="mt-2 line-clamp-2 text-sm font-black tracking-tight text-text-main transition-colors group-hover:text-amber-200">
-                      {job.title}
-                    </h3>
-                    {featuredBudget && (
-                      <p className="mt-1 text-xs font-bold text-text-main">
-                        {featuredBudget}
-                      </p>
-                    )}
+                    {/* Left amber accent bar */}
+                    <div className="h-full w-1 shrink-0 self-stretch bg-amber-400/50 group-hover:bg-amber-400/80 transition-colors" />
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1 px-3 py-3 sm:px-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.25em] text-amber-300/80">
+                          <Sparkles className="h-2.5 w-2.5" />
+                          Featured
+                        </span>
+                        {job.categories.slice(0, 1).map((c) => (
+                          <span key={c} className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                      <h3 className="mt-0.5 truncate text-sm font-bold text-text-main transition-colors group-hover:text-amber-200">
+                        {job.title}
+                      </h3>
+                      {featuredBudget && (
+                        <p className="mt-0.5 text-xs font-bold text-text-secondary">
+                          {featuredBudget}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Right CTA */}
+                    <div className="shrink-0 pr-4">
+                      <ArrowRight className="h-4 w-4 text-amber-300/40 transition-all group-hover:translate-x-0.5 group-hover:text-amber-300" />
+                    </div>
                   </Link>
                 </li>
               );
@@ -324,29 +342,29 @@ export default async function JobsPage({ searchParams }: Props) {
               <li key={job.id} className="group">
                 <Link
                   href={`/jobs/${job.id}` as '/jobs/[id]'}
-                  className={`flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-secondary/50 md:flex-row md:items-center md:gap-6 md:px-5 md:py-4 ${
-                    featured ? 'border-l-4 border-l-amber-400/70' : ''
+                  className={`flex items-center gap-3 px-0 py-3 transition-colors hover:bg-secondary/40 md:gap-6 md:px-5 md:py-4 ${
+                    featured ? 'border-l-4 border-l-amber-400/70 pl-3 md:pl-0' : 'px-4 md:px-5'
                   }`}
                 >
-                  {/* ── Title + description column ─────────────── */}
+                  {/* ── Title + meta ─────────────────────────── */}
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       {featured && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-300/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-amber-300">
-                          <Flame className="h-3 w-3" />
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-300/15 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300">
+                          <Flame className="h-2.5 w-2.5" />
                           Featured
                         </span>
                       )}
-                      <h3 className="text-sm font-bold text-text-main transition-colors group-hover:text-primary md:text-base">
-                        {job.title}
-                      </h3>
+                      {job.categories.slice(0, 1).map((c) => (
+                        <span key={`cat-${c}`} className="hidden rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary sm:inline-flex">
+                          {c}
+                        </span>
+                      ))}
                     </div>
-                    {job.description && (
-                      <p className="mt-1 line-clamp-1 text-xs text-text-secondary md:text-sm">
-                        {job.description}
-                      </p>
-                    )}
-                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-secondary">
+                    <h3 className="mt-0.5 text-sm font-bold leading-snug text-text-main transition-colors group-hover:text-primary">
+                      {job.title}
+                    </h3>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-text-secondary">
                       <span className="inline-flex items-center gap-1 capitalize">
                         <MapPin className="h-3 w-3" />
                         {job.location_kind}
@@ -358,76 +376,45 @@ export default async function JobsPage({ searchParams }: Props) {
                           Verified only
                         </span>
                       )}
-                      {job.categories.slice(0, 2).map((c) => (
-                        <span
-                          key={`cat-${c}`}
-                          className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-primary"
-                        >
-                          {c}
-                        </span>
-                      ))}
                     </div>
                   </div>
 
-                  {/* ── Poster column ──────────────────────────── */}
+                  {/* ── Poster — desktop only ─────────────────── */}
                   {poster && (
-                    <div className="hidden min-w-0 shrink-0 items-center gap-2 text-xs text-text-secondary md:flex md:w-32">
+                    <div className="hidden shrink-0 items-center gap-2 text-xs text-text-secondary md:flex md:w-32">
                       <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full bg-secondary">
                         {poster.avatarUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={poster.avatarUrl}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={poster.avatarUrl} alt="" className="h-full w-full object-cover" />
                         ) : (
                           <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[10px] font-black text-white">
                             {poster.displayName.slice(0, 1).toUpperCase()}
                           </span>
                         )}
                       </span>
-                      <span className="min-w-0 truncate">
-                        @{poster.handle}
-                        {poster.isVerified && (
-                          <ShieldCheck className="ml-1 inline h-3 w-3 text-primary" />
-                        )}
-                      </span>
+                      <span className="min-w-0 truncate">@{poster.handle}</span>
                     </div>
                   )}
 
-                  {/* ── Budget column ──────────────────────────── */}
-                  <div className="shrink-0 text-left md:w-40 md:text-right">
+                  {/* ── Budget + time ─────────────────────────── */}
+                  <div className="shrink-0 text-right">
                     {budget ? (
-                      <p className="text-sm font-black text-text-main md:text-base">
-                        {budget}
-                      </p>
+                      <p className="text-sm font-black text-text-main">{budget}</p>
                     ) : (
-                      <p className="text-xs text-text-secondary/60">
-                        No budget listed
-                      </p>
+                      <p className="text-xs text-text-secondary/40">—</p>
                     )}
-                    {job.published_at && (
-                      <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-text-secondary">
-                        <Clock className="h-3 w-3" />
-                        {timeAgo(job.published_at)}
-                      </p>
-                    )}
-                    {job.expires_at && (
-                      <p
-                        className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300"
-                        title={`Applications close ${new Date(job.expires_at).toLocaleString()}`}
-                      >
-                        Closes {timeUntil(job.expires_at)}
-                      </p>
-                    )}
+                    <p className="mt-0.5 text-[10px] text-text-secondary/60">
+                      {job.expires_at ? (
+                        <span className="text-amber-300/80">Closes {timeUntil(job.expires_at)}</span>
+                      ) : job.published_at ? (
+                        timeAgo(job.published_at)
+                      ) : null}
+                    </p>
                   </div>
 
-                  {/* ── CTA column ─────────────────────────────── */}
-                  <div className="shrink-0">
-                    <span className="inline-flex items-center gap-1 rounded-full border border-border-color px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-text-secondary transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
-                      View
-                      <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                    </span>
+                  {/* ── Arrow ─────────────────────────────────── */}
+                  <div className="shrink-0 pr-4 md:pr-0">
+                    <ArrowRight className="h-4 w-4 text-text-secondary/30 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                   </div>
                 </Link>
               </li>
