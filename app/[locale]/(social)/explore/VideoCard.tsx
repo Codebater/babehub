@@ -1,6 +1,7 @@
-import { Play, Clock } from 'lucide-react';
+import { Play, Clock, Eye } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { formatCastingNumber } from '@/lib/casting/numbers';
+import { boostViews, formatViews } from '@/lib/format/views';
 import type { FeedVideo } from './types';
 import type { PrimaryCreator } from './primary-creator';
 
@@ -23,11 +24,8 @@ export default function VideoCard({
 }) {
   const thumb = video.default_thumb?.src ?? video.thumbs?.[0]?.src ?? '';
 
-  const formatViews = (n: number): string => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-    return String(n);
-  };
+  // Display-boosted, deterministic view count (see lib/format/views).
+  const viewsLabel = formatViews(boostViews(video.views, video.id));
 
   const watchHref = {
     pathname: `/v/eporner/${video.id}` as '/v/eporner/[contentId]',
@@ -35,10 +33,9 @@ export default function VideoCard({
       embed: video.embed,
       title: video.title,
       thumb,
-      source: video.url,
       keywords: video.keywords,
       length: video.length_min,
-      views: formatViews(video.views),
+      views: viewsLabel,
     },
   };
 
@@ -77,6 +74,12 @@ export default function VideoCard({
             </div>
           </div>
         )}
+
+        {/* Views — bottom left */}
+        <span className="absolute bottom-1.5 left-1.5 flex items-center gap-0.5 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+          <Eye className="h-2.5 w-2.5" />
+          {viewsLabel}
+        </span>
 
         {/* Duration pill — bottom right */}
         <span className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">

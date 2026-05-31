@@ -12,6 +12,7 @@ import {
   Loader2,
   FileText,
   ShieldAlert,
+  MessageSquare,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { signOut } from '../app/(public)/login/actions';
@@ -58,6 +59,8 @@ type Props = {
    * the smart "Profile" menu entry: yes → /c/{handle}, no → setup.
    */
   hasProfessionalProfile?: boolean;
+  /** True when there's an unread admin-chat message (welcome / status). */
+  hasUnreadChat?: boolean;
 };
 
 export default function ProfileMenu({
@@ -66,6 +69,7 @@ export default function ProfileMenu({
   isAdmin = false,
   isRecruiter = false,
   hasProfessionalProfile = false,
+  hasUnreadChat = false,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -190,6 +194,20 @@ export default function ProfileMenu({
             <FileText className="h-4 w-4" />
             My applications
           </Link>
+          {/* Messages — direct line to the BabeHub team. Pink dot when
+              there's an unread message (welcome note / application update). */}
+          <Link
+            href={'/app/chat' as never}
+            onClick={close}
+            className={itemClass}
+            role="menuitem"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Messages
+            {hasUnreadChat && (
+              <span className="ml-auto h-2 w-2 rounded-full bg-primary shadow-[0_0_0_3px] shadow-primary/20" />
+            )}
+          </Link>
           {/* Single "Profile" entry — smart-routed:
                  • Pro profile set up → go to the public /c/{handle}
                  • Not set up yet     → go to the Profile editor
@@ -278,18 +296,26 @@ export default function ProfileMenu({
           href={`/c/${profile.handle}` as '/c/[handle]'}
           className="flex min-w-0 flex-1 items-center gap-3 text-left"
         >
-          <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-secondary">
-            {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className="h-full w-full object-cover"
+          <span className="relative h-9 w-9 shrink-0 overflow-visible rounded-full">
+            <span className="block h-full w-full overflow-hidden rounded-full bg-secondary">
+              {profile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar_url}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
+                  {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
+                </span>
+              )}
+            </span>
+            {hasUnreadChat && (
+              <span
+                aria-label="Unread message"
+                className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-card bg-primary"
               />
-            ) : (
-              <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
-                {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
-              </span>
             )}
           </span>
           <span className="min-w-0 flex-1">

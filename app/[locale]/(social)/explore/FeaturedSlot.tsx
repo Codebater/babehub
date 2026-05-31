@@ -1,99 +1,109 @@
 'use client';
 
-import { Sparkles, Star } from 'lucide-react';
+import { Sparkles, Star, ArrowRight } from 'lucide-react';
 import { useSurveyModal } from '../SurveyModalProvider';
 
 /**
- * A "featured slot" tile that sits inside the /explore grid alongside
- * VideoCards. Matches the VideoCard layout exactly (aspect-video thumbnail
- * + small title below) so it doesn't distort the grid rhythm.
+ * A full-width "featured slot" STRIP spliced into the /explore grid via
+ * `col-span-full`, so it spans the whole row regardless of column count
+ * and reads as a slim promoted bar rather than a square tile.
  *
- * Everything is overlaid on the thumbnail — no separate card body.
+ * Click → the creator apply survey (openApply) for casting / live cams /
+ * default themes. Only the luxury theme is a B2B placement pitch and
+ * opens the banner-inquiry modal (openBanner).
  */
 type Theme = 'casting' | 'livecams' | 'luxury' | 'default';
 
 const THEMES: Record<Theme, {
   bg: string;
+  border: string;
   glow: string;
-  badge: string;
+  iconBg: string;
+  eyebrow: string;
+  cta: string;
   label: string;
   title: string;
+  action: string;
 }> = {
   casting: {
-    bg: 'bg-gradient-to-br from-zinc-950 via-black to-zinc-900',
-    glow: 'from-primary/20 via-transparent to-transparent',
-    badge: 'bg-primary/20 text-primary border-primary/30',
-    label: 'Featured slot — open',
-    title: 'Apply to be cast',
+    bg: 'bg-gradient-to-r from-zinc-950 via-black to-zinc-900',
+    border: 'border-white/10',
+    glow: 'bg-primary/20',
+    iconBg: 'bg-primary/15 text-primary',
+    eyebrow: 'text-white/50',
+    cta: 'bg-primary text-white',
+    label: 'Casting',
+    title: 'Apply to be cast — open auditions now',
+    action: 'Apply',
   },
   livecams: {
-    bg: 'bg-gradient-to-br from-black via-red-950/70 to-black',
-    glow: 'from-red-500/20 via-transparent to-transparent',
-    badge: 'bg-red-500/20 text-red-300 border-red-500/30',
-    label: 'Live slot — apply now',
-    title: 'Apply for a live slot',
+    bg: 'bg-gradient-to-r from-black via-red-950/50 to-black',
+    border: 'border-red-500/20',
+    glow: 'bg-red-500/20',
+    iconBg: 'bg-red-500/15 text-red-300',
+    eyebrow: 'text-red-200/60',
+    cta: 'bg-red-500 text-white',
+    label: 'Live Cams',
+    title: 'Apply for a live slot — go live with us',
+    action: 'Apply',
   },
   luxury: {
-    bg: 'bg-gradient-to-br from-black via-zinc-900 to-purple-950/60',
-    glow: 'from-amber-300/20 via-transparent to-transparent',
-    badge: 'bg-amber-300/15 text-amber-200 border-amber-300/30',
-    label: 'Premium feature spot',
-    title: 'Feature your brand',
+    bg: 'bg-gradient-to-r from-black via-zinc-900 to-purple-950/40',
+    border: 'border-amber-300/20',
+    glow: 'bg-amber-300/20',
+    iconBg: 'bg-amber-300/15 text-amber-200',
+    eyebrow: 'text-amber-200/60',
+    cta: 'bg-amber-300 text-black',
+    label: 'Luxury',
+    title: 'Feature your brand — premium placement',
+    action: 'Feature',
   },
   default: {
-    bg: 'bg-gradient-to-br from-black via-zinc-900 to-pink-950/60',
-    glow: 'from-primary/20 via-transparent to-transparent',
-    badge: 'bg-primary/20 text-primary border-primary/30',
-    label: 'Featured slot — apply',
-    title: 'Apply to be featured',
+    bg: 'bg-gradient-to-r from-black via-zinc-900 to-pink-950/40',
+    border: 'border-primary/20',
+    glow: 'bg-primary/20',
+    iconBg: 'bg-primary/15 text-primary',
+    eyebrow: 'text-primary/70',
+    cta: 'bg-primary text-white',
+    label: 'Featured',
+    title: 'Apply to be featured on BabeHub',
+    action: 'Apply',
   },
 };
 
 export default function FeaturedSlot({ theme = 'default' as Theme }: { theme?: Theme }) {
   const { openApply, openBanner } = useSurveyModal();
   const t = THEMES[theme];
-
-  // Casting / live cams / default slots are creator-facing — clicking them
-  // means "I want to perform / be cast", so they open the creator apply
-  // survey. Only the luxury slot ("Feature your brand") is a B2B placement
-  // pitch, so it opens the banner-inquiry modal instead.
   const onClick = theme === 'luxury' ? openBanner : openApply;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group flex flex-col text-left"
+      className={`group relative col-span-full flex items-center gap-3 overflow-hidden rounded-xl border px-3 py-2.5 text-left transition-all hover:brightness-125 sm:gap-4 sm:px-4 ${t.border} ${t.bg}`}
     >
-      {/* Thumbnail — matches VideoCard exactly */}
-      <div className={`relative aspect-video w-full overflow-hidden rounded-md sm:rounded-xl ${t.bg}`}>
+      {/* Glow */}
+      <span className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full blur-3xl ${t.glow}`} aria-hidden />
 
-        {/* Diagonal glow */}
-        <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${t.glow}`} aria-hidden />
+      {/* Icon */}
+      <span className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${t.iconBg}`}>
+        <Star className="h-4 w-4" />
+      </span>
 
-        {/* Pulsing star icon — center */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Star className="h-8 w-8 text-white/25 transition-transform duration-300 group-hover:scale-110 group-hover:text-white/40 sm:h-10 sm:w-10" />
-        </div>
-
-        {/* Badge — top-left */}
-        <div className="absolute left-2 top-2">
-          <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.2em] ${t.badge}`}>
-            <Sparkles className="h-2.5 w-2.5" />
-            Open
-          </span>
-        </div>
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-white/0 transition-colors group-hover:bg-white/[0.04]" />
-      </div>
-
-      {/* Below thumbnail — matches VideoCard info row */}
-      <div className="mt-1.5 px-0.5">
-        <p className="text-[11px] font-medium leading-tight text-text-secondary/70 group-hover:text-text-secondary sm:text-xs">
-          {t.title}
+      {/* Text */}
+      <div className="relative min-w-0 flex-1">
+        <p className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.25em] ${t.eyebrow}`}>
+          <Sparkles className="h-2.5 w-2.5" />
+          {t.label}
         </p>
+        <p className="truncate text-xs font-bold text-white sm:text-sm">{t.title}</p>
       </div>
+
+      {/* CTA */}
+      <span className={`relative inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-bold transition-transform group-hover:scale-105 ${t.cta}`}>
+        {t.action}
+        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+      </span>
     </button>
   );
 }

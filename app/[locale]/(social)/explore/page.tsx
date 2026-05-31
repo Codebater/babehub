@@ -205,7 +205,9 @@ export default async function ExplorePage({ searchParams }: Props) {
         : showLuxuryBanner
           ? 'luxury'
           : 'default';
-  const liveCamsLeadingSlots = showLiveCamsBanner ? 4 : 0;
+  // One leading slot — it now spans the full grid width as a strip
+  // (col-span-full), so a single bar reads cleaner than four stacked ones.
+  const liveCamsLeadingSlots = showLiveCamsBanner ? 1 : 0;
   let randomFeaturedIndex = -1;
   if (
     !eporneFailed &&

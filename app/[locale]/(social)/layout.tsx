@@ -52,8 +52,11 @@ export default async function SocialLayout({ children }: { children: React.React
   } | null = null;
 
   let hasProfessionalProfile = false;
+  let hasUnreadChat = false;
   if (user) {
-    const [{ data }, { data: pro }] = await Promise.all([
+    // admin_threads isn't in the typed schema yet — cast for the unread query.
+    const sb = supabase as any;
+    const [{ data }, { data: pro }, { data: thread }] = await Promise.all([
       supabase
         .from('profiles')
         .select('handle, display_name, avatar_url, role, roles')
@@ -67,9 +70,16 @@ export default async function SocialLayout({ children }: { children: React.React
         .select('user_id')
         .eq('user_id', user.id)
         .maybeSingle(),
+      // Unread admin-chat indicator — drives the dot on the Messages
+      // entry + the account avatar so the welcome message is noticed.
+      sb.from('admin_threads').select('updated_at, user_last_read_at').eq('user_id', user.id).maybeSingle(),
     ]);
     if (data) profile = data;
     hasProfessionalProfile = Boolean(pro);
+    const t = thread as { updated_at: string; user_last_read_at: string | null } | null;
+    hasUnreadChat = t
+      ? !t.user_last_read_at || new Date(t.updated_at) > new Date(t.user_last_read_at)
+      : false;
   }
 
   const isCreator = profile?.role === 'creator';
@@ -186,6 +196,7 @@ export default async function SocialLayout({ children }: { children: React.React
             isAdmin={isAdmin}
             isRecruiter={isRecruiter}
             hasProfessionalProfile={hasProfessionalProfile}
+            hasUnreadChat={hasUnreadChat}
           />
         ) : (
           <div className="space-y-2 border-t border-border-color/40 pt-4">
@@ -238,6 +249,7 @@ export default async function SocialLayout({ children }: { children: React.React
         isCreator={isCreator}
         isAdmin={isAdmin}
         hasProfessionalProfile={hasProfessionalProfile}
+        hasUnreadChat={hasUnreadChat}
       />
     </div>
     </SurveyModalProvider>

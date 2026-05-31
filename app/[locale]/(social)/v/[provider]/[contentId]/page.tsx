@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExternalLink, ShieldCheck, MessageSquare, Eye, Clock, ChevronLeft, Sparkles } from 'lucide-react';
+import { ShieldCheck, MessageSquare, Eye, Clock, ChevronLeft, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadInteractionSummary } from '@/lib/interactions/load';
@@ -202,24 +202,13 @@ export default async function VideoPage({ params, searchParams }: Props) {
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {sp.views && (
               <span className="inline-flex items-center gap-1 rounded-full border border-border-color/60 bg-secondary/60 px-2.5 py-1 text-[11px] text-text-secondary">
-                <Eye className="h-3 w-3" /> {sp.views}
+                <Eye className="h-3 w-3" /> {sp.views} views
               </span>
             )}
             {sp.length && (
               <span className="inline-flex items-center gap-1 rounded-full border border-border-color/60 bg-secondary/60 px-2.5 py-1 text-[11px] text-text-secondary">
                 <Clock className="h-3 w-3" /> {sp.length}
               </span>
-            )}
-            {sourceUrl && (
-              <a
-                href={sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-full border border-border-color/60 bg-secondary/60 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Source
-              </a>
             )}
           </div>
 

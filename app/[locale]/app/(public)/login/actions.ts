@@ -155,6 +155,12 @@ export async function signUpWithPassword(
   // If "Confirm email" is ON (default), the user clicks the email link
   // which hits /auth/callback → /app/onboarding.
   if (data?.session) {
+    // Instant-signup bypasses /auth/callback, so fire the welcome message
+    // here too. Idempotent + best-effort.
+    if (data.user?.id) {
+      const { ensureWelcomeMessage } = await import('@/lib/chat/welcome');
+      await ensureWelcomeMessage(data.user.id);
+    }
     redirect('/app/onboarding');
   }
 
@@ -240,6 +246,11 @@ export async function verifyEmailToken(
   } catch {
     /* admin promotion is best-effort */
   }
+
+  // Token-verify path also bypasses /auth/callback — send the welcome
+  // message here. Idempotent + best-effort.
+  const { ensureWelcomeMessage } = await import('@/lib/chat/welcome');
+  await ensureWelcomeMessage(data.user.id);
 
   const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : '/explore';
   redirect(safeNext);

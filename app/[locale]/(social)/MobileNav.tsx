@@ -20,6 +20,7 @@ import {
   FileText,
   X,
   User,
+  MessageSquare,
 } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { usePathname } from 'next/navigation';
@@ -36,6 +37,7 @@ type Props = {
   isCreator: boolean;
   isAdmin: boolean;
   hasProfessionalProfile: boolean;
+  hasUnreadChat?: boolean;
 };
 
 const CATEGORIES = [
@@ -102,6 +104,7 @@ export default function MobileNav({
   isCreator,
   isAdmin,
   hasProfessionalProfile,
+  hasUnreadChat = false,
 }: Props) {
   const [sheet, setSheet] = useState<'browse' | 'me' | null>(null);
   const pathname = usePathname();
@@ -183,7 +186,7 @@ export default function MobileNav({
                 onClick={() => setSheet((s) => (s === 'me' ? null : 'me'))}
                 className="flex w-full flex-col items-center gap-0.5"
               >
-                <span className={`flex h-9 w-9 items-center justify-center rounded-2xl transition-all ${sheet === 'me' ? 'ring-2 ring-primary ring-offset-1 ring-offset-black' : ''}`}>
+                <span className={`relative flex h-9 w-9 items-center justify-center rounded-2xl transition-all ${sheet === 'me' ? 'ring-2 ring-primary ring-offset-1 ring-offset-black' : ''}`}>
                   {profile.avatar_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -195,6 +198,9 @@ export default function MobileNav({
                     <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-pink-600 text-[11px] font-black text-white">
                       {(profile.display_name || profile.handle).slice(0, 1).toUpperCase()}
                     </span>
+                  )}
+                  {hasUnreadChat && (
+                    <span className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full border-2 border-black bg-primary" />
                   )}
                 </span>
                 <span className={`text-[9px] font-semibold uppercase tracking-wider transition-colors ${sheet === 'me' ? 'text-primary' : 'text-white/40'}`}>
@@ -381,6 +387,17 @@ export default function MobileNav({
                 iconBg="bg-emerald-500/15 text-emerald-400"
               >
                 My applications
+              </AccountLink>
+              <AccountLink
+                href="/app/chat"
+                onClick={close}
+                icon={<MessageSquare className="h-4 w-4" />}
+                iconBg="bg-primary/20 text-primary"
+              >
+                Messages
+                {hasUnreadChat && (
+                  <span className="ml-auto h-2.5 w-2.5 rounded-full bg-primary" />
+                )}
               </AccountLink>
             </div>
 
