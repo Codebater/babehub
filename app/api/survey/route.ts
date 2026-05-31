@@ -167,8 +167,8 @@ export async function POST(request: Request) {
     const { error: insertError } = await supabase.from('survey_submissions').insert({
       user_id: user?.id ?? null,
       name: body.name?.trim() ?? '',
-      email: body.email.trim().toLowerCase(),
-      whatsapp: body.whatsapp?.trim() || null,
+      email: body.email?.trim().toLowerCase() ?? '',
+      whatsapp: body.whatsapp?.trim() || body.telegram?.trim() || null,
       country: body.country?.trim() || null,
       is_over_18: ynToBool(body.isOver18),
       is_active_creator: ynToBool(body.isActiveCreator),
