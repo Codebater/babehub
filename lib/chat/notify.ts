@@ -82,6 +82,18 @@ export const ChatMessages = {
   jobApplied: (jobTitle: string) =>
     `📋 Your application for **${jobTitle}** has been submitted.\n\nThe recruiter has been notified and will review your profile and intro message. We'll update you here when there's news.`,
 
+  /** Video uploaded — pending review */
+  videoSubmitted: (title: string) =>
+    `🎬 Your video **"${title}"** has been received and is now **being reviewed** by our team.\n\nWe check every upload to keep the platform safe and high-quality. You'll get a message here as soon as it's approved — usually within 24 hours.\n\nThanks for contributing to BabeHub!`,
+
+  /** Video approved — now live */
+  videoApproved: (title: string) =>
+    `✅ Great news — your video **"${title}"** has been **approved** and is now live on your profile and the Explore feed!\n\nKeep the content coming. The more you upload, the more discovery and earning opportunities open up.\n\n👉 Reply here if you have any questions.`,
+
+  /** Video rejected — with optional reason */
+  videoRejected: (title: string, reason?: string) =>
+    `Your video **"${title}"** wasn't approved this time.${reason ? `\n\n**Reason:** ${reason}` : ''}\n\nThis is usually about quality, content guidelines, or technical issues. Feel free to upload a revised version — and reply here if you'd like clarification from our team.`,
+
   /** Job application status changed (applicant-facing) */
   jobStatus: (jobTitle: string, status: string) => {
     switch (status) {

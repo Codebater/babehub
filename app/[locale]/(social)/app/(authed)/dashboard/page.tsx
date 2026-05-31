@@ -7,7 +7,6 @@ import {
   Heart,
   Plus,
   Layers,
-  Wallet,
   Briefcase,
   Sparkles,
   Compass,
@@ -15,8 +14,10 @@ import {
   Star,
   Settings as SettingsIcon,
   MessageSquare,
+  Film,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import SwitchToCreatorButton from './SwitchToCreatorButton';
 
 /**
  * `/app/dashboard` — first authenticated screen after sign-in.
@@ -190,11 +191,17 @@ export default async function DashboardPage() {
             </h2>
             <ul className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <ActionCard
+                href="/app/upload"
+                icon={<Film className="h-4 w-4" />}
+                title="Upload video"
+                hint="Reviewed before going live"
+                accent
+              />
+              <ActionCard
                 href="/app/dashboard/posts/new"
                 icon={<Plus className="h-4 w-4" />}
                 title="New post"
                 hint="Publish to your feed"
-                accent
               />
               <ActionCard
                 href="/app/dashboard/posts"
@@ -207,13 +214,6 @@ export default async function DashboardPage() {
                 icon={<Layers className="h-4 w-4" />}
                 title="Tiers"
                 hint="Subscription plans"
-              />
-              <ActionCard
-                href="/app/payouts"
-                icon={<Wallet className="h-4 w-4" />}
-                title="Payouts"
-                hint="Coming soon"
-                disabled
               />
             </ul>
           </section>
@@ -277,13 +277,9 @@ export default async function DashboardPage() {
               and get paid in crypto today (NOWPayments) or card (CCBill, soon).
               Your fan history stays — you just unlock creator features.
             </p>
-            <Link
-              href="/app/professional/edit"
-              className="relative mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] hover:bg-pink-400"
-            >
-              Switch to creator
-              <ArrowRight className="h-4 w-4" />
-            </Link>
+            <div className="relative mt-5">
+              <SwitchToCreatorButton />
+            </div>
           </section>
 
           <section>
@@ -302,6 +298,12 @@ export default async function DashboardPage() {
                 icon={<Heart className="h-4 w-4" />}
                 title="Favorites"
                 hint="Saved videos"
+              />
+              <ActionCard
+                href="/app/upload"
+                icon={<Film className="h-4 w-4" />}
+                title="Upload video"
+                hint="Get featured · reviewed first"
               />
               <ActionCard
                 href="/jobs"

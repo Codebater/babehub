@@ -28,6 +28,7 @@ export type AdminCounts = {
   blogDrafts: number;
   totalChats: number;
   unreadChats: number;
+  pendingVideos: number;
 };
 
 export async function loadAdminCounts(
@@ -51,6 +52,7 @@ export async function loadAdminCounts(
     blogDrafts,
     totalChatsRes,
     threadsForUnread,
+    pendingVideosRes,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase
@@ -85,6 +87,11 @@ export async function loadAdminCounts(
     // Chat counts via admin client (admin_threads not in typed schema yet)
     adminDb.from('admin_threads').select('id', { count: 'exact', head: true }),
     adminDb.from('admin_threads').select('id, admin_last_read_at, updated_at'),
+    // Pending video submissions awaiting review
+    adminDb
+      .from('video_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
   ]);
 
   // Unread chats = threads where user sent messages after admin_last_read_at
@@ -107,5 +114,6 @@ export async function loadAdminCounts(
     blogDrafts: blogDrafts.count ?? 0,
     totalChats: totalChatsRes.count ?? 0,
     unreadChats,
+    pendingVideos: pendingVideosRes.count ?? 0,
   };
 }

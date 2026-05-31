@@ -12,6 +12,7 @@ import {
   FileText,
   ImageIcon,
   MessageSquare,
+  Film,
 } from 'lucide-react';
 import type { AdminCounts } from '@/lib/admin/counts';
 
@@ -95,6 +96,14 @@ export default function AdminNav({ counts }: { counts: AdminCounts }) {
       icon: <ImageIcon className="h-4 w-4" />,
       count: 0,
       accent: 'sky',
+    },
+    {
+      href: '/app/admin/videos',
+      label: 'Videos',
+      icon: <Film className="h-4 w-4" />,
+      count: 0,
+      pending: counts.pendingVideos,
+      accent: 'amber',
     },
     {
       href: '/app/admin/chat',
