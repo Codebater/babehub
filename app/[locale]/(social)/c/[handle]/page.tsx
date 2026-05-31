@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, ShieldCheck, Heart, Briefcase, MapPin, Languages, Sparkles } from 'lucide-react';
+import { Lock, ShieldCheck, Heart, Briefcase, MapPin, Languages, Sparkles, Play, MessageSquare } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadFullInteractionsBatch } from '@/lib/interactions/load';
@@ -478,50 +478,76 @@ export default async function CreatorProfilePage({ params }: Props) {
                 </p>
               </div>
             ) : (
-              <ul className="space-y-4">
+              /* Tight 2-col (mobile) / 3-col (sm+) thumbnail grid —
+                 same rhythm as the /explore feed. Click → full video page. */
+              <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 sm:gap-2">
                 {posts.map((post) => {
                   const mediaItems: MediaItem[] = (post.media_ids ?? [])
                     .map((id) => mediaUrlMap.get(id))
                     .filter((m): m is MediaItem => Boolean(m));
                   const ix = interactionsMap.get(post.id);
-                  const firstMediaUrl = mediaItems[0]?.url ?? null;
+                  const firstMedia = mediaItems[0] ?? null;
+                  const hasMedia = mediaItems.length > 0;
+
                   return (
-                    <li
-                      key={post.id}
-                      className="overflow-hidden rounded-2xl border border-border-color bg-card"
-                    >
-                      {post.body && (
-                        <p className="whitespace-pre-wrap p-5 text-text-main">{post.body}</p>
-                      )}
+                    <li key={post.id} className="group flex flex-col">
+                      {/* Thumbnail tile */}
+                      <Link
+                        href={`/v/creator_post/${post.id}`}
+                        className="relative block aspect-video overflow-hidden rounded-md bg-zinc-900 sm:rounded-xl"
+                      >
+                        {hasMedia && firstMedia?.kind === 'image' && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={firstMedia.url}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                          />
+                        )}
+                        {hasMedia && firstMedia?.kind === 'video' && (
+                          <div className="flex h-full w-full items-center justify-center bg-zinc-900">
+                            <Play className="h-8 w-8 fill-white/60 text-white/60" />
+                          </div>
+                        )}
+                        {!hasMedia && (
+                          /* Text-only post tile */
+                          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-800 p-3">
+                            <p className="line-clamp-4 text-center text-[10px] leading-snug text-zinc-400 sm:text-xs">
+                              {post.body}
+                            </p>
+                          </div>
+                        )}
 
-                      {mediaItems.length > 0 && <MediaTile items={mediaItems} />}
+                        {/* Hover overlay */}
+                        <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/25" />
 
-                      <div className="flex items-center gap-3 border-t border-border-color/40 px-5 py-3 text-xs text-text-secondary">
-                        <span>
-                          {post.published_at && new Date(post.published_at).toLocaleString()}
-                        </span>
+                        {/* Lock badge */}
                         {post.tier_required_id && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">
-                            <Lock className="h-3 w-3" /> Subscriber
+                          <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/70">
+                            <Lock className="h-3 w-3 text-primary" />
                           </span>
                         )}
-                      </div>
 
-                      <PostInteractions
-                        provider="creator_post"
-                        contentId={post.id}
-                        initialLikeCount={ix?.likeCount ?? 0}
-                        initialIsLiked={ix?.isLiked ?? false}
-                        initialIsFavorited={ix?.isFavorited ?? false}
-                        initialComments={ix?.comments ?? []}
-                        commentCount={ix?.commentCount ?? 0}
-                        viewerId={viewer?.id ?? null}
-                        isSignedIn={Boolean(viewer)}
-                        meta={{
-                          title: post.body?.slice(0, 80) || `Post by @${profile.handle}`,
-                          thumbUrl: firstMediaUrl,
-                        }}
-                      />
+                        {/* Multi-media count */}
+                        {mediaItems.length > 1 && (
+                          <span className="absolute left-1.5 top-1.5 rounded bg-black/70 px-1 py-0.5 text-[9px] font-bold text-white">
+                            +{mediaItems.length}
+                          </span>
+                        )}
+                      </Link>
+
+                      {/* Minimal stats row */}
+                      <div className="mt-1 flex items-center gap-2.5 px-0.5 text-[10px] text-text-secondary/60">
+                        <span className="flex items-center gap-0.5">
+                          <Heart className="h-3 w-3" />
+                          {ix?.likeCount ?? 0}
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <MessageSquare className="h-3 w-3" />
+                          {ix?.commentCount ?? 0}
+                        </span>
+                      </div>
                     </li>
                   );
                 })}

@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ExternalLink, ShieldCheck, MessageSquare, Eye, Clock } from 'lucide-react';
+import { ExternalLink, ShieldCheck, MessageSquare, Eye, Clock, ChevronLeft, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getSignedMediaUrls } from '@/lib/storage/signedUrls';
 import { loadInteractionSummary } from '@/lib/interactions/load';
 import VideoActions from '@/components/VideoActions';
 import CommentThread from '@/components/CommentThread';
 import AdStrip from '@/app/[locale]/(social)/_components/AdStrip';
+import ApplyButton from '@/app/[locale]/(social)/_components/ApplyButton';
 
 /**
  * `/v/{provider}/{contentId}` — dedicated page for one video. Lives
@@ -159,99 +160,130 @@ export default async function VideoPage({ params, searchParams }: Props) {
     const title = sp.title ?? 'Video';
     const thumb = sp.thumb ?? null;
     const sourceUrl = sp.source ?? null;
-    const keywords = sp.keywords ?? null;
+    const keywordList = (sp.keywords ?? '')
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean)
+      .slice(0, 10);
 
     return (
-      <main className="mx-auto max-w-5xl px-6 py-6 md:py-8">
-        {/* Pre-roll banner */}
-        <div className="mb-3">
-          <AdStrip placement="video-preroll-eporner" />
-        </div>
-        {/* Player */}
-        <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
-          <iframe
-            src={sp.embed}
-            title={title}
-            allow="autoplay; fullscreen; encrypted-media"
-            allowFullScreen
-            className="h-full w-full border-0"
-          />
+      <main className="mx-auto max-w-5xl py-3 md:py-6">
+        {/* ── Back nav ──────────────────────────────────────────── */}
+        <div className="mb-3 px-4 sm:px-6">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-secondary transition-all hover:border-primary/40 hover:text-primary"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            Explore
+          </Link>
         </div>
 
-        {/* Title + meta + actions */}
-        <header className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 flex-1">
-            <h1 className="text-xl font-bold tracking-tight text-text-main sm:text-2xl">
-              {title}
-            </h1>
-            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-text-secondary">
-              {sp.views && (
-                <span className="inline-flex items-center gap-1">
-                  <Eye className="h-3 w-3" /> {sp.views} views
-                </span>
-              )}
-              {sp.length && (
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="h-3 w-3" /> {sp.length}
-                </span>
-              )}
-              {sourceUrl && (
-                <a
-                  href={sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-primary"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Source
-                </a>
-              )}
-            </div>
+        {/* ── Player — edge-to-edge on mobile ───────────────────── */}
+        <div className="-mx-0 sm:px-0">
+          <div className="aspect-video w-full overflow-hidden bg-black shadow-2xl sm:rounded-2xl">
+            <iframe
+              src={sp.embed}
+              title={title}
+              allow="autoplay; fullscreen; encrypted-media"
+              allowFullScreen
+              className="h-full w-full border-0"
+            />
           </div>
-        </header>
-
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <VideoActions
-            provider="eporner"
-            contentId={contentId}
-            initialLikeCount={summary.likeCount}
-            initialIsLiked={summary.isLiked}
-            initialIsFavorited={summary.isFavorited}
-            isSignedIn={Boolean(user)}
-            meta={{
-              title,
-              thumbUrl: thumb,
-              embedUrl: sp.embed,
-              sourceUrl: sourceUrl,
-            }}
-          />
-          <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
-            <MessageSquare className="h-3.5 w-3.5" />
-            {summary.commentCount}{' '}
-            {summary.commentCount === 1 ? 'comment' : 'comments'}
-          </span>
         </div>
 
-        {keywords && (
-          <p className="mt-3 line-clamp-1 text-xs text-text-secondary">
-            {keywords
-              .split(',')
-              .slice(0, 8)
-              .map((k) => k.trim())
-              .filter(Boolean)
-              .join(' · ')}
-          </p>
-        )}
+        {/* ── Meta + actions ────────────────────────────────────── */}
+        <div className="mt-4 px-4 sm:px-6">
+          <h1 className="text-lg font-bold leading-snug tracking-tight text-text-main sm:text-xl md:text-2xl">
+            {title}
+          </h1>
 
-        {/* Ad strip */}
-        <div className="mt-6">
-          <AdStrip placement="video-eporner" />
+          {/* Stats chips */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {sp.views && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-border-color/60 bg-secondary/60 px-2.5 py-1 text-[11px] text-text-secondary">
+                <Eye className="h-3 w-3" /> {sp.views}
+              </span>
+            )}
+            {sp.length && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-border-color/60 bg-secondary/60 px-2.5 py-1 text-[11px] text-text-secondary">
+                <Clock className="h-3 w-3" /> {sp.length}
+              </span>
+            )}
+            {sourceUrl && (
+              <a
+                href={sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-full border border-border-color/60 bg-secondary/60 px-2.5 py-1 text-[11px] text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Source
+              </a>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <VideoActions
+              provider="eporner"
+              contentId={contentId}
+              initialLikeCount={summary.likeCount}
+              initialIsLiked={summary.isLiked}
+              initialIsFavorited={summary.isFavorited}
+              isSignedIn={Boolean(user)}
+              meta={{ title, thumbUrl: thumb, embedUrl: sp.embed, sourceUrl }}
+            />
+            <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
+              <MessageSquare className="h-3.5 w-3.5" />
+              {summary.commentCount} {summary.commentCount === 1 ? 'comment' : 'comments'}
+            </span>
+          </div>
+
+          {/* Keyword chips */}
+          {keywordList.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {keywordList.map((kw) => (
+                <Link
+                  key={kw}
+                  href={`/explore?q=${encodeURIComponent(kw)}`}
+                  className="rounded-full border border-border-color/50 bg-secondary/40 px-2.5 py-1 text-[10px] text-text-secondary/70 transition-all hover:border-primary/40 hover:bg-primary/8 hover:text-primary"
+                >
+                  {kw}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Apply CTA strip */}
+          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3">
+            <div className="min-w-0">
+              <p className="flex items-center gap-1.5 text-xs font-bold text-text-main">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Want to appear in content like this?
+              </p>
+              <p className="mt-0.5 text-[11px] text-text-secondary">
+                Apply to BabeHub — casting, live cams, luxury & OnlyFans talent wanted.
+              </p>
+            </div>
+            <ApplyButton
+              variant="primary"
+              label="Apply"
+              withArrow
+              className="shrink-0 !px-3 !py-1.5 !text-xs"
+            />
+          </div>
+
+          {/* Ad strip */}
+          <div className="mt-5">
+            <AdStrip placement="video-eporner" />
+          </div>
         </div>
 
-        {/* Comments */}
-        <section className="mt-8 border-t border-border-color/40 pt-6">
-          <h2 className="mb-4 text-lg font-bold text-text-main">
-            Comments ({summary.commentCount})
+        {/* ── Comments ──────────────────────────────────────────── */}
+        <section className="mt-8 border-t border-border-color/40 px-4 pt-6 sm:px-6">
+          <h2 className="mb-4 text-base font-bold text-text-main">
+            {summary.commentCount > 0 ? `${summary.commentCount} comment${summary.commentCount === 1 ? '' : 's'}` : 'Comments'}
           </h2>
           <CommentThread
             provider="eporner"
@@ -272,95 +304,91 @@ export default async function VideoPage({ params, searchParams }: Props) {
   const title = post.body?.slice(0, 80) || `Post by @${creator?.handle ?? ''}`;
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-6 md:py-8">
-      {/* Pre-roll banner */}
-      <div className="mb-3">
-        <AdStrip placement="video-preroll-creator" />
+    <main className="mx-auto max-w-5xl py-3 md:py-6">
+      {/* Back nav */}
+      <div className="mb-3 px-4 sm:px-6">
+        {creator && (
+          <Link
+            href={`/c/${creator.handle}`}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border-color px-3 py-1.5 text-xs font-bold text-text-secondary transition-all hover:border-primary/40 hover:text-primary"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            @{creator.handle}
+          </Link>
+        )}
       </div>
+
+      {/* Player — edge-to-edge on mobile */}
       {videoUrl ? (
-        <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl">
-          <video
-            src={videoUrl}
-            controls
-            autoPlay
-            playsInline
-            className="h-full w-full"
-          />
+        <div className="aspect-video w-full overflow-hidden bg-black shadow-2xl sm:rounded-2xl">
+          <video src={videoUrl} controls autoPlay playsInline className="h-full w-full" />
         </div>
       ) : (
-        <div className="flex aspect-video w-full items-center justify-center rounded-2xl bg-secondary/50 text-text-secondary">
+        <div className="flex aspect-video w-full items-center justify-center bg-secondary/50 text-text-secondary sm:rounded-2xl">
           This post has no video.
         </div>
       )}
 
-      <header className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold tracking-tight text-text-main sm:text-2xl">
-            {title}
-          </h1>
-          {creator && (
-            <Link
-              href={`/c/${creator.handle}`}
-              className="mt-2 inline-flex items-center gap-2 rounded-full border border-border-color px-3 py-1.5 text-sm font-bold text-text-main transition-colors hover:border-primary hover:text-primary"
-            >
-              <span className="h-7 w-7 overflow-hidden rounded-full bg-secondary">
-                {creator.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={creator.avatar_url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-xs font-black text-white">
-                    {(creator.display_name || creator.handle).slice(0, 1).toUpperCase()}
-                  </span>
-                )}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                {creator.display_name || creator.handle}
-                {creator.is_verified && (
-                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                )}
-              </span>
-              <span className="text-text-secondary">@{creator.handle}</span>
-            </Link>
-          )}
+      {/* Meta */}
+      <div className="mt-4 px-4 sm:px-6">
+        {/* Creator pill */}
+        {creator && (
+          <Link
+            href={`/c/${creator.handle}`}
+            className="mb-3 inline-flex items-center gap-2 rounded-full border border-border-color px-3 py-1.5 text-sm font-bold text-text-main transition-colors hover:border-primary hover:text-primary"
+          >
+            <span className="h-6 w-6 overflow-hidden rounded-full bg-secondary">
+              {creator.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={creator.avatar_url} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[10px] font-black text-white">
+                  {(creator.display_name || creator.handle).slice(0, 1).toUpperCase()}
+                </span>
+              )}
+            </span>
+            <span className="inline-flex items-center gap-1 text-sm">
+              {creator.display_name || creator.handle}
+              {creator.is_verified && <ShieldCheck className="h-3.5 w-3.5 text-primary" />}
+            </span>
+          </Link>
+        )}
+
+        <h1 className="text-lg font-bold leading-snug tracking-tight text-text-main sm:text-xl">
+          {title}
+        </h1>
+
+        {post.body && (
+          <p className="mt-2 whitespace-pre-wrap text-sm text-text-secondary">{post.body}</p>
+        )}
+
+        {/* Actions */}
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <VideoActions
+            provider="creator_post"
+            contentId={contentId}
+            initialLikeCount={summary.likeCount}
+            initialIsLiked={summary.isLiked}
+            initialIsFavorited={summary.isFavorited}
+            isSignedIn={Boolean(user)}
+            meta={{ title, thumbUrl: null }}
+          />
+          <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
+            <MessageSquare className="h-3.5 w-3.5" />
+            {summary.commentCount} {summary.commentCount === 1 ? 'comment' : 'comments'}
+          </span>
         </div>
-      </header>
 
-      {post.body && (
-        <p className="mt-4 whitespace-pre-wrap text-text-main">{post.body}</p>
-      )}
-
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <VideoActions
-          provider="creator_post"
-          contentId={contentId}
-          initialLikeCount={summary.likeCount}
-          initialIsLiked={summary.isLiked}
-          initialIsFavorited={summary.isFavorited}
-          isSignedIn={Boolean(user)}
-          meta={{
-            title,
-            thumbUrl: null,
-          }}
-        />
-        <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
-          <MessageSquare className="h-3.5 w-3.5" />
-          {summary.commentCount}{' '}
-          {summary.commentCount === 1 ? 'comment' : 'comments'}
-        </span>
+        {/* Ad strip */}
+        <div className="mt-5">
+          <AdStrip placement="video-creator" />
+        </div>
       </div>
 
-      {/* Ad strip */}
-      <div className="mt-6">
-        <AdStrip placement="video-creator" />
-      </div>
-
-      <section className="mt-8 border-t border-border-color/40 pt-6">
-        <h2 className="mb-4 text-lg font-bold text-text-main">
-          Comments ({summary.commentCount})
+      {/* Comments */}
+      <section className="mt-8 border-t border-border-color/40 px-4 pt-6 sm:px-6">
+        <h2 className="mb-4 text-base font-bold text-text-main">
+          {summary.commentCount > 0 ? `${summary.commentCount} comment${summary.commentCount === 1 ? '' : 's'}` : 'Comments'}
         </h2>
         <CommentThread
           provider="creator_post"
