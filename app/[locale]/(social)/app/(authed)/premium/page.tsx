@@ -51,7 +51,7 @@ const FEATURES = [
     badge: null,
     title: 'Creator Content',
     description:
-      'Unlock every creator's tier-locked posts across the platform in one flat fee — no per-creator subscription needed.',
+      "Unlock every creator's tier-locked posts across the platform in one flat fee — no per-creator subscription needed.",
     perks: ['All locked posts unlocked', 'Luxury & premium shoots', 'New content as it drops'],
   },
   {
