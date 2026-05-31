@@ -131,9 +131,9 @@ export async function POST(request: Request) {
     }
 
     // ── Anti-spam: rate limit — 3 submissions per email per day ──────
-    // Uses the admin client (bypasses RLS) so we can count all rows for
-    // this email regardless of who submitted them.
+    // Only runs when email is provided (email is now optional).
     try {
+      if (body.email?.trim()) {
       const adminClient = createAdminClient();
       const dayStart = new Date();
       dayStart.setUTCHours(0, 0, 0, 0);
@@ -149,6 +149,7 @@ export async function POST(request: Request) {
           { status: 429 },
         );
       }
+      } // end if email
     } catch {
       // Rate-limit check is best-effort; don't block valid submissions
       // if the count query fails for any reason.
