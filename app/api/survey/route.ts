@@ -26,6 +26,7 @@ type SurveyFormBody = {
   name?: string;
   email?: string;
   whatsapp?: string;
+  telegram?: string;
   country?: string;
   isOver18?: string;
   isActiveCreator?: string;
