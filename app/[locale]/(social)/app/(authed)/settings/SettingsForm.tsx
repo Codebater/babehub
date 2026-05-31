@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { updateProfileText, type SettingsState } from './actions';
 
@@ -62,6 +62,8 @@ export default function SettingsForm({
 }) {
   const [state, formAction] = useActionState(updateProfileText, initial);
   const values = state.values ?? defaults;
+  // Controlled gender so pill highlights react instantly to clicks
+  const [gender, setGender] = useState<string>(values.gender ?? '');
 
   return (
     <form action={formAction} className="space-y-4">
@@ -120,11 +122,11 @@ export default function SettingsForm({
       <fieldset>
         <legend className="mb-2 block text-sm font-bold text-text-main">Gender</legend>
         <div className="flex flex-wrap gap-2">
-          {GENDER_OPTIONS.map((opt) => (
+          {([...GENDER_OPTIONS, { value: '', label: 'Prefer not to say' }] as { value: string; label: string }[]).map((opt) => (
             <label
-              key={opt.value}
+              key={opt.value || 'none'}
               className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all ${
-                (values.gender ?? '') === opt.value
+                gender === opt.value
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-border-color bg-secondary text-text-secondary hover:border-primary/40'
               }`}
@@ -133,28 +135,13 @@ export default function SettingsForm({
                 type="radio"
                 name="gender"
                 value={opt.value}
-                defaultChecked={(values.gender ?? '') === opt.value}
+                checked={gender === opt.value}
+                onChange={() => setGender(opt.value)}
                 className="sr-only"
               />
               {opt.label}
             </label>
           ))}
-          <label
-            className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 text-sm transition-all ${
-              !values.gender
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border-color bg-secondary text-text-secondary hover:border-primary/40'
-            }`}
-          >
-            <input
-              type="radio"
-              name="gender"
-              value=""
-              defaultChecked={!values.gender}
-              className="sr-only"
-            />
-            Prefer not to say
-          </label>
         </div>
       </fieldset>
 

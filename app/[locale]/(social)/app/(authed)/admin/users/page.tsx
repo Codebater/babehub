@@ -31,9 +31,7 @@ export default async function AdminUsersPage() {
   // user count outgrows that, paginate with `?page=` query params.
   const { data: profiles } = await supabase
     .from('profiles')
-    .select(
-      'id, handle, display_name, avatar_url, role, country, gender, is_verified, verified_at, is_frozen, is_banned, applied_babehub, is_premium, premium_until, created_at',
-    )
+    .select('*')
     .order('created_at', { ascending: false })
     .limit(200);
 
