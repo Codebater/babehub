@@ -117,9 +117,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    if (!body.email?.trim()) {
+    // At least one contact method is required: email, WhatsApp, or Telegram.
+    const hasContact =
+      body.email?.trim() ||
+      body.whatsapp?.trim() ||
+      body.telegram?.trim();
+    if (!hasContact) {
       return NextResponse.json(
-        { error: 'Bad Request', details: 'Missing email' },
+        { error: 'Bad Request', details: 'Please provide at least one contact method (WhatsApp, Telegram, or email).' },
         { status: 400 },
       );
     }
