@@ -1,25 +1,16 @@
-import { Play, Eye, Clock, ShieldCheck } from 'lucide-react';
+import { Play, Clock } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { formatCastingNumber } from '@/lib/casting/numbers';
 import type { FeedVideo } from './types';
 import type { PrimaryCreator } from './primary-creator';
 
 /**
- * One eporner video card in the /explore grid. Thumbnail + duration +
- * title + view count. Click navigates to /v/eporner/{id} where the
- * dedicated video page lives inside the (social) shell.
+ * One eporner video card in the /explore grid.
  *
- * Outer wrapper is a `<div>` (not a Link) because the card has two
- * separate navigation targets that can't both be anchor tags inside
- * each other:
- *   - the thumbnail + title → /v/eporner/{id}
- *   - the optional creator-attribution pill → /c/{handle}
- *
- * Player metadata (embed URL, title, thumb, source URL, keywords) is
- * passed via URL query params — eporner doesn't ship a get-by-id
- * endpoint and we already have everything from the search response
- * that produced this card, so threading params avoids a second API
- * round-trip per page render.
+ * Design: pure-thumbnail tile — no visible card border or background.
+ * The 16:9 thumbnail fills the cell; duration overlays bottom-right;
+ * title sits below in 1–2 lines. Feels like a native mobile feed
+ * (YouTube Shorts / TikTok grid) rather than a web card component.
  */
 export default function VideoCard({
   video,
@@ -27,13 +18,7 @@ export default function VideoCard({
   primaryCreator = null,
 }: {
   video: FeedVideo;
-  /** When set, renders a casting-slate badge over the thumbnail. */
   castingNumber?: number;
-  /**
-   * Platform creator credited as the "uploader" of this catalog card.
-   * Renders a small avatar + handle pill in the card body that links
-   * to /c/{handle}. When null, no attribution is shown.
-   */
   primaryCreator?: PrimaryCreator | null;
 }) {
   const thumb = video.default_thumb?.src ?? video.thumbs?.[0]?.src ?? '';
@@ -58,63 +43,52 @@ export default function VideoCard({
   };
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-lg border border-border-color bg-card text-left transition-colors hover:border-primary sm:rounded-2xl">
-      <Link href={watchHref} className="block">
-        <div className="relative aspect-video bg-black">
-          {thumb && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={thumb}
-              alt={video.title}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          )}
+    <div className="group flex flex-col">
+      {/* ── Thumbnail ─────────────────────────────────────────────── */}
+      <Link href={watchHref} className="relative block aspect-video overflow-hidden rounded-md bg-zinc-900 sm:rounded-xl">
+        {thumb && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={thumb}
+            alt={video.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        )}
 
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
-            <span className="rounded-full bg-primary/90 p-2 opacity-0 transition-opacity group-hover:opacity-100 sm:p-4">
-              <Play className="h-4 w-4 fill-white text-white sm:h-6 sm:w-6" />
-            </span>
-          </div>
-
-          {castingNumber !== undefined && (
-            <div className="absolute left-1.5 top-1.5 overflow-hidden rounded-md border border-white/40 bg-black font-mono text-white shadow-2xl sm:left-2 sm:top-2">
-              <div
-                className="h-1.5 w-full sm:h-2"
-                style={{
-                  backgroundImage:
-                    'repeating-linear-gradient(-30deg, #ffffff 0 8px, #000000 8px 16px)',
-                }}
-                aria-hidden
-              />
-              <div className="px-1.5 py-1 sm:px-2.5 sm:py-1.5">
-                <p className="text-[7px] font-bold uppercase leading-none tracking-[0.2em] text-white/70 sm:text-[8px] sm:tracking-[0.25em]">
-                  Casting · Take
-                </p>
-                <p className="mt-0.5 text-sm font-black leading-none tracking-tight sm:mt-1 sm:text-lg">
-                  {formatCastingNumber(castingNumber)}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Duration — bottom-right */}
-          <span className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 rounded bg-black/75 px-1 py-0.5 text-[10px] font-medium text-white sm:bottom-2 sm:right-2 sm:gap-1 sm:rounded-md sm:px-2 sm:text-xs">
-            <Clock className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-            {video.length_min}
-          </span>
-
-          {/* Views — bottom-left, hidden on very small to avoid clutter */}
-          <span className="absolute bottom-1.5 left-1.5 hidden items-center gap-0.5 rounded bg-black/75 px-1 py-0.5 text-[10px] font-medium text-white sm:bottom-2 sm:left-2 sm:flex sm:gap-1 sm:rounded-md sm:px-2 sm:text-xs">
-            <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-            {formatViews(video.views)}
+        {/* Play overlay on hover */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
+          <span className="rounded-full bg-white/90 p-2.5 opacity-0 shadow-lg transition-all group-hover:opacity-100 sm:p-3">
+            <Play className="h-4 w-4 fill-zinc-900 text-zinc-900 sm:h-5 sm:w-5" />
           </span>
         </div>
+
+        {/* Casting badge */}
+        {castingNumber !== undefined && (
+          <div className="absolute left-1.5 top-1.5 overflow-hidden rounded border border-white/30 bg-black/90 font-mono text-white">
+            <div
+              className="h-1.5 w-full"
+              style={{ backgroundImage: 'repeating-linear-gradient(-30deg, #fff 0 6px, #000 6px 12px)' }}
+              aria-hidden
+            />
+            <div className="px-1.5 py-1">
+              <p className="text-[7px] font-bold uppercase leading-none tracking-[0.2em] text-white/60">Take</p>
+              <p className="mt-0.5 text-xs font-black leading-none">{formatCastingNumber(castingNumber)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Duration pill — bottom right */}
+        <span className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 rounded bg-black/80 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white">
+          <Clock className="h-2.5 w-2.5" />
+          {video.length_min}
+        </span>
       </Link>
 
-      <div className="flex-1 p-2 sm:p-3">
-        <Link href={watchHref} className="block">
-          <h3 className="line-clamp-2 text-[11px] font-medium leading-snug text-text-main group-hover:text-primary sm:text-sm">
+      {/* ── Info below thumbnail ───────────────────────────────────── */}
+      <div className="mt-1.5 px-0.5">
+        <Link href={watchHref}>
+          <h3 className="line-clamp-2 text-[11px] font-medium leading-tight text-text-main group-hover:text-primary sm:text-xs sm:leading-snug">
             {video.title}
           </h3>
         </Link>
@@ -122,26 +96,19 @@ export default function VideoCard({
         {primaryCreator && (
           <Link
             href={`/c/${primaryCreator.handle}` as '/c/[handle]'}
-            className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-secondary/60 px-1.5 py-0.5 transition-colors hover:bg-primary/15 sm:mt-2 sm:gap-1.5 sm:px-2 sm:py-1"
+            className="mt-1 inline-flex items-center gap-1 text-[10px] text-text-secondary/70 transition-colors hover:text-primary"
           >
-            <span className="h-4 w-4 shrink-0 overflow-hidden rounded-full bg-secondary sm:h-5 sm:w-5">
+            <span className="h-3.5 w-3.5 shrink-0 overflow-hidden rounded-full bg-secondary">
               {primaryCreator.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={primaryCreator.avatarUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
+                <img src={primaryCreator.avatarUrl} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[8px] font-black text-white">
+                <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/40 to-pink-600/40 text-[7px] font-black text-white">
                   {primaryCreator.displayName.slice(0, 1).toUpperCase()}
                 </span>
               )}
             </span>
-            <span className="flex items-center gap-0.5 text-[10px] font-medium text-text-secondary sm:text-[11px]">
-              <ShieldCheck className="h-2.5 w-2.5 text-primary sm:h-3 sm:w-3" />
-              @{primaryCreator.handle}
-            </span>
+            @{primaryCreator.handle}
           </Link>
         )}
       </div>

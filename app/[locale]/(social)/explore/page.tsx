@@ -283,7 +283,7 @@ export default async function ExplorePage({ searchParams }: Props) {
               locked={showCastingNumbers && !viewerElevated}
               category="Casting"
             >
-              <div className="grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-1 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                 {/* Live Cams: 4 leading "Apply for a live slot" placeholders */}
                 {Array.from({ length: liveCamsLeadingSlots }).map((_, i) => (
                   <FeaturedSlot key={`lc-slot-${i}`} theme="livecams" />
@@ -317,7 +317,7 @@ export default async function ExplorePage({ searchParams }: Props) {
                 clickable/readable. The button passes `locked` through
                 so freshly-loaded batches stay blurred for non-premium
                 viewers, matching the initial grid above. */}
-            <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-1 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
               <LoadMoreButton
                 initialPage={firstPage.page}
                 initialHasMore={firstPage.hasMore}

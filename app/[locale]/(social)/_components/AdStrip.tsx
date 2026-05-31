@@ -5,22 +5,10 @@ import { ArrowRight } from 'lucide-react';
 import { useSurveyModal } from '../SurveyModalProvider';
 
 /**
- * `<AdStrip>` — full-width ad rail.
+ * `<AdStrip>` — full-width house ad rail.
  *
- * Priority:
- *   1. ExoClick  — if NEXT_PUBLIC_EXOCLICK_ZONE_STRIP is set
- *   2. JuicyAds  — if NEXT_PUBLIC_JUICYADS_SPOT_STRIP is set
- *   3. Placeholder rotating banner (house ad, opens BannerInquiryModal)
- *
- * ExoClick setup:
- *   - Create a Display Banner zone in your ExoClick Publisher dashboard
- *   - Recommended sizes: 728×90 (desktop) + 300×100 (mobile)
- *   - Set NEXT_PUBLIC_EXOCLICK_ZONE_STRIP to the numeric zone ID
- *   - Optionally set NEXT_PUBLIC_EXOCLICK_ZONE_STRIP_MOBILE for the
- *     mobile zone (falls back to the desktop zone if unset)
- *
- * JuicyAds setup:
- *   - Set NEXT_PUBLIC_JUICYADS_SPOT_STRIP to your spot UUID
+ * Rotates through a set of BabeHub brand creatives and opens the
+ * B2B BannerInquiryModal when clicked. No third-party ad networks.
  */
 type Props = {
   variant?: 'thin' | 'compact';
@@ -28,32 +16,7 @@ type Props = {
   placement?: string;
 };
 
-// ── ExoClick ────────────────────────────────────────────────────────
-const EXOCLICK_ZONE_DESKTOP = process.env.NEXT_PUBLIC_EXOCLICK_ZONE_STRIP;
-const EXOCLICK_ZONE_MOBILE = process.env.NEXT_PUBLIC_EXOCLICK_ZONE_STRIP_MOBILE ?? EXOCLICK_ZONE_DESKTOP;
-
-function ExoClickAd({ placement }: { placement: string }) {
-  useEffect(() => {
-    // Always push so new ins tags are picked up after client-side navigation.
-    const w = window as unknown as Record<string, unknown[]>;
-    w.AdProvider = w.AdProvider ?? [];
-    w.AdProvider.push({ serve: {} });
-
-    if (document.querySelector('script[src*="a.magsrv.com/ad-provider.js"]')) return;
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = 'https://a.magsrv.com/ad-provider.js';
-    document.head.appendChild(s);
-  }, []);
-
-  return (
-    <div data-ad-placement={placement} className="flex w-full justify-center overflow-hidden py-1">
-      <ins className="eas6a97888e2" data-zoneid={EXOCLICK_ZONE_DESKTOP} />
-    </div>
-  );
-}
-
-// ── JuicyAds ────────────────────────────────────────────────────────
+// ── JuicyAds (optional) ─────────────────────────────────────────────
 const JUICYADS_SPOT = process.env.NEXT_PUBLIC_JUICYADS_SPOT_STRIP;
 
 function JuicyAdsAd({ placement }: { placement: string }) {
@@ -84,8 +47,8 @@ type Creative = {
 const DEFAULT_CREATIVES: Creative[] = [
   {
     key: 'reach',
-    headline: 'Your ad could be here',
-    sub: 'Reach every visitor on this page — pitch a slot in 60 seconds.',
+    headline: 'Your brand here',
+    sub: 'Reach every creator and fan visiting this page — pitch a slot in 60 seconds.',
     accent: 'mono',
   },
   {
@@ -145,7 +108,7 @@ export default function AdStrip({
 }: Props) {
   const { openBanner } = useSurveyModal();
 
-  if (EXOCLICK_ZONE_DESKTOP) return <ExoClickAd placement={placement} />;
+  // JuicyAds optional integration (ExoClick removed)
   if (JUICYADS_SPOT) return <JuicyAdsAd placement={placement} />;
 
   if (variant === 'compact') {
@@ -213,12 +176,9 @@ function RotatingStrip({
           fading ? 'opacity-0' : 'opacity-100'
         }`}
       >
-        {/* Sponsored label */}
         <span className="shrink-0 rounded-md border border-border-color/50 bg-secondary/80 px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-[0.2em] text-text-secondary/60">
           Sponsored
         </span>
-
-        {/* Copy */}
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-bold text-text-main transition-colors group-hover:text-primary sm:text-[15px]">
             {c.headline}
@@ -227,15 +187,11 @@ function RotatingStrip({
             {c.sub}
           </p>
         </div>
-
-        {/* CTA */}
         <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-[11px] font-bold tracking-wide text-primary ring-1 ring-primary/20 transition-all group-hover:bg-primary group-hover:text-white group-hover:ring-primary/60">
           Get in touch
           <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
         </span>
       </div>
-
-      {/* Subtle right-side glow on hover */}
       <div className="pointer-events-none absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-primary/[0.06] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
     </button>
   );
