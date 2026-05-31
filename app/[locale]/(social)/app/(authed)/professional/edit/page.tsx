@@ -1,3 +1,4 @@
+import { Link } from '@/i18n/navigation';
 import { requireOnboarded } from '@/lib/auth/guards';
 import ProfessionalProfileForm from './ProfessionalProfileForm';
 import SettingsForm from '../../settings/SettingsForm';
@@ -63,8 +64,8 @@ export default async function ProfessionalEditPage() {
 
       {/* ── Welcome message nudge (new users only) ─────────────────── */}
       {hasUnreadWelcome && (
-        <a
-          href="/app/chat"
+        <Link
+          href={'/app/chat' as never}
           className="group mb-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/8 px-4 py-3.5 transition-all hover:border-primary/50 hover:bg-primary/12"
         >
           <span className="relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
@@ -79,7 +80,7 @@ export default async function ProfessionalEditPage() {
               Complete your profile below, then check your inbox for tips on getting started →
             </p>
           </div>
-        </a>
+        </Link>
       )}
 
       <header className="mb-6">
