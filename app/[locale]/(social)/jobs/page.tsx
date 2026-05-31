@@ -263,16 +263,11 @@ export default async function JobsPage({ searchParams }: Props) {
 
                     {/* Content */}
                     <div className="min-w-0 flex-1 px-3 py-3 sm:px-4">
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.25em] text-amber-300/80">
                           <Sparkles className="h-2.5 w-2.5" />
                           Featured
                         </span>
-                        {job.categories.slice(0, 1).map((c) => (
-                          <span key={c} className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-primary">
-                            {c}
-                          </span>
-                        ))}
                       </div>
                       <h3 className="mt-0.5 truncate text-sm font-bold text-text-main transition-colors group-hover:text-amber-200">
                         {job.title}
