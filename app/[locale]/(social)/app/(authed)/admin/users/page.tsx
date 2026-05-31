@@ -117,7 +117,8 @@ export default async function AdminUsersPage() {
               <th className="px-3 py-3">Premium</th>
               <th className="px-3 py-3">Applied</th>
               <th className="px-3 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-3 py-3 text-center">Chat</th>
+              <th className="px-4 py-3 text-right">Moderation</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-color/40">
@@ -239,16 +240,21 @@ export default async function AdminUsersPage() {
                       )}
                     </div>
                   </td>
+                  {/* Chat — dedicated column */}
+                  <td className="px-3 py-3 text-center">
+                    <Link
+                      href={`/app/admin/chat/${p.handle}` as never}
+                      title="Open chat with this user"
+                      className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary ring-1 ring-primary/20 transition-all hover:bg-primary hover:text-white hover:ring-primary/60"
+                    >
+                      <MessageSquare className="h-3 w-3" />
+                      Write
+                    </Link>
+                  </td>
+
+                  {/* Moderation actions */}
                   <td className="px-4 py-3">
-                    <div className="flex flex-wrap items-center gap-2 justify-end">
-                      <Link
-                        href={`/app/admin/chat/${p.handle}` as never}
-                        className="inline-flex items-center gap-1 rounded-md border border-border-color px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
-                        title="Open chat with this user"
-                      >
-                        <MessageSquare className="h-3 w-3" />
-                        Message
-                      </Link>
+                    <div className="flex flex-wrap items-center gap-1.5 justify-end">
                       <AdminUserActions
                         userId={p.id}
                         isVerified={p.is_verified}
@@ -266,7 +272,7 @@ export default async function AdminUsersPage() {
             })}
             {(!profiles || profiles.length === 0) && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-text-secondary">
+                <td colSpan={10} className="px-4 py-10 text-center text-text-secondary">
                   No users yet.
                 </td>
               </tr>

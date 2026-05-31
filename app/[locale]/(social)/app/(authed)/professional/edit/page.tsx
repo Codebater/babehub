@@ -29,6 +29,21 @@ export const dynamic = 'force-dynamic';
 export default async function ProfessionalEditPage() {
   const { user, profile, supabase } = await requireOnboarded();
 
+  // Check for unread welcome message from admin (fires on first visit after signup)
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const db = createAdminClient() as any;
+  const { data: threadRow } = await db
+    .from('admin_threads')
+    .select('id, user_last_read_at, admin_messages(id)')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  const hasUnreadWelcome = (() => {
+    if (!threadRow) return false;
+    const msgs = (threadRow.admin_messages ?? []) as { id: string }[];
+    return msgs.length > 0 && !threadRow.user_last_read_at;
+  })();
+
   const [{ data: pro }, { data: portfolio }] = await Promise.all([
     supabase
       .from('professional_profiles')
@@ -45,6 +60,28 @@ export default async function ProfessionalEditPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-10">
+
+      {/* ── Welcome message nudge (new users only) ─────────────────── */}
+      {hasUnreadWelcome && (
+        <a
+          href="/app/chat"
+          className="group mb-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/8 px-4 py-3.5 transition-all hover:border-primary/50 hover:bg-primary/12"
+        >
+          <span className="relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20">
+            <span className="text-base">💬</span>
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-primary" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-text-main group-hover:text-primary">
+              You have a welcome message from the BabeHub Team
+            </p>
+            <p className="mt-0.5 text-xs text-text-secondary">
+              Complete your profile below, then check your inbox for tips on getting started →
+            </p>
+          </div>
+        </a>
+      )}
+
       <header className="mb-6">
         <p className="text-sm text-text-secondary">
           Edit how you appear across Babe Hub. Keep it short — this is what

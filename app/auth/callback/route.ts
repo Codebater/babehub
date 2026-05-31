@@ -74,6 +74,52 @@ export async function GET(request: NextRequest) {
     // reason to fail the sign-in itself.
   }
 
+  // ── Welcome message for new users ───────────────────────────────────
+  // If no admin_thread exists for this user yet, it's their first sign-in.
+  // Create the thread and drop a welcome message from the first admin
+  // account. Best-effort — never blocks the redirect.
+  try {
+    const userId = data?.user?.id;
+    if (userId) {
+      const db = createAdminClient() as any;
+
+      // Check if thread already exists (idempotency)
+      const { data: existing } = await db
+        .from('admin_threads')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!existing) {
+        // Find first admin profile to use as sender
+        const { data: adminProfile } = await db
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin')
+          .limit(1)
+          .maybeSingle();
+
+        // Create the thread
+        const { data: thread } = await db
+          .from('admin_threads')
+          .insert({ user_id: userId })
+          .select('id')
+          .single();
+
+        if (thread && adminProfile) {
+          await db.from('admin_messages').insert({
+            thread_id: thread.id,
+            sender_id: adminProfile.id,
+            is_from_admin: true,
+            body: `Welcome to BabeHub! 👋\n\nGreat to have you here. To get started, please complete your profile:\n\n• Set a handle and display name\n• Upload a profile photo\n• Write a short bio about yourself\n• Choose your categories and skills\n\nYour profile is how brands, agencies, and casting directors discover you — so the more complete it is, the better your chances.\n\nIf you have any questions or need help, just reply here. We're active and happy to assist.\n\n— The BabeHub Team 🚀`,
+          });
+        }
+      }
+    }
+  } catch {
+    // Welcome message is best-effort — never a reason to fail sign-in.
+  }
+
   // Password-reset flow: Supabase appends `?type=recovery` when the user
   // clicked a reset-password email link. Redirect to the set-new-password
   // page instead of the normal post-login destination.
