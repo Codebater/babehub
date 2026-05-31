@@ -53,7 +53,7 @@ export default async function DashboardPage() {
     .single();
 
   if (profile && !profile.onboarded_at) {
-    redirect('/app/onboarding');
+    redirect('/app/professional/edit');
   }
 
   if (error || !profile) {

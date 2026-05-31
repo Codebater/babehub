@@ -44,7 +44,7 @@ export async function requireUser(): Promise<GuardResult> {
 /** Require a signed-in + onboarded user. */
 export async function requireOnboarded(): Promise<GuardResult> {
   const result = await requireUser();
-  if (!result.profile.onboarded_at) redirect('/app/onboarding');
+  if (!result.profile.onboarded_at) redirect('/app/professional/edit');
   return result;
 }
 
