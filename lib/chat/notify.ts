@@ -70,7 +70,7 @@ export const ChatMessages = {
       case 'contacted':
         return `📬 We've reached out to you about your application — please check your email for a message from us.`;
       case 'accepted':
-        return `🎉 Congratulations! Your BabeHub application has been **accepted**.\n\nWelcome to the community! Our team will be in touch with next steps shortly. We're excited to work with you.`;
+        return `🎉 Congratulations! Your BabeHub application has been **accepted**.\n\nWelcome to the community! Our team will be in touch with next steps shortly.\n\n👉 **Reply to this message** with any questions — we're right here and happy to chat. We're excited to work with you! 🚀`;
       case 'rejected':
         return `Thank you for applying to BabeHub. After careful consideration, we're unable to offer you a spot at this time.\n\nYou're welcome to apply again in the future — the platform evolves quickly and new opportunities open up regularly.`;
       default:
@@ -90,7 +90,7 @@ export const ChatMessages = {
       case 'shortlisted':
         return `⭐ You've been shortlisted for **${jobTitle}**!\n\nThe recruiter is interested and will be in touch soon. Stand by.`;
       case 'accepted':
-        return `🎉 Congratulations — you've been **accepted** for **${jobTitle}**!\n\nThe recruiter will contact you directly with next steps. Well done!`;
+        return `🎉 Congratulations — you've been **accepted** for **${jobTitle}**!\n\nThe recruiter will contact you directly with next steps.\n\n👉 **Reply here** if you have any questions for our team. Well done!`;
       case 'rejected':
         return `Update on **${jobTitle}**: the recruiter has filled the position.\n\nDon't be discouraged — there are many more opportunities on BabeHub. Keep applying!`;
       default:

@@ -1,4 +1,4 @@
-import { MessageSquare, Sparkles } from 'lucide-react';
+import { MessageSquare, Sparkles, Zap } from 'lucide-react';
 import { requireOnboarded } from '@/lib/auth/guards';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { userEnsureThread, userMarkRead } from '../admin/chat/actions';
@@ -6,26 +6,39 @@ import ChatWindow from '../admin/chat/_components/ChatWindow';
 
 export const dynamic = 'force-dynamic';
 
-const RATE_LIMIT = 10;
 const RATE_WINDOW_HOURS = 24;
 
 /**
- * `/app/chat` — user's inbox. One thread per user with the BabeHub team.
- *
- * - Beta badge prominent at the top
- * - Shows remaining rate-limit quota so the user knows their budget
- * - Auto-creates a thread on first visit (server action + redirect avoids
- *   a double-render; upsert is idempotent so safe to call every page load)
+ * Rate limit tiers — mirrors the server-action logic so the UI shows
+ * the correct quota without another round-trip.
+ *   - Verified / admin   → unlimited
+ *   - Applied (applied_babehub) → 30/day
+ *   - Everyone else      → 10/day
  */
+function resolveRateLimit(profile: {
+  role: string;
+  is_verified: boolean;
+  applied_babehub?: boolean | null;
+}): number {
+  if (profile.role === 'admin' || profile.is_verified) return Infinity;
+  if (profile.applied_babehub) return 30;
+  return 10;
+}
+
 export default async function UserChatPage() {
   const { user, profile } = await requireOnboarded();
 
   const db = createAdminClient() as any;
+  const fullProfile = profile as any;
 
-  // Always ensure a thread exists (idempotent upsert)
+  const rateLimit = resolveRateLimit({
+    role: fullProfile.role,
+    is_verified: fullProfile.is_verified ?? false,
+    applied_babehub: fullProfile.applied_babehub,
+  });
+
+  // Ensure thread + mark read
   const threadId = await userEnsureThread();
-
-  // Mark as read
   await userMarkRead(threadId);
 
   // Fetch messages
@@ -43,7 +56,7 @@ export default async function UserChatPage() {
     sender_handle: m.profiles?.handle ?? '?',
   }));
 
-  // Compute remaining rate-limit quota
+  // Compute remaining quota (infinite for elevated users)
   const windowStart = new Date(
     Date.now() - RATE_WINDOW_HOURS * 60 * 60 * 1000,
   ).toISOString();
@@ -55,7 +68,11 @@ export default async function UserChatPage() {
     .eq('is_from_admin', false)
     .gte('created_at', windowStart);
 
-  const remaining = Math.max(0, RATE_LIMIT - (usedCount ?? 0));
+  const used = usedCount ?? 0;
+  const remaining = rateLimit === Infinity ? Infinity : Math.max(0, rateLimit - used);
+
+  const isUnlimited = rateLimit === Infinity;
+  const isAccepted = fullProfile.applied_babehub === true;
 
   return (
     <main className="flex h-[calc(100vh-8rem)] flex-col">
@@ -68,34 +85,56 @@ export default async function UserChatPage() {
               <h1 className="text-lg font-black tracking-tight text-text-main">
                 BabeHub Team
               </h1>
-              {/* Beta badge */}
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300">
-                <Sparkles className="h-2.5 w-2.5" />
-                Beta
-              </span>
+              {isUnlimited ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-green-400/40 bg-green-400/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-green-400">
+                  <Zap className="h-2.5 w-2.5" />
+                  Unlimited
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-amber-300">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  Beta
+                </span>
+              )}
             </div>
             <p className="mt-1 text-xs text-text-secondary">
               Direct line to our team. We aim to respond within 24 hours.
             </p>
           </div>
-          <div className="shrink-0 text-right">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary/60">
-              Quota
-            </p>
-            <p className="text-sm font-bold text-text-main">
-              {remaining}
-              <span className="text-[10px] font-normal text-text-secondary">
-                /{RATE_LIMIT} today
-              </span>
-            </p>
-          </div>
+
+          {/* Quota indicator */}
+          {!isUnlimited && (
+            <div className="shrink-0 text-right">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-text-secondary/60">
+                Today
+              </p>
+              <p className="text-sm font-bold text-text-main">
+                {remaining}
+                <span className="text-[10px] font-normal text-text-secondary">
+                  /{rateLimit}
+                </span>
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Beta info strip */}
-        <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/5 px-3 py-2 text-[11px] text-amber-300/80">
-          <strong className="text-amber-300">Chat is in beta.</strong> You can send up to{' '}
-          {RATE_LIMIT} messages per day. For urgent matters, use the contact form instead.
-        </div>
+        {/* Status strip */}
+        {isUnlimited ? (
+          <div className="mt-3 rounded-xl border border-green-400/20 bg-green-400/5 px-3 py-2 text-[11px] text-green-300/80">
+            <strong className="text-green-400">Unlimited access.</strong>{' '}
+            You can message our team freely — no daily cap.
+          </div>
+        ) : isAccepted ? (
+          <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-[11px] text-primary/80">
+            <strong className="text-primary">Application member.</strong>{' '}
+            You can send up to {rateLimit} messages per day. Reply here anytime.
+          </div>
+        ) : (
+          <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-400/5 px-3 py-2 text-[11px] text-amber-300/80">
+            <strong className="text-amber-300">Chat is in beta.</strong>{' '}
+            {rateLimit} messages per day. For urgent matters, use the contact form.
+          </div>
+        )}
       </header>
 
       {/* Chat window */}
@@ -105,8 +144,8 @@ export default async function UserChatPage() {
           messages={messages}
           isAdmin={false}
           myHandle={profile.handle}
-          rateRemaining={remaining}
-          rateLimit={RATE_LIMIT}
+          rateRemaining={remaining === Infinity ? 999 : remaining}
+          rateLimit={rateLimit === Infinity ? 999 : rateLimit}
         />
       </div>
     </main>

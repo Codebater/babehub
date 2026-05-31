@@ -5,9 +5,19 @@ import { redirect } from 'next/navigation';
 import { requireOnboarded } from '@/lib/auth/guards';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-/** Max messages a user can send in RATE_WINDOW_HOURS. */
-const RATE_LIMIT = 10;
 const RATE_WINDOW_HOURS = 24;
+
+/**
+ * Rate limit tiers:
+ *   - Verified / admin   → unlimited (they're trusted insiders)
+ *   - Applied (applied_babehub=true) → 30/day (ongoing working relationship)
+ *   - New / regular      → 10/day  (beta, prevent spam)
+ */
+function rateLimitForProfile(profile: { is_verified: boolean; role: string; applied_babehub?: boolean | null }): number {
+  if (profile.role === 'admin' || profile.is_verified) return Infinity;
+  if (profile.applied_babehub) return 30;
+  return 10;
+}
 
 // ── Admin actions ───────────────────────────────────────────────────────
 
@@ -108,7 +118,7 @@ export async function userSendMessage(
   threadId: string,
   body: string,
 ): Promise<{ ok: boolean; error?: string; remaining?: number }> {
-  const { user } = await requireOnboarded();
+  const { user, profile } = await requireOnboarded();
 
   const trimmed = body.trim();
   if (!trimmed || trimmed.length > 2000)
@@ -116,7 +126,10 @@ export async function userSendMessage(
 
   const db = createAdminClient() as any;
 
-  // Rate-limit check
+  // Resolve tier-based rate limit for this user
+  const rateLimit = rateLimitForProfile(profile as any);
+
+  // Rate-limit check (skip entirely for unlimited tier)
   const windowStart = new Date(
     Date.now() - RATE_WINDOW_HOURS * 60 * 60 * 1000,
   ).toISOString();
@@ -129,10 +142,10 @@ export async function userSendMessage(
     .gte('created_at', windowStart);
 
   const used = sentCount ?? 0;
-  if (used >= RATE_LIMIT) {
+  if (rateLimit !== Infinity && used >= rateLimit) {
     return {
       ok: false,
-      error: `You've reached the limit of ${RATE_LIMIT} messages per ${RATE_WINDOW_HOURS} hours. Please wait before sending more.`,
+      error: `You've reached the limit of ${rateLimit} messages per ${RATE_WINDOW_HOURS} hours. Please wait before sending more.`,
       remaining: 0,
     };
   }
@@ -152,7 +165,8 @@ export async function userSendMessage(
     .eq('id', threadId);
 
   revalidatePath('/app/chat');
-  return { ok: true, remaining: RATE_LIMIT - used - 1 };
+  const remaining = rateLimit === Infinity ? Infinity : rateLimit - used - 1;
+  return { ok: true, remaining };
 }
 
 /**
