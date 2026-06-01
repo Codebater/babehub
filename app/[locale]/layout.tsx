@@ -75,6 +75,12 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   icons: { icon: '/favicon.png', apple: '/favicon.png' },
+  verification: {
+    google: 'o5JrL8VSLTJcm1Y3liJ41MTvLIx6lzS-QlH7iHKd4hM',
+    other: {
+      'msvalidate.01': '1936F8EAE80BE2E6ED09FA745AD1B103', // Bing Webmaster Tools
+    },
+  },
   other: {
     'google-site-verification': 'o5JrL8VSLTJcm1Y3liJ41MTvLIx6lzS-QlH7iHKd4hM',
     '6a97888e-site-verification': 'f0dbbe21efdb52edc5a865db796962bd',
