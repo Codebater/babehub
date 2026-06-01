@@ -27,6 +27,7 @@ type SurveyFormBody = {
   email?: string;
   whatsapp?: string;
   telegram?: string;
+  gender?: string;
   country?: string;
   isOver18?: string;
   isActiveCreator?: string;
@@ -164,11 +165,18 @@ export async function POST(request: Request) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { error: insertError } = await supabase.from('survey_submissions').insert({
+    const validGender = ['woman', 'man', 'non_binary'].includes(body.gender ?? '')
+      ? body.gender
+      : null;
+
+    // `gender` is a recent column not yet in the generated types — cast.
+    const sdb = supabase as any;
+    const { error: insertError } = await sdb.from('survey_submissions').insert({
       user_id: user?.id ?? null,
       name: body.name?.trim() ?? '',
       email: body.email?.trim().toLowerCase() ?? '',
       whatsapp: body.whatsapp?.trim() || body.telegram?.trim() || null,
+      gender: validGender,
       country: body.country?.trim() || null,
       is_over_18: ynToBool(body.isOver18),
       is_active_creator: ynToBool(body.isActiveCreator),

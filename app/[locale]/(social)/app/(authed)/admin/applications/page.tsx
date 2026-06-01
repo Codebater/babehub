@@ -95,6 +95,22 @@ export default async function AdminApplicationsPage() {
                     <p className="text-sm font-bold text-text-main">
                       {r.name || <span className="italic text-text-secondary">Anonymous</span>}
                     </p>
+                    {(() => {
+                      const g = (r as { gender?: string | null }).gender;
+                      if (!g) return null;
+                      const label = g === 'non_binary' ? 'Non-binary' : g.charAt(0).toUpperCase() + g.slice(1);
+                      const tone = g === 'woman' ? 'bg-pink-500/15 text-pink-400' : g === 'man' ? 'bg-sky-500/15 text-sky-300' : 'bg-amber-400/15 text-amber-300';
+                      return (
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${tone}`}>
+                          {label}
+                        </span>
+                      );
+                    })()}
+                    {r.is_active_creator !== null && (
+                      <span className="inline-flex rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                        {r.is_active_creator ? 'Pro' : 'Beginner'}
+                      </span>
+                    )}
                     <span
                       className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest ${STATUS_TONE[r.status as Status]}`}
                     >

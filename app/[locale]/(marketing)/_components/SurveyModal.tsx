@@ -116,6 +116,7 @@ const BLANK = {
   telegram: '',
   email: '',
   name: '',
+  gender: '',
 };
 
 export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
@@ -169,8 +170,15 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
   const ok = () => {
     if (mode === 'quick') {
-      // Minimal: at least one niche, one contact method, 18+ confirmed.
-      return form.sections.length > 0 && hasContact() && form.isOver18 === 'yes';
+      // Name, gender, experience, niche, a contact, and 18+ confirmed.
+      return (
+        form.name.trim().length >= 2 &&
+        form.gender !== '' &&
+        form.isActiveCreator !== '' &&
+        form.sections.length > 0 &&
+        hasContact() &&
+        form.isOver18 === 'yes'
+      );
     }
     switch (step) {
       case 1: {
@@ -240,9 +248,13 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
               </div>
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-green-400/80">Application received</p>
               <h2 className="mt-2 text-2xl font-black tracking-tight text-white">You&apos;re in the queue.</h2>
-              <p className="mt-3 max-w-xs text-sm text-zinc-400">
-                We review every application personally. If you&apos;re a strong fit you&apos;ll hear from us within 48 hours — check your{' '}
-                <strong className="text-white">BabeHub chat</strong> for updates.
+              <p className="mt-3 max-w-sm text-sm text-zinc-400">
+                We review every application personally — usually within 48 hours.
+              </p>
+              <p className="mt-2 max-w-sm text-sm text-zinc-400">
+                <strong className="text-white">Once you&apos;re approved</strong>, we&apos;ll reach out on
+                WhatsApp / Telegram and unlock your account — you&apos;ll be able to set up your{' '}
+                <strong className="text-white">profile</strong> and chat directly with our team.
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3 text-[10px] text-zinc-500">
                 <span className="flex items-center gap-1"><Lock className="h-2.5 w-2.5" />Confidential</span>
@@ -262,6 +274,43 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
               </div>
 
               <form onSubmit={submit} className="space-y-5">
+                {/* Name */}
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    What should we call you? <span className="text-primary">*</span>
+                  </label>
+                  <input type="text" value={form.name} maxLength={50} onChange={(e) => set('name', e.target.value)}
+                    placeholder="First name or stage name" className={input} />
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    You are <span className="text-primary">*</span>
+                  </p>
+                  <div className="flex gap-2">
+                    {([['woman', 'Woman'], ['man', 'Man'], ['non_binary', 'Non-binary']] as const).map(([val, label]) => (
+                      <button key={val} type="button" onClick={() => set('gender', val)}
+                        className={`flex-1 rounded-xl border py-2.5 text-sm font-bold transition-all ${
+                          form.gender === val ? 'border-primary bg-primary/12 text-primary' : 'border-zinc-700 bg-zinc-900/60 text-zinc-400 hover:border-zinc-600 hover:text-white'
+                        }`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Experience */}
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    Your experience <span className="text-primary">*</span>
+                  </p>
+                  <div className="flex gap-2">
+                    <YesNo name="isActiveCreator" value="no" label="Just starting" selected={form.isActiveCreator} onSelect={set} />
+                    <YesNo name="isActiveCreator" value="yes" label="Experienced / pro" selected={form.isActiveCreator} onSelect={set} />
+                  </div>
+                </div>
+
                 {/* Niche */}
                 <fieldset>
                   <legend className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-zinc-400">
