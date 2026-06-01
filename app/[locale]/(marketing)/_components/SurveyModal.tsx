@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from 'react';
 import { X, ArrowRight, ArrowLeft, Loader2, Check, Clapperboard, Radio, Gem, Star, Lock, Shield, MessageCircle } from 'lucide-react';
+import { track } from '@/lib/analytics/track';
 
 interface SurveyModalProps {
   isOpen: boolean;
@@ -132,8 +133,18 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   }, [onClose]);
 
   useEffect(() => {
-    if (isOpen) { setStep(1); setForm(BLANK); setDone(false); setErr(null); }
+    if (isOpen) {
+      setStep(1); setForm(BLANK); setDone(false); setErr(null);
+      track('apply_open');
+    }
   }, [isOpen]);
+
+  // Funnel step tracking — fires when the user advances past step 1.
+  useEffect(() => {
+    if (!isOpen) return;
+    if (step === 2) track('apply_step2');
+    else if (step === 3) track('apply_step3');
+  }, [step, isOpen]);
 
   if (!isOpen) return null;
 
@@ -171,6 +182,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
     if (step !== TOTAL || !ok()) return;
     setBusy(true);
     setErr(null);
+    track('apply_submit');
     const sectionLabel = form.sections.map((s) => SECTIONS.find((x) => x.id === s)?.label).filter(Boolean).join(', ');
     const goals = `[Interest: ${sectionLabel}] ${form.goals}`.trim();
     try {
@@ -184,8 +196,10 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         throw new Error(data.details || data.error || `Request failed (${res.status})`);
       }
       setDone(true);
+      track('apply_success');
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
+      track('apply_error');
     } finally {
       setBusy(false);
     }

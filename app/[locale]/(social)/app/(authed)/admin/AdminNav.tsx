@@ -13,6 +13,7 @@ import {
   ImageIcon,
   MessageSquare,
   Film,
+  BarChart3,
 } from 'lucide-react';
 import type { AdminCounts } from '@/lib/admin/counts';
 
@@ -112,6 +113,13 @@ export default function AdminNav({ counts }: { counts: AdminCounts }) {
       count: counts.totalChats,
       pending: counts.unreadChats,
       accent: 'primary',
+    },
+    {
+      href: '/app/admin/analytics',
+      label: 'Analytics',
+      icon: <BarChart3 className="h-4 w-4" />,
+      count: 0,
+      accent: 'sky',
     },
   ];
 
