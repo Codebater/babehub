@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Analytics } from '@vercel/analytics/next';
 import { Poppins } from 'next/font/google';
 import { routing, type AppLocale } from '@/i18n/routing';
 import AgeGate from './_components/AgeGate';
+import PageViewTracker from '@/components/PageViewTracker';
 import '../globals.css';
 
 const poppins = Poppins({
@@ -184,7 +184,7 @@ export default async function LocaleLayout({
             covers every page underneath. Reads/writes localStorage in a
             useEffect — SSR-safe, never blocks search-engine crawl. */}
         <AgeGate />
-        <Analytics />
+        <PageViewTracker />
       </body>
     </html>
   );

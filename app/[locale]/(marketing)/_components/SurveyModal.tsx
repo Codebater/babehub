@@ -119,6 +119,9 @@ const BLANK = {
 };
 
 export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
+  // 'quick' = one-screen apply (niche + contact); 'full' = the detailed
+  // 3-step survey. Quick is the default conversion path.
+  const [mode, setMode] = useState<'quick' | 'full'>('quick');
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(BLANK);
   const [busy, setBusy] = useState(false);
@@ -134,7 +137,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
   useEffect(() => {
     if (isOpen) {
-      setStep(1); setForm(BLANK); setDone(false); setErr(null);
+      setMode('quick'); setStep(1); setForm(BLANK); setDone(false); setErr(null);
       track('apply_open');
     }
   }, [isOpen]);
@@ -161,7 +164,14 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
       sections: p.sections.includes(id) ? p.sections.filter((s) => s !== id) : [...p.sections, id],
     }));
 
+  const hasContact = () =>
+    !!(form.whatsapp.trim() || form.telegram.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email));
+
   const ok = () => {
+    if (mode === 'quick') {
+      // Minimal: at least one niche, one contact method, 18+ confirmed.
+      return form.sections.length > 0 && hasContact() && form.isOver18 === 'yes';
+    }
     switch (step) {
       case 1: {
         const revenueOk = form.isGeneratingRevenue === 'yes' ? form.monthlyEarnings !== '' : true;
@@ -170,8 +180,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
       case 2:
         return form.socialPlatform.trim() !== '' && form.contentType.trim() !== '';
       case 3:
-        // Require at least WhatsApp, Telegram, or a valid email
-        return !!(form.whatsapp.trim() || form.telegram.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email));
+        return hasContact();
       default:
         return false;
     }
@@ -179,10 +188,11 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-    if (step !== TOTAL || !ok()) return;
+    if (!ok()) return;
+    if (mode === 'full' && step !== TOTAL) return;
     setBusy(true);
     setErr(null);
-    track('apply_submit');
+    track(mode === 'quick' ? 'quick_apply_submit' : 'apply_submit');
     const sectionLabel = form.sections.map((s) => SECTIONS.find((x) => x.id === s)?.label).filter(Boolean).join(', ');
     const goals = `[Interest: ${sectionLabel}] ${form.goals}`.trim();
     try {
@@ -196,7 +206,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
         throw new Error(data.details || data.error || `Request failed (${res.status})`);
       }
       setDone(true);
-      track('apply_success');
+      track(mode === 'quick' ? 'quick_apply_success' : 'apply_success');
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
       track('apply_error');
@@ -242,9 +252,95 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                 Done
               </button>
             </div>
+          ) : mode === 'quick' ? (
+            /* ─────────────────── QUICK APPLY (one screen) ─────────────────── */
+            <>
+              <div className="mb-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/80">Apply to BabeHub</p>
+                <h2 className="mt-1.5 text-xl font-black tracking-tight text-white">Apply in 30 seconds</h2>
+                <p className="mt-0.5 text-xs text-zinc-500">Pick your niche, drop a contact — we&apos;ll take it from there in chat.</p>
+              </div>
+
+              <form onSubmit={submit} className="space-y-5">
+                {/* Niche */}
+                <fieldset>
+                  <legend className="mb-2.5 block text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    What&apos;s your niche? <span className="text-primary">*</span>
+                  </legend>
+                  <div className="grid grid-cols-2 gap-2">
+                    {SECTIONS.map(({ id, icon: Icon, label, desc, activeCls }) => {
+                      const active = form.sections.includes(id);
+                      return (
+                        <button key={id} type="button" onClick={() => toggleSection(id)}
+                          className={`group rounded-xl border border-zinc-700 bg-zinc-900/60 p-3 text-left transition-all hover:border-zinc-600 ${active ? activeCls : ''}`}>
+                          <Icon className={`mb-1.5 h-4 w-4 transition-colors ${active ? '' : 'text-zinc-500'}`} />
+                          <p className="text-xs font-bold text-zinc-300">{label}</p>
+                          <p className="mt-0.5 text-[10px] leading-snug text-zinc-600">{desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+
+                {/* Contact */}
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    How do we reach you? <span className="text-primary">*</span>
+                    <span className="ml-2 font-normal normal-case text-zinc-600">— one is enough</span>
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-1.5 flex items-center gap-1.5 text-xs text-zinc-500">
+                        <MessageCircle className="h-3.5 w-3.5 text-green-400" /> WhatsApp
+                      </label>
+                      <input type="tel" value={form.whatsapp} onChange={(e) => set('whatsapp', e.target.value)}
+                        placeholder="+1 123 456 7890" className={input} />
+                    </div>
+                    <div>
+                      <label className="mb-1.5 flex items-center gap-1.5 text-xs text-zinc-500">
+                        <MessageCircle className="h-3.5 w-3.5 text-sky-400" /> Telegram
+                      </label>
+                      <input type="text" value={form.telegram} onChange={(e) => set('telegram', e.target.value)}
+                        placeholder="@username" className={input} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 18+ */}
+                <Checkbox
+                  name="quick18"
+                  checked={form.isOver18 === 'yes'}
+                  onChange={(e) => set('isOver18', e.target.checked ? 'yes' : '')}
+                  label={<span>I confirm I am <strong className="text-white">18 years or older</strong> and that adult content is legal where I live.</span>}
+                />
+
+                {err && (
+                  <div className="rounded-xl border border-red-500/30 bg-red-500/8 px-4 py-2.5 text-xs text-red-400">{err}</div>
+                )}
+
+                <button type="submit" disabled={busy || !ok()}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-pink-400 hover:scale-[1.01] disabled:opacity-40 disabled:hover:scale-100">
+                  {busy ? <><Loader2 className="h-4 w-4 animate-spin" />Submitting…</> : <>Submit Application <ArrowRight className="h-4 w-4" /></>}
+                </button>
+
+                <div className="flex items-center justify-center gap-4 pt-1 text-[10px] text-zinc-600">
+                  <span className="flex items-center gap-1"><Lock className="h-2.5 w-2.5" />Confidential</span>
+                  <span className="flex items-center gap-1"><Shield className="h-2.5 w-2.5" />No obligation</span>
+                </div>
+
+                <button type="button" onClick={() => setMode('full')}
+                  className="w-full text-center text-[11px] text-zinc-500 underline-offset-2 transition-colors hover:text-primary hover:underline">
+                  Prefer the detailed application? Add more about yourself →
+                </button>
+              </form>
+            </>
           ) : (
             <>
               <div className="mb-5">
+                <button type="button" onClick={() => setMode('quick')}
+                  className="mb-2 inline-flex items-center gap-1 text-[11px] text-zinc-500 transition-colors hover:text-primary">
+                  <ArrowLeft className="h-3 w-3" /> Back to quick apply
+                </button>
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/80">Apply to BabeHub</p>
                 <h2 className="mt-1.5 text-xl font-black tracking-tight text-white">
                   {step === 1 && 'Tell us about yourself'}

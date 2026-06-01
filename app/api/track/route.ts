@@ -9,7 +9,9 @@ import { createAdminClient } from '@/lib/supabase/admin';
  * so the client never waits on analytics.
  */
 const ALLOWED = new Set([
-  // Creator apply funnel
+  // Page traffic
+  'pageview',
+  // Creator apply funnel (full + quick)
   'apply_open',
   'apply_step2',
   'apply_step3',
@@ -17,6 +19,8 @@ const ALLOWED = new Set([
   'apply_success',
   'apply_error',
   'apply_close',
+  'quick_apply_submit',
+  'quick_apply_success',
   // B2B inquiry funnel
   'b2b_open',
   'b2b_submit',
