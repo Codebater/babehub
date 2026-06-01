@@ -115,29 +115,13 @@ export async function POST(request: NextRequest) {
     periodEnd.setUTCDate(periodEnd.getUTCDate() + 30);
 
     if (invoice.purpose === 'premium') {
-      // Premium top-up: extend the subscriber's premium_until window.
-      // If they're already premium with a future expiry, push it +30d
-      // from the current expiry (stacking). Otherwise +30d from now.
-      const { data: prof } = await admin
-        .from('profiles')
-        .select('is_premium, premium_until')
-        .eq('id', invoice.subscriber_id)
-        .maybeSingle();
-
-      let newUntil = periodEnd;
-      if (prof?.premium_until) {
-        const existingUntil = new Date(prof.premium_until);
-        if (existingUntil.getTime() > Date.now()) {
-          newUntil = new Date(existingUntil);
-          newUntil.setUTCDate(newUntil.getUTCDate() + 30);
-        }
-      }
-
+      // One-time Casting unlock — lifetime access, no expiry.
+      // `premium_until = null` is treated by isElevated() as never-expiring.
       const { error: profErr } = await admin
         .from('profiles')
         .update({
           is_premium: true,
-          premium_until: newUntil.toISOString(),
+          premium_until: null,
         })
         .eq('id', invoice.subscriber_id);
 

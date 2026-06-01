@@ -39,6 +39,8 @@ type SurveyFormBody = {
   goals?: string;
   interestedInCampaigns?: boolean;
   agreesToProfitShare?: boolean;
+  /** Optional apply-form photos — storage paths from /api/apply-upload. */
+  image_paths?: string[];
   /** Honeypot — must be absent/empty. Bots that auto-fill forms set this. */
   _trap?: string;
 };
@@ -169,6 +171,13 @@ export async function POST(request: Request) {
       ? body.gender
       : null;
 
+    // Sanitize image paths — must be plain filenames in the applications bucket.
+    const imagePaths = Array.isArray(body.image_paths)
+      ? body.image_paths
+          .filter((p): p is string => typeof p === 'string' && /^[a-z0-9-]+\.(jpg|jpeg|png|webp)$/i.test(p))
+          .slice(0, 6)
+      : [];
+
     // `gender` is a recent column not yet in the generated types — cast.
     const sdb = supabase as any;
     const { error: insertError } = await sdb.from('survey_submissions').insert({
@@ -177,6 +186,7 @@ export async function POST(request: Request) {
       email: body.email?.trim().toLowerCase() ?? '',
       whatsapp: body.whatsapp?.trim() || body.telegram?.trim() || null,
       gender: validGender,
+      image_paths: imagePaths,
       country: body.country?.trim() || null,
       is_over_18: ynToBool(body.isOver18),
       is_active_creator: ynToBool(body.isActiveCreator),

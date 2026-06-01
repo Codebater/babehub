@@ -52,7 +52,7 @@ export default function PremiumGate({
               Unlock the full {category} section
             </p>
             <p className="mt-1.5 text-xs leading-relaxed text-white/50">
-              Premium gives you instant, unblurred access to the entire {category.toLowerCase()} catalog — plus every creator&apos;s locked posts, job applications, and upcoming chat features.
+              A one-time $10 payment unlocks the entire {category.toLowerCase()} catalog — unblurred, forever. No subscription. Applying to jobs and uploading videos stays free.
             </p>
 
             {/* Price + CTA */}
@@ -62,12 +62,12 @@ export default function PremiumGate({
                 className="group flex flex-1 items-center justify-center gap-2 rounded-full bg-amber-400 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-black shadow-lg shadow-amber-400/25 transition-all hover:bg-amber-300 hover:scale-[1.02]"
               >
                 <Lock className="h-3 w-3" />
-                Unlock · $10/mo
+                Unlock · $10 once
                 <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
             <p className="mt-2 text-center text-[10px] text-white/25">
-              Crypto · cancel any time
+              Crypto · pay once, lifetime access
             </p>
           </div>
         </div>

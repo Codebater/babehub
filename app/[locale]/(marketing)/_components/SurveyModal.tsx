@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, type FormEvent } from 'react';
-import { X, ArrowRight, ArrowLeft, Loader2, Check, Clapperboard, Radio, Gem, Star, Lock, Shield, MessageCircle } from 'lucide-react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { X, ArrowRight, ArrowLeft, Loader2, Check, Clapperboard, Radio, Gem, Star, Lock, Shield, MessageCircle, ImagePlus } from 'lucide-react';
 import { track } from '@/lib/analytics/track';
+
+type UploadedImage = { preview: string; path?: string; uploading: boolean };
 
 interface SurveyModalProps {
   isOpen: boolean;
@@ -128,7 +130,38 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [images, setImages] = useState<UploadedImage[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
   const TOTAL = 3;
+  const MAX_PHOTOS = 4;
+
+  const addPhotos = async (files: FileList) => {
+    const room = MAX_PHOTOS - images.length;
+    const picked = Array.from(files).slice(0, Math.max(0, room));
+    for (const file of picked) {
+      if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) continue;
+      const preview = URL.createObjectURL(file);
+      setImages((p) => [...p, { preview, uploading: true }]);
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/apply-upload', { method: 'POST', body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.path) {
+          setImages((p) => p.map((im) => (im.preview === preview ? { ...im, path: data.path, uploading: false } : im)));
+        } else {
+          setImages((p) => p.filter((im) => im.preview !== preview));
+        }
+      } catch {
+        setImages((p) => p.filter((im) => im.preview !== preview));
+      }
+    }
+  };
+
+  const removePhoto = (preview: string) => {
+    setImages((p) => p.filter((im) => im.preview !== preview));
+    URL.revokeObjectURL(preview);
+  };
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -138,7 +171,7 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
 
   useEffect(() => {
     if (isOpen) {
-      setMode('quick'); setStep(1); setForm(BLANK); setDone(false); setErr(null);
+      setMode('quick'); setStep(1); setForm(BLANK); setDone(false); setErr(null); setImages([]);
       track('apply_open');
     }
   }, [isOpen]);
@@ -203,11 +236,12 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
     track(mode === 'quick' ? 'quick_apply_submit' : 'apply_submit');
     const sectionLabel = form.sections.map((s) => SECTIONS.find((x) => x.id === s)?.label).filter(Boolean).join(', ');
     const goals = `[Interest: ${sectionLabel}] ${form.goals}`.trim();
+    const image_paths = images.filter((i) => i.path).map((i) => i.path as string);
     try {
       const res = await fetch('/api/survey', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, goals }),
+        body: JSON.stringify({ ...form, goals, image_paths }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -353,6 +387,41 @@ export default function SurveyModal({ isOpen, onClose }: SurveyModalProps) {
                         placeholder="@username" className={input} />
                     </div>
                   </div>
+                </div>
+
+                {/* Optional photos */}
+                <div>
+                  <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-zinc-400">
+                    Photos <span className="font-normal normal-case text-zinc-600">(optional — helps us review faster)</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {images.map((im) => (
+                      <div key={im.preview} className="relative h-16 w-16 overflow-hidden rounded-lg border border-zinc-700">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={im.preview} alt="" className="h-full w-full object-cover" />
+                        {im.uploading && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                            <Loader2 className="h-4 w-4 animate-spin text-white" />
+                          </div>
+                        )}
+                        {!im.uploading && (
+                          <button type="button" onClick={() => removePhoto(im.preview)}
+                            className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-red-500">
+                            <X className="h-3 w-3" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {images.length < MAX_PHOTOS && (
+                      <button type="button" onClick={() => fileRef.current?.click()}
+                        className="flex h-16 w-16 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-zinc-700 text-zinc-500 transition-colors hover:border-primary/50 hover:text-primary">
+                        <ImagePlus className="h-4 w-4" />
+                        <span className="text-[8px] font-bold uppercase tracking-wider">Add</span>
+                      </button>
+                    )}
+                  </div>
+                  <input ref={fileRef} type="file" accept="image/*" multiple className="hidden"
+                    onChange={(e) => { if (e.target.files) addPhotos(e.target.files); e.target.value = ''; }} />
                 </div>
 
                 {/* 18+ */}

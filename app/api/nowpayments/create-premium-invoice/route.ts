@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       price_amount: PREMIUM_PRICE_USD,
       price_currency: 'usd',
       order_id: invoiceRowId,
-      order_description: 'BabeHub Premium · 30 days',
+      order_description: 'BabeHub Casting Access · Lifetime (one-time)',
       ipn_callback_url: `${base}/api/nowpayments/ipn`,
       success_url: `${base}/app/subscriptions/${invoiceRowId}`,
       cancel_url: `${base}/app/premium?cancelled=1`,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     currency: 'USD',
     purpose: 'premium',
     metadata: {
-      premium_days: 30,
+      lifetime: true,
     },
   });
 

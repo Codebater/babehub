@@ -1,5 +1,6 @@
-import { ShieldAlert, Mail, Globe, MessageSquare, Calendar, ExternalLink } from 'lucide-react';
+import { ShieldAlert, Mail, Globe, MessageSquare, Calendar, ExternalLink, ImageIcon } from 'lucide-react';
 import { requireAdmin } from '@/lib/auth/guards';
+import { createAdminClient } from '@/lib/supabase/admin';
 import SubmissionStatusButtons from '../_components/SubmissionStatusButtons';
 import SubmissionDeleteButton from '../_components/SubmissionDeleteButton';
 
@@ -46,6 +47,21 @@ export default async function AdminApplicationsPage() {
     .select('*')
     .order('created_at', { ascending: false })
     .limit(200);
+
+  // Mint signed URLs for any applicant photos (private bucket).
+  const allPaths = (rows ?? []).flatMap(
+    (r) => (r as { image_paths?: string[] }).image_paths ?? [],
+  );
+  const signed = new Map<string, string>();
+  if (allPaths.length > 0) {
+    const admin = createAdminClient();
+    const { data: urls } = await admin.storage
+      .from('applications')
+      .createSignedUrls(allPaths, 3600);
+    for (const u of urls ?? []) {
+      if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl);
+    }
+  }
 
   const total = rows?.length ?? 0;
   const byStatus = (s: Status) => (rows ?? []).filter((r) => r.status === s).length;
@@ -192,6 +208,29 @@ export default async function AdminApplicationsPage() {
                   )}
                 </div>
               )}
+
+              {(() => {
+                const paths = (r as { image_paths?: string[] }).image_paths ?? [];
+                if (paths.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap items-center gap-2 border-t border-border-color/40 px-4 py-3 md:px-5">
+                    <span className="mr-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                      <ImageIcon className="h-3 w-3" />
+                      Photos
+                    </span>
+                    {paths.map((p) => {
+                      const url = signed.get(p);
+                      if (!url) return null;
+                      return (
+                        <a key={p} href={url} target="_blank" rel="noopener noreferrer" className="block h-16 w-16 overflow-hidden rounded-lg border border-border-color transition-transform hover:scale-105">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt="Applicant photo" className="h-full w-full object-cover" />
+                        </a>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </li>
           ))}
         </ul>
