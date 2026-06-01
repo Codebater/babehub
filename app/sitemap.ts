@@ -41,6 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${DOMAIN}/jobs`, lastModified: today, changeFrequency: 'daily', priority: 0.95 },
     { url: `${DOMAIN}/blog`, lastModified: today, changeFrequency: 'weekly', priority: 0.85 },
     { url: `${DOMAIN}/creators`, lastModified: today, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${DOMAIN}/accept-crypto`, lastModified: today, changeFrequency: 'monthly', priority: 0.75 },
   ];
 
   // Programmatic category/keyword landing pages (/videos/{slug}) — the

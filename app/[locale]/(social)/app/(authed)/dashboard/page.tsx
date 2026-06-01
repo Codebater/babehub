@@ -15,6 +15,7 @@ import {
   Settings as SettingsIcon,
   MessageSquare,
   Film,
+  Megaphone,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import SwitchToCreatorButton from './SwitchToCreatorButton';
@@ -241,6 +242,12 @@ export default async function DashboardPage() {
                 icon={<Star className="h-4 w-4" />}
                 title="Favorites"
                 hint="Saved videos"
+              />
+              <ActionCard
+                href="/app/promote"
+                icon={<Megaphone className="h-4 w-4" />}
+                title="Get badge"
+                hint="Embed & grow reach"
               />
               <ActionCard
                 href="/app/professional/edit"

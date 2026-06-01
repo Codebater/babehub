@@ -232,6 +232,13 @@ export default async function SocialLayout({ children }: { children: React.React
             Privacy
           </Link>
           <span aria-hidden>·</span>
+          <Link
+            href={'/accept-crypto' as never}
+            className="transition-colors hover:text-primary"
+          >
+            Accepts crypto
+          </Link>
+          <span aria-hidden>·</span>
           <span>18+ only</span>
         </div>
       </aside>
